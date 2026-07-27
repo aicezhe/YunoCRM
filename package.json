@@ -10,6 +10,7 @@
     "explore": "tsx scripts/explore.ts",
     "ingest": "tsx --env-file=.env.local scripts/ingest.ts",
     "classify": "tsx --env-file=.env.local scripts/classify.ts",
+    "resolve": "tsx --env-file=.env.local scripts/resolve.ts",
     "test": "vitest run"
   },
   "dependencies": {
