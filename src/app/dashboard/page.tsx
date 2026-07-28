@@ -4,69 +4,16 @@ import { BarChart3, Clock, Radio, TrendingDown, type LucideIcon } from "lucide-r
 import { db } from "@/db";
 import { users } from "../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { MetricCard, MetricCardSkeleton } from "./metric-card";
-import {
-  getDataAsOf,
-  getSourceMetric,
-  getStageMetric,
-  getTimeMetric,
-  getWitheringMetric,
-  type Metric,
-} from "./metrics";
+import { SectionCard } from "./section-card";
+import { getDataAsOf } from "./metrics";
 import { SignOutButton } from "./sign-out-button";
 
-interface CardDef {
-  href: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  load: () => Promise<Metric>;
-}
-
-const CARDS: CardDef[] = [
-  {
-    href: "/dashboard/source",
-    title: "Source",
-    description: "Where prospects come from",
-    icon: Radio,
-    load: getSourceMetric,
-  },
-  {
-    href: "/dashboard/by-stage",
-    title: "By stage",
-    description: "Distribution across the funnel",
-    icon: BarChart3,
-    load: getStageMetric,
-  },
-  {
-    href: "/dashboard/time",
-    title: "Time",
-    description: "How long each stage takes",
-    icon: Clock,
-    load: getTimeMetric,
-  },
-  {
-    href: "/dashboard/withering",
-    title: "Withering",
-    description: "Prospects going quiet",
-    icon: TrendingDown,
-    load: getWitheringMetric,
-  },
+const SECTIONS: { href: string; title: string; icon: LucideIcon }[] = [
+  { href: "/dashboard/source", title: "Source", icon: Radio },
+  { href: "/dashboard/by-stage", title: "By stage", icon: BarChart3 },
+  { href: "/dashboard/time", title: "Time", icon: Clock },
+  { href: "/dashboard/withering", title: "Withering", icon: TrendingDown },
 ];
-
-/** Streams in once its own query resolves, so each card loads independently. */
-async function AsyncMetricCard({ card }: { card: CardDef }) {
-  const metric = await card.load();
-  return (
-    <MetricCard
-      href={card.href}
-      title={card.title}
-      description={card.description}
-      icon={card.icon}
-      metric={metric}
-    />
-  );
-}
 
 /** Prefers the team member's real name; falls back to the email local part. */
 async function getGreetingName(email: string | undefined): Promise<string> {
@@ -122,19 +69,13 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-          {CARDS.map((card) => (
-            <Suspense
-              key={card.href}
-              fallback={
-                <MetricCardSkeleton
-                  title={card.title}
-                  description={card.description}
-                  icon={card.icon}
-                />
-              }
-            >
-              <AsyncMetricCard card={card} />
-            </Suspense>
+          {SECTIONS.map((section) => (
+            <SectionCard
+              key={section.href}
+              href={section.href}
+              title={section.title}
+              icon={section.icon}
+            />
           ))}
         </div>
       </div>

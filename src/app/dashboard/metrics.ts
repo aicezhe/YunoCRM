@@ -2,10 +2,16 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 
 /**
- * Preview metrics for the dashboard cards. Each function owns one card's
- * single headline number and never throws — it resolves to a discriminated
- * union so the card can render an ok / empty / error state without an
- * error boundary swallowing the whole page.
+ * Pipeline metrics, one function per dashboard section.
+ *
+ * The home screen's cards are navigation tiles and no longer show a number,
+ * so only getDataAsOf() is called from there today — the rest are kept for
+ * the section screens (/dashboard/source, /by-stage, /time, /withering),
+ * which are built next.
+ *
+ * No function throws: each resolves to a discriminated union so a caller can
+ * render an ok / empty / error state without one failed query taking down
+ * the whole page.
  */
 export type Metric =
   | { state: "ok"; value: string; caption: string }
