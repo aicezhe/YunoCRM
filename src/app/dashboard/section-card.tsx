@@ -2,19 +2,19 @@ import Link from "next/link";
 import { ArrowUpRight, type LucideIcon } from "lucide-react";
 
 /**
- * A dashboard section tile: purple gradient, oversized icon, large title and
- * a circled arrow, lifting and growing on hover.
+ * A dashboard section tile, following the owner's sketch: white on the left
+ * blending horizontally into saturated purple on the right, the icon drawn
+ * in purple on the white zone, the title in white over the purple zone, and
+ * a circled arrow top-right. The card lifts and grows on hover.
  *
- * The white bloom in the top-left corner is a radial layer over the diagonal
- * gradient — that soft white-into-purple blend is what makes the card read as
- * Yuno's rather than a flat brand-colour block. It is set inline rather than
- * as a Tailwind arbitrary value: a two-layer background needs top-level
- * commas, which the class scanner does not parse (it silently emits no rule
- * at all, leaving white-on-white).
+ * Two stacked layers: a purple base and a white wash fading out toward the
+ * right. Set inline rather than as a Tailwind arbitrary value — a
+ * multi-layer background needs top-level commas, which the class scanner
+ * silently refuses to turn into a rule at all.
  */
 const CARD_BACKGROUND = [
-  "radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 46%)",
-  "linear-gradient(135deg, #6E62EE 0%, #5B4FE9 45%, #4536C6 100%)",
+  "linear-gradient(97deg, #FFFFFF 0%, rgba(255,255,255,0.92) 24%, rgba(255,255,255,0.45) 42%, rgba(255,255,255,0) 62%)",
+  "linear-gradient(105deg, #8A82F2 0%, #6A5FF0 45%, #5B4FE9 70%, #4C3DD9 100%)",
 ].join(", ");
 
 export function SectionCard({
@@ -39,13 +39,17 @@ export function SectionCard({
       }
     >
       <div className="flex items-start justify-between">
-        <Icon className="h-10 w-10 text-white/85 sm:h-11 sm:w-11" strokeWidth={1.5} />
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/45 text-white transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#5B4FE9]">
+        {/* The icon sits on the white end of the gradient, so it is purple. */}
+        <Icon className="h-10 w-10 text-[#5B4FE9] sm:h-11 sm:w-11" strokeWidth={1.5} />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 text-white transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#5B4FE9]">
           <ArrowUpRight className="h-5 w-5" strokeWidth={2} />
         </span>
       </div>
 
-      <h2 className="mt-8 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{title}</h2>
+      {/* The title lives on the purple end, bottom-right, as sketched. */}
+      <h2 className="mt-8 self-end text-right text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+        {title}
+      </h2>
     </Link>
   );
 }
