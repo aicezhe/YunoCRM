@@ -129,14 +129,16 @@ export function SearchClient() {
             aria-checked={smart}
             onClick={() => setSmart((s) => !s)}
             className={
-              "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors " +
-              (smart ? "bg-[#5B4FE9]" : "bg-gray-200")
+              "relative inline-flex h-8 w-16 shrink-0 items-center rounded-full border transition-colors " +
+              (smart
+                ? "border-[#4B3FE0] bg-[#5B4FE9]"
+                : "border-gray-200 bg-gradient-to-r from-white via-gray-100 to-gray-300 shadow-inner")
             }
           >
             <span
               className={
-                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform " +
-                (smart ? "translate-x-6" : "translate-x-1")
+                "inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-1 ring-black/5 transition-transform " +
+                (smart ? "translate-x-9" : "translate-x-1")
               }
             />
           </span>
