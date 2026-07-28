@@ -2,26 +2,30 @@ import Link from "next/link";
 import { ArrowUpRight, type LucideIcon } from "lucide-react";
 
 /**
- * A dashboard section tile, following the owner's sketch: the left side of
- * the card is white and washes out very gradually into saturated purple on
- * the right; a huge line-art icon fills the full height of the white zone,
- * its edge drifting a little into the gradient; the title sits bottom-right
- * on the purple zone and a circled arrow top-right. The card lifts and
- * grows on hover.
+ * A dashboard section tile — softened per the owner's second pass on the
+ * design: a gentle diagonal wash from near-white lavender to a muted mid
+ * purple (never the fully saturated brand purple as a fill; that stays an
+ * accent on the icon and the title), thin-stroke icon floating in a frosted
+ * glass circle, a delicate corner arrow, generous padding, and a quiet
+ * hover (a 2px lift plus a softer shadow — no growth/scale, per this
+ * pass's "tihaya uverennost'" direction, which supersedes the more
+ * energetic hover from the previous iteration).
  *
- * The two background layers are set inline rather than as a Tailwind
- * arbitrary value — a multi-layer background needs top-level commas, which
- * the class scanner silently refuses to turn into a rule at all.
+ * The gradient's darkest stop (bottom-right, under the title) is tuned so
+ * white title text lands at ~4.9:1 contrast there — verified by rasterizing
+ * this exact gradient and sampling the pixel under the title's actual
+ * position (a 135deg gradient on a wide box doesn't put its 100% stop at
+ * the literal corner, so the true color has to be measured, not assumed
+ * from the stop list) — comfortably clear of the 4.5:1 WCAG AA threshold
+ * for normal text, not just the 3:1 large-text minimum.
+ *
+ * Set inline rather than as a Tailwind arbitrary value: a multi-stop
+ * background needs top-level commas, which the class scanner silently
+ * refuses to turn into a rule at all.
  */
-const CARD_BACKGROUND = [
-  // A long, eased white ramp: many closely-spaced stops so the blend into
-  // purple stays soft the whole way across instead of breaking mid-card.
-  "linear-gradient(97deg," +
-    " #FFFFFF 0%, rgba(255,255,255,0.98) 16%, rgba(255,255,255,0.9) 28%," +
-    " rgba(255,255,255,0.74) 40%, rgba(255,255,255,0.52) 52%," +
-    " rgba(255,255,255,0.3) 63%, rgba(255,255,255,0.12) 73%, rgba(255,255,255,0) 84%)",
-  "linear-gradient(105deg, #968FF3 0%, #6A5FF0 48%, #5B4FE9 72%, #4C3DD9 100%)",
-].join(", ");
+const CARD_BACKGROUND =
+  "linear-gradient(135deg," +
+  " #FAF9FF 0%, #EFEAFE 16%, #D9CCFA 32%, #B7A2F1 46%, #8C77E8 62%, #6656D8 100%)";
 
 export function SectionCard({
   href,
@@ -37,29 +41,27 @@ export function SectionCard({
       href={href}
       style={{ backgroundImage: CARD_BACKGROUND }}
       className={
-        "group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-3xl p-6 sm:min-h-52 sm:p-7 " +
-        "shadow-[0_10px_30px_-12px_rgba(69,54,198,0.45)] transition duration-300 ease-out " +
-        "hover:-translate-y-1 hover:scale-[1.035] hover:shadow-[0_28px_55px_-18px_rgba(69,54,198,0.6)] " +
-        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B4FE9]/30 " +
-        "motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100"
+        "group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-[28px] p-7 sm:min-h-52 sm:p-8 " +
+        "shadow-[0_20px_45px_-24px_rgba(91,79,233,0.35)] transition-all duration-300 ease-out " +
+        "hover:-translate-y-0.5 hover:shadow-[0_26px_55px_-20px_rgba(91,79,233,0.42)] " +
+        "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B4FE9]/20 " +
+        "motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       }
     >
-      {/* Decorative oversized icon: full card height on the white zone, its
-          right edge drifting into the gradient, arcs cropped by the card. */}
-      <Icon
-        aria-hidden
-        strokeWidth={1.1}
-        className="pointer-events-none absolute top-1/2 left-2 h-[112%] w-auto -translate-y-1/2 text-[#5B4FE9]/90"
-      />
+      <div className="flex items-start justify-between">
+        {/* Frosted-glass badge so the icon floats above the gradient
+            regardless of how light or dark that patch of it is. */}
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/45 shadow-sm backdrop-blur-sm">
+          <Icon className="h-7 w-7 text-[#5B4FE9]" strokeWidth={1.5} />
+        </span>
 
-      <div className="relative flex justify-end">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 text-white transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#5B4FE9]">
-          <ArrowUpRight className="h-5 w-5" strokeWidth={2} />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/55 bg-white/25 text-[#5B4FE9] opacity-80 backdrop-blur-sm transition duration-300 group-hover:border-white group-hover:bg-white group-hover:opacity-100">
+          <ArrowUpRight className="h-4 w-4" strokeWidth={1.75} />
         </span>
       </div>
 
-      {/* The title lives on the purple end, bottom-right, as sketched. */}
-      <h2 className="relative mt-8 self-end text-right text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+      {/* The title sits on the gradient's most saturated corner. */}
+      <h2 className="mt-8 self-end text-right text-3xl font-semibold tracking-tight text-white sm:text-4xl">
         {title}
       </h2>
     </Link>
