@@ -33,7 +33,8 @@ export function ParticleField({ className = "" }: { className?: string }) {
     let height = 0;
     let frame = 0;
 
-    function seed() {
+    /** Matches the backing store to the element's css size and the pixel ratio. */
+    function resizeCanvas() {
       const rect = canvas!.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
@@ -42,7 +43,10 @@ export function ParticleField({ className = "" }: { className?: string }) {
       canvas!.width = Math.round(width * dpr);
       canvas!.height = Math.round(height * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
+    function seed() {
+      resizeCanvas();
       nodes = createNodes(width, height);
     }
 
@@ -84,8 +88,16 @@ export function ParticleField({ className = "" }: { className?: string }) {
     draw();
     if (!reduceMotion) frame = requestAnimationFrame(tick);
 
+    /**
+     * Only a width change (rotation, a resized desktop window) is worth
+     * regenerating the field for. Mobile browsers fire resize whenever the
+     * URL bar slides away, changing height alone — re-seeding on that would
+     * make the whole constellation visibly jump mid-scroll.
+     */
     function handleResize() {
-      seed();
+      const previousWidth = width;
+      resizeCanvas();
+      if (Math.abs(width - previousWidth) > 1) nodes = createNodes(width, height);
       draw();
     }
     window.addEventListener("resize", handleResize);

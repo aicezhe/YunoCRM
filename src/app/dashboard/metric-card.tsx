@@ -3,7 +3,7 @@ import { ArrowUpRight, type LucideIcon } from "lucide-react";
 import type { Metric } from "./metrics";
 
 const CARD_SHELL =
-  "group relative flex flex-col rounded-3xl border border-white bg-white/80 p-7 " +
+  "group relative flex flex-col rounded-3xl border border-white bg-white/80 p-6 sm:p-7 " +
   "shadow-[0_8px_30px_-12px_rgba(91,79,233,0.20)] backdrop-blur-sm";
 
 function MetricValue({ metric }: { metric: Metric }) {

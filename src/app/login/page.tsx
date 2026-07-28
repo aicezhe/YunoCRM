@@ -49,10 +49,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white px-4 font-sans">
+    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white px-4 py-8 font-sans">
       <ParticleField className="pointer-events-none absolute inset-0 h-full w-full" />
 
-      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white/80 p-10 shadow-[0_20px_60px_-15px_rgba(91,79,233,0.25)] backdrop-blur-sm">
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white/80 p-7 shadow-[0_20px_60px_-15px_rgba(91,79,233,0.25)] backdrop-blur-sm sm:p-10">
         <div className="mb-8 text-center">
           <span className="text-2xl font-semibold tracking-tight text-[#5B4FE9]">
             Yuno<span className="text-gray-900">CRM</span>
@@ -63,6 +63,8 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-gray-500">Log in to your workspace</p>
         </div>
 
+        {/* Inputs are 16px on phones and 14px from sm up: below 16px, iOS
+            Safari zooms the whole page in when a field takes focus. */}
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -72,10 +74,14 @@ export default function LoginPage() {
               id="email"
               type="email"
               autoComplete="email"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-[#5B4FE9] focus:ring-4 focus:ring-[#5B4FE9]/10"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none transition focus:border-[#5B4FE9] focus:ring-4 focus:ring-[#5B4FE9]/10 sm:text-sm"
             />
           </div>
 
@@ -90,7 +96,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-[#5B4FE9] focus:ring-4 focus:ring-[#5B4FE9]/10"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none transition focus:border-[#5B4FE9] focus:ring-4 focus:ring-[#5B4FE9]/10 sm:text-sm"
             />
           </div>
 
