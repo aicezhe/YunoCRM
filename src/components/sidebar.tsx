@@ -49,8 +49,10 @@ export function Sidebar({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors " +
-                (active ? "bg-[#5B4FE9]/10 text-[#5B4FE9]" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900")
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors " +
+                (active
+                  ? "bg-[#5B4FE9]/[0.14] font-semibold text-[#5B4FE9]"
+                  : "font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900")
               }
             >
               <Icon className="h-4.5 w-4.5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
@@ -65,7 +67,7 @@ export function Sidebar({
         })}
       </nav>
 
-      <div className="border-t border-gray-100 px-4 py-4">
+      <div className="border-t border-gray-200 px-4 py-4">
         <p className="truncate px-2 text-sm font-medium text-gray-900">{name}</p>
         {email && <p className="truncate px-2 text-xs text-gray-400">{email}</p>}
         <div className="mt-3 px-2">

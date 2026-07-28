@@ -133,3 +133,49 @@ export async function getWitheringMetric(): Promise<Metric> {
     return failed("withering", err);
   }
 }
+
+export type ActivityItem = {
+  id: string;
+  companyName: string;
+  type: string;
+  direction: string | null;
+  occurredAt: string;
+};
+
+export type ActivityReport = { state: "ok"; items: ActivityItem[] } | { state: "empty" } | { state: "error" };
+
+/** Recent activity — the newest few interactions across every prospect, for
+ * the home screen's "the CRM is alive" strip below the section cards. */
+export async function getRecentActivity(limit = 5): Promise<ActivityReport> {
+  try {
+    const rows = await db.execute<{
+      id: string;
+      company_name: string;
+      type: string;
+      direction: string | null;
+      occurred_at: string;
+    }>(sql`
+      select i.id, c.name as company_name, i.type::text as type, i.direction::text as direction, i.occurred_at
+      from interactions i
+      join prospects p on p.id = i.prospect_id
+      join companies c on c.id = p.company_id
+      order by i.occurred_at desc
+      limit ${limit}
+    `);
+
+    if (rows.length === 0) return { state: "empty" };
+    return {
+      state: "ok",
+      items: rows.map((r) => ({
+        id: r.id,
+        companyName: r.company_name,
+        type: r.type,
+        direction: r.direction,
+        occurredAt: r.occurred_at,
+      })),
+    };
+  } catch (err) {
+    console.error("[dashboard] recent activity query failed:", err);
+    return { state: "error" };
+  }
+}
