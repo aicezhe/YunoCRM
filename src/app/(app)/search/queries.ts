@@ -10,18 +10,16 @@ export type SearchResultCompany = {
   channel: string | null;
   stage: string | null;
   similarity?: number;
+  /** Set when this company surfaced via a contact match rather than its
+   * own name — the card still represents the company, just annotated with
+   * which person matched. */
+  matchedContact?: { name: string | null; email: string } | null;
 };
 
-export type SearchResultContact = {
-  kind: "contact";
-  id: string;
-  name: string | null;
-  email: string;
-  companyId: string;
-  companyName: string;
-};
-
-export type SearchResult = SearchResultCompany | SearchResultContact;
+/** The result list is always companies — a contact match still resolves to
+ * its company's card (see matchedContact), never a separate top-level
+ * "contact" card. */
+export type SearchResult = SearchResultCompany;
 
 export type SearchReport = { state: "ok"; results: SearchResult[] } | { state: "empty"; query: string } | { state: "error" };
 
@@ -65,7 +63,7 @@ export async function listAllCompaniesAlphabetical(): Promise<SearchReport> {
     `);
 
     if (rows.length === 0) return { state: "empty", query: "" };
-    return { state: "ok", results: rows.map((r) => ({ kind: "company", ...r })) };
+    return { state: "ok", results: rows.map((r) => ({ kind: "company" as const, ...r, matchedContact: null })) };
   } catch (err) {
     console.error("[search] list-all query failed:", err);
     return { state: "error" };
@@ -91,35 +89,55 @@ export async function searchNormal(query: string): Promise<SearchReport> {
       limit ${RESULT_LIMIT}
     `);
 
+    // Contacts never appear as their own top-level result — a matching
+    // contact resolves to their company's card instead (annotated below),
+    // so this joins straight through to the company.
     const contactRows = await db.execute<{
-      id: string;
-      name: string | null;
-      email: string;
       company_id: string;
       company_name: string;
+      domain: string | null;
+      channel: string | null;
+      stage: string | null;
+      contact_name: string | null;
+      contact_email: string;
     }>(sql`
-      select ct.id, ct.name, ct.email, c.id as company_id, c.name as company_name
+      select
+        c.id as company_id, c.name as company_name, c.domain,
+        p.channel::text as channel, p.current_stage::text as stage,
+        ct.name as contact_name, ct.email as contact_email
       from contacts ct
       join companies c on c.id = ct.company_id
+      ${CHOSEN_PROSPECT_JOIN}
       where ct.name ilike ${pattern} or ct.email ilike ${pattern}
       order by ct.name asc
       limit ${RESULT_LIMIT}
     `);
 
-    const results: SearchResult[] = [
-      ...companyRows.map((r): SearchResultCompany => ({ kind: "company", ...r })),
-      ...contactRows.map(
-        (r): SearchResultContact => ({
-          kind: "contact",
-          id: r.id,
-          name: r.name,
-          email: r.email,
-          companyId: r.company_id,
-          companyName: r.company_name,
-        })
-      ),
-    ];
+    const byCompany = new Map<string, SearchResultCompany>();
+    for (const r of companyRows) {
+      byCompany.set(r.id, { kind: "company", ...r, matchedContact: null });
+    }
+    for (const r of contactRows) {
+      const existing = byCompany.get(r.company_id);
+      const matchedContact = { name: r.contact_name, email: r.contact_email };
+      if (existing) {
+        // Company already matched by name — just note the contact too,
+        // without overwriting an earlier contact match.
+        existing.matchedContact ??= matchedContact;
+      } else {
+        byCompany.set(r.company_id, {
+          kind: "company",
+          id: r.company_id,
+          name: r.company_name,
+          domain: r.domain,
+          channel: r.channel,
+          stage: r.stage,
+          matchedContact,
+        });
+      }
+    }
 
+    const results = [...byCompany.values()].sort((a, b) => a.name.localeCompare(b.name));
     if (results.length === 0) return { state: "empty", query };
     return { state: "ok", results };
   } catch (err) {
@@ -172,7 +190,7 @@ export async function searchSmart(query: string): Promise<SearchReport> {
     const matches = rows.filter((r) => r.similarity >= SMART_SIMILARITY_THRESHOLD);
     if (matches.length === 0) return { state: "empty", query };
 
-    return { state: "ok", results: matches.map((r) => ({ kind: "company", ...r })) };
+    return { state: "ok", results: matches.map((r) => ({ kind: "company" as const, ...r, matchedContact: null })) };
   } catch (err) {
     console.error("[search] smart search failed:", err);
     return { state: "error" };
