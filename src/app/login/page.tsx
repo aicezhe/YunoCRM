@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ParticleField } from "@/components/particle-field";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -48,8 +49,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white px-4 font-sans">
-      <div className="w-full max-w-md rounded-3xl bg-white/80 p-10 shadow-[0_20px_60px_-15px_rgba(91,79,233,0.25)] backdrop-blur-sm">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white px-4 font-sans">
+      <ParticleField className="pointer-events-none absolute inset-0 h-full w-full" />
+
+      <div className="relative z-10 w-full max-w-md rounded-3xl bg-white/80 p-10 shadow-[0_20px_60px_-15px_rgba(91,79,233,0.25)] backdrop-blur-sm">
         <div className="mb-8 text-center">
           <span className="text-2xl font-semibold tracking-tight text-[#5B4FE9]">
             Yuno<span className="text-gray-900">CRM</span>
