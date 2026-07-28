@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ArrowUpRight, type LucideIcon } from "lucide-react";
 
 /**
- * A dashboard section tile. Icon, title and layout are the plain, settled
- * design (clean lucide line icons, ordinary sans-serif) — only the card's
- * background is a deliberate effect: an organic watercolor-style wash
- * instead of a linear gradient.
+ * A dashboard section tile: a large decorative icon (full card height, no
+ * badge/box around it — just the line art, cropped by the rounded
+ * corners) on the left, a delicate corner arrow, and the title bottom-right
+ * on an organic watercolor-style background wash.
  *
  * The wash is two solid-colour circles blurred with a real CSS `filter:
  * blur()` (not faked with gradient stops), overlapping and bleeding in from
@@ -46,11 +46,15 @@ export function SectionCard({
         <div className="absolute -bottom-[18%] -right-[6%] h-[68%] w-[58%] rounded-full bg-[#4B36C6]/85 blur-[38px]" />
       </div>
 
-      <div className="relative z-10 flex items-start justify-between">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/60 bg-white/45 shadow-sm backdrop-blur-sm">
-          <Icon className="h-7 w-7 text-[#5B4FE9]" strokeWidth={1.5} />
-        </span>
+      {/* Decorative, full-height icon — no badge/box around it, just the
+          line art itself, cropped by the card's rounded corners. */}
+      <Icon
+        aria-hidden
+        strokeWidth={1.25}
+        className="pointer-events-none absolute top-1/2 left-3 h-[110%] w-auto -translate-y-1/2 text-[#5B4FE9]/85"
+      />
 
+      <div className="relative z-10 flex justify-end">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/55 bg-white/25 text-[#5B4FE9] opacity-80 backdrop-blur-sm transition duration-300 group-hover:border-white group-hover:bg-white group-hover:opacity-100">
           <ArrowUpRight className="h-4 w-4" strokeWidth={1.75} />
         </span>
