@@ -22,7 +22,7 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 flex border-t border-gray-100 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 flex border-t border-[#E4DFFC] bg-gradient-to-t from-[#EEEBFF] to-[#F3F0FD]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       aria-label="Primary"
     >
       <div className="mx-auto flex w-full max-w-5xl items-stretch justify-around px-2">

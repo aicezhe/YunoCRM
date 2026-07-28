@@ -42,7 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-[#FAFAFF] font-sans">
+    <div className="min-h-dvh bg-[#FCFBFF] font-sans">
       {/* Mobile-only top bar — desktop shows the same logo/user/sign-out
           inside Sidebar instead. */}
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-5 sm:px-6 sm:py-6 md:hidden">
