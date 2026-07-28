@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getSourceReport, type ChannelRow } from "./queries";
-
-const CHANNEL_LABELS: Record<string, string> = {
-  website: "Website",
-  linkedin_outbound: "LinkedIn outbound",
-  referral: "Referral",
-  event: "Events / trade fairs",
-  content_inbound: "Content inbound",
-};
+import { getSourceReport } from "./queries";
+import { ChannelDonut } from "./channel-donut";
+import { UtmDonut } from "./utm-donut";
 
 function Header() {
   return (
@@ -24,52 +18,6 @@ function Header() {
       <p className="mt-2 max-w-xl text-sm text-gray-500">
         Where do our prospects come from, and which channels convert best?
       </p>
-    </div>
-  );
-}
-
-function ChannelTable({ channels }: { channels: ChannelRow[] }) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 text-xs font-medium tracking-wide text-gray-400 uppercase">
-              <th className="px-5 py-4">Channel</th>
-              <th className="px-5 py-4">Prospects</th>
-              <th className="px-5 py-4">Active</th>
-              <th className="px-5 py-4">Conversion to Won</th>
-            </tr>
-          </thead>
-          <tbody>
-            {channels.map((row, i) => (
-              <tr key={row.channel} className={i !== channels.length - 1 ? "border-b border-gray-50" : ""}>
-                <td className="px-5 py-4 font-medium text-gray-900">
-                  {CHANNEL_LABELS[row.channel] ?? row.channel}
-                  {i === 0 && row.total > 0 && (
-                    <span className="ml-2 rounded-full bg-[#5B4FE9]/10 px-2 py-0.5 text-xs font-semibold text-[#5B4FE9]">
-                      Best
-                    </span>
-                  )}
-                </td>
-                <td className="px-5 py-4 text-gray-600">{row.total}</td>
-                <td className="px-5 py-4 text-gray-600">{row.active}</td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full bg-[#5B4FE9]"
-                        style={{ width: `${Math.min(row.conversionPct, 100)}%` }}
-                      />
-                    </div>
-                    <span className="font-medium text-gray-900">{row.conversionPct}%</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
@@ -93,22 +41,17 @@ export default async function SourcePage() {
         )}
         {report.state === "ok" && (
           <div className="space-y-8">
-            <ChannelTable channels={report.channels} />
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
+              <ChannelDonut channels={report.channels} />
+            </div>
 
             {report.utm.length > 0 && (
               <div>
-                <h2 className="text-sm font-semibold tracking-wide text-gray-500 uppercase">
+                <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">
                   Website — by UTM source
                 </h2>
-                <div className="mt-3 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
-                  <ul className="divide-y divide-gray-50">
-                    {report.utm.map((row) => (
-                      <li key={row.utmSource} className="flex items-center justify-between px-5 py-3 text-sm">
-                        <span className="text-gray-700">{row.utmSource}</span>
-                        <span className="font-medium text-gray-900">{row.total}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
+                  <UtmDonut utm={report.utm} />
                 </div>
               </div>
             )}
