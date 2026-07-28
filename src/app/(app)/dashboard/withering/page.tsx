@@ -1,0 +1,108 @@
+import Link from "next/link";
+import { ArrowLeft, PartyPopper } from "lucide-react";
+import { getWitheringReport } from "./queries";
+
+const CHANNEL_LABELS: Record<string, string> = {
+  website: "Website",
+  linkedin_outbound: "LinkedIn outbound",
+  referral: "Referral",
+  event: "Events / trade fairs",
+  content_inbound: "Content inbound",
+  manual: "Manual",
+};
+
+export default async function WitheringPage() {
+  const report = await getWitheringReport();
+
+  return (
+    <>
+      <div className="mx-auto max-w-5xl px-5 pt-4 sm:px-6 sm:pt-6">
+        <Link
+          href="/dashboard"
+          className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-gray-500 transition hover:text-[#5B4FE9] sm:min-h-0"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={2} />
+          Dashboard
+        </Link>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Withering</h1>
+        <p className="mt-2 max-w-xl text-sm text-gray-500">
+          Which prospects have gone cold (no interaction for 14+ days)?
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-5 pt-6 pb-4 sm:px-6">
+        {report.state === "error" && (
+          <p className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">
+            Couldn&apos;t load cold prospects right now. Try refreshing the page.
+          </p>
+        )}
+        {report.state === "empty" && (
+          <div className="flex items-center gap-3 rounded-2xl bg-white px-5 py-6 text-sm text-gray-600 shadow-sm">
+            <PartyPopper className="h-5 w-5 shrink-0 text-[#5B4FE9]" strokeWidth={1.75} />
+            Nice — no cold prospects right now.
+          </div>
+        )}
+        {report.state === "ok" && (
+          <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-xs font-medium tracking-wide text-gray-400 uppercase">
+                    <th className="px-5 py-4">Company</th>
+                    <th className="px-5 py-4">Stage</th>
+                    <th className="px-5 py-4">Owner</th>
+                    <th className="px-5 py-4">Channel</th>
+                    <th className="px-5 py-4">Days cold</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.rows.map((row, i) => (
+                    <tr
+                      key={row.prospectId}
+                      className={
+                        "group cursor-pointer hover:bg-[#5B4FE9]/[0.03] " +
+                        (i !== report.rows.length - 1 ? "border-b border-gray-50" : "")
+                      }
+                    >
+                      <td className="p-0">
+                        <Link
+                          href={`/companies/${row.companyId}`}
+                          className="block px-5 py-4 font-medium text-gray-900 group-hover:text-[#5B4FE9]"
+                        >
+                          {row.companyName}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link href={`/companies/${row.companyId}`} className="block px-5 py-4 text-gray-600">
+                          {row.currentStage}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link href={`/companies/${row.companyId}`} className="block px-5 py-4 text-gray-600">
+                          {row.ownerName ?? "Unassigned"}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link href={`/companies/${row.companyId}`} className="block px-5 py-4 text-gray-600">
+                          {CHANNEL_LABELS[row.channel] ?? row.channel}
+                        </Link>
+                      </td>
+                      <td className="p-0">
+                        <Link
+                          href={`/companies/${row.companyId}`}
+                          className="block px-5 py-4 font-semibold text-red-600"
+                        >
+                          {row.daysCold}d
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

@@ -32,7 +32,7 @@ export function SectionCard({
     <Link
       href={href}
       className={
-        "group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-[28px] bg-[#F7F5FF] p-7 sm:min-h-52 sm:p-8 " +
+        "group relative flex min-h-44 flex-col justify-between overflow-hidden rounded-[28px] bg-[#FCFBFF] p-7 sm:min-h-52 sm:p-8 " +
         "shadow-[0_20px_45px_-24px_rgba(91,79,233,0.35)] transition-all duration-300 ease-out " +
         "hover:-translate-y-0.5 hover:shadow-[0_26px_55px_-20px_rgba(91,79,233,0.42)] " +
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B4FE9]/20 " +
@@ -50,8 +50,9 @@ export function SectionCard({
           line art itself, cropped by the card's rounded corners. */}
       <Icon
         aria-hidden
+        preserveAspectRatio="none"
         strokeWidth={1}
-        className="pointer-events-none absolute top-1/2 left-3 h-[78%] w-auto -translate-y-1/2 text-[#5B4FE9]/50"
+        className="pointer-events-none absolute top-1/2 left-3 h-[97%] w-[41%] -translate-y-1/2 text-[#5B4FE9]/50"
       />
 
       <div className="relative z-10 flex justify-end">

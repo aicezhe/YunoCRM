@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { ArrowLeft, type LucideIcon } from "lucide-react";
 
-/** Shared placeholder for the four dashboard sub-screens, built in a later step. */
+/** Shared placeholder for screens whose content isn't built yet. */
 export function ComingSoon({
   title,
   description,
   icon: Icon,
+  backHref = "/dashboard",
 }: {
   title: string;
   description: string;
   icon: LucideIcon;
+  backHref?: string;
 }) {
   return (
-    <main className="min-h-dvh bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white font-sans">
+    <>
       <div className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6">
         <Link
-          href="/dashboard"
+          href={backHref}
           className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-gray-500 transition hover:text-[#5B4FE9] sm:min-h-0"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={2} />
@@ -33,6 +35,6 @@ export function ComingSoon({
           Coming soon
         </p>
       </div>
-    </main>
+    </>
   );
 }

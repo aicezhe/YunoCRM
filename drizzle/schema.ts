@@ -1,4 +1,4 @@
-import { pgTable, index, foreignKey, check, uuid, text, timestamp, unique, date, jsonb, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, index, unique, uuid, text, timestamp, vector, foreignKey, check, date, jsonb, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const channelType = pgEnum("channel_type", ['website', 'linkedin_outbound', 'referral', 'event', 'content_inbound', 'manual'])
@@ -6,6 +6,18 @@ export const funnelStage = pgEnum("funnel_stage", ['Lead', 'Contacted', 'Demo Sc
 export const interactionDirection = pgEnum("interaction_direction", ['inbound', 'outbound'])
 export const interactionType = pgEnum("interaction_type", ['email', 'call', 'meeting', 'note'])
 
+
+export const companies = pgTable("companies", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	name: text().notNull(),
+	domain: text(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	embedding: vector({ dimensions: 512 }),
+}, (table) => [
+	index("idx_companies_embedding_cosine").using("ivfflat", table.embedding.asc().nullsLast().op("vector_cosine_ops")).with({lists: "100"}),
+	index("idx_companies_name_trgm").using("gin", table.name.asc().nullsLast().op("gin_trgm_ops")),
+	unique("companies_domain_key").on(table.domain),
+]);
 
 export const prospects = pgTable("prospects", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
@@ -43,15 +55,6 @@ export const users = pgTable("users", {
 }, (table) => [
 	unique("users_email_key").on(table.email),
 	check("users_role_check", sql`role = ANY (ARRAY['admin'::text, 'member'::text])`),
-]);
-
-export const companies = pgTable("companies", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	name: text().notNull(),
-	domain: text(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	unique("companies_domain_key").on(table.domain),
 ]);
 
 export const contacts = pgTable("contacts", {
