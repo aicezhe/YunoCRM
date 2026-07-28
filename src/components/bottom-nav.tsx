@@ -2,20 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Search, ShieldAlert, Users, type LucideIcon } from "lucide-react";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  badge?: number;
-};
+import { NAV_ITEMS } from "./nav-items";
 
 /**
- * Fixed bottom navigation shown on every protected route (a deliberate
- * mobile/PWA-style pattern rather than a top nav, per the brief). Rendered
- * from the (app) layout, so it persists across dashboard/search/quarantine/
- * users without remounting.
+ * Fixed bottom navigation for mobile (< md). Hidden at md+, where Sidebar
+ * takes over instead — see src/app/(app)/layout.tsx. Reads the same
+ * NAV_ITEMS list Sidebar does, so the admin-only Users rule lives in one
+ * place, not duplicated per nav variant.
  */
 export function BottomNav({
   isAdmin,
@@ -25,23 +18,18 @@ export function BottomNav({
   quarantineOpenCount: number;
 }) {
   const pathname = usePathname();
-
-  const items: NavItem[] = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-    { href: "/search", label: "Search", icon: Search },
-    { href: "/quarantine", label: "Quarantine", icon: ShieldAlert, badge: quarantineOpenCount },
-    ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
-  ];
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-100 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-50 flex border-t border-gray-100 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       aria-label="Primary"
     >
-      <div className="mx-auto flex max-w-5xl items-stretch justify-around px-2">
+      <div className="mx-auto flex w-full max-w-5xl items-stretch justify-around px-2">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
+          const badge = item.href === "/quarantine" ? quarantineOpenCount : 0;
           return (
             <Link
               key={item.href}
@@ -54,9 +42,9 @@ export function BottomNav({
                   className={active ? "h-5 w-5 text-[#5B4FE9]" : "h-5 w-5"}
                   strokeWidth={active ? 2.25 : 1.75}
                 />
-                {!!item.badge && item.badge > 0 && (
+                {badge > 0 && (
                   <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#5B4FE9] px-1 text-[10px] font-semibold leading-none text-white">
-                    {item.badge > 9 ? "9+" : item.badge}
+                    {badge > 9 ? "9+" : badge}
                   </span>
                 )}
               </span>

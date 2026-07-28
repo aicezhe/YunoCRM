@@ -4,8 +4,11 @@ import { users, quarantineItems } from "../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { BottomNav } from "@/components/bottom-nav";
+import { Sidebar } from "@/components/sidebar";
 
-/** Shared shell for every protected route: header + bottom nav. */
+/** Shared shell for every protected route: a mobile top bar + BottomNav
+ * below md, a desktop Sidebar at md and up — see NAV_ITEMS for the single
+ * source of truth both read from. */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
@@ -13,12 +16,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } = await supabase.auth.getUser();
 
   let isAdmin = false;
+  let name = user?.email?.split("@")[0] ?? "there";
   if (user?.email) {
     try {
-      const [row] = await db.select({ role: users.role }).from(users).where(eq(users.email, user.email));
+      const [row] = await db
+        .select({ name: users.name, role: users.role })
+        .from(users)
+        .where(eq(users.email, user.email));
       isAdmin = row?.role === "admin";
+      if (row?.name) name = row.name;
     } catch (err) {
-      console.error("[app-layout] role lookup failed:", err);
+      console.error("[app-layout] user lookup failed:", err);
     }
   }
 
@@ -35,7 +43,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-dvh bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white font-sans">
-      <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-5 sm:px-6 sm:py-6">
+      {/* Mobile-only top bar — desktop shows the same logo/user/sign-out
+          inside Sidebar instead. */}
+      <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-5 py-5 sm:px-6 sm:py-6 md:hidden">
         <span className="text-lg font-semibold tracking-tight text-[#5B4FE9] sm:text-xl">
           Yuno<span className="text-gray-900">CRM</span>
         </span>
@@ -46,8 +56,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {/* pb clears the fixed BottomNav so content never sits behind it. */}
-      <div className="pb-28">{children}</div>
+      <Sidebar isAdmin={isAdmin} quarantineOpenCount={quarantineOpenCount} name={name} email={user?.email} />
+
+      {/* pb clears the fixed mobile BottomNav; md:ml clears the fixed
+          desktop Sidebar instead, and md:pb-0 since there's no bottom nav
+          to clear there. */}
+      <div className="pb-28 md:ml-60 md:pb-0">{children}</div>
 
       <BottomNav isAdmin={isAdmin} quarantineOpenCount={quarantineOpenCount} />
     </div>
