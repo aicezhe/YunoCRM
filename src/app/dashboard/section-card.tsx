@@ -50,8 +50,8 @@ export function SectionCard({
           line art itself, cropped by the card's rounded corners. */}
       <Icon
         aria-hidden
-        strokeWidth={1.25}
-        className="pointer-events-none absolute top-1/2 left-3 h-[110%] w-auto -translate-y-1/2 text-[#5B4FE9]/85"
+        strokeWidth={1}
+        className="pointer-events-none absolute top-1/2 left-3 h-[78%] w-auto -translate-y-1/2 text-[#5B4FE9]/50"
       />
 
       <div className="relative z-10 flex justify-end">
