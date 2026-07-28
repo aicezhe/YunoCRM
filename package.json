@@ -11,9 +11,14 @@
     "ingest": "tsx --env-file=.env.local scripts/ingest.ts",
     "classify": "tsx --env-file=.env.local scripts/classify.ts",
     "resolve": "tsx --env-file=.env.local scripts/resolve.ts",
+    "enrich": "tsx --env-file=.env.local scripts/enrich-quarantine.ts",
+    "seed-users": "tsx --env-file=.env.local scripts/seed-users.ts",
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@supabase/ssr": "^0.12.3",
+    "@supabase/supabase-js": "^2.110.9",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.12",
     "postgres": "^3.4.9",
