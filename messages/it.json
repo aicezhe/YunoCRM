@@ -121,5 +121,74 @@
     "colDaysCold": "Giorni di inattività",
     "unassigned": "Non assegnato",
     "daysCold": "{count, number}gg"
+  },
+  "search": {
+    "searchButton": "Cerca",
+    "showFullList": "Mostra elenco completo",
+    "smartSearch": "Ricerca smart",
+    "smartSearchHint": "— comprende il significato, non solo le parole esatte",
+    "kbdHint": "per l'elenco completo delle aziende",
+    "placeholder": "Cerca aziende per nome, settore o descrizione...",
+    "placeholderPhrase1": "Cerca aziende per nome...",
+    "placeholderPhrase2": "Prova: fornitore automotive in Lombardia",
+    "placeholderPhrase3": "Prova: azienda di logistica a conduzione familiare",
+    "error": "Qualcosa è andato storto durante la ricerca. Riprova.",
+    "unconfiguredTitle": "La ricerca smart non è ancora configurata.",
+    "unconfiguredNoKey": "Il server non ha una VOYAGE_API_KEY, quindi le query non possono diventare embedding.",
+    "unconfiguredNoEmbeddings": "Nessuna azienda è ancora stata elaborata — esegui una volta lo script embed-companies.",
+    "unconfiguredFooter": "Nel frattempo la ricerca normale funziona.",
+    "emptyNoQuery": "Ancora nessuna azienda.",
+    "emptySmart": "Nessuna azienda trovata per \"{query}\" — prova a disattivare la ricerca smart per una corrispondenza esatta.",
+    "emptyNormal": "Nessun risultato per \"{query}\".",
+    "resultCount": "{count, plural, one {# risultato} other {# risultati}}",
+    "matchPct": "corrispondenza {pct}%",
+    "matchedVia": "Trovato tramite: {name}",
+    "press": "Premi"
+  },
+  "companyDetail": {
+    "back": "Indietro",
+    "stageHistory": "Storico fasi",
+    "noStageHistory": "Ancora nessuno storico.",
+    "createdAs": "Creato come {stage}",
+    "transition": "{from} → {to}",
+    "tasks": "Attività",
+    "noTasks": "Nessuna attività.",
+    "due": "Scadenza {date}",
+    "unassigned": "Non assegnato",
+    "interactions": "Interazioni",
+    "noInteractions": "Nessuna interazione registrata.",
+    "notFound": "Impossibile trovare questa azienda.",
+    "loadError": "Impossibile caricare questa azienda. Riprova.",
+    "noProspect": "Ancora nessun prospect per questa azienda.",
+    "knownContact": "Contatto noto",
+    "matchedVia": "Trovato tramite: {name}",
+    "stage": "Fase",
+    "channel": "Canale",
+    "owner": "Responsabile",
+    "created": "Creato",
+    "lostReason": "Motivo perdita:",
+    "noContacts": "Nessun contatto registrato.",
+    "prospects": "Prospect",
+    "prospect": "Prospect",
+    "contacts": "Contatti"
+  },
+  "interactionType": {
+    "email": "email",
+    "call": "chiamata",
+    "meeting": "riunione",
+    "note": "nota"
+  },
+  "interactionDirection": {
+    "inbound": "in entrata",
+    "outbound": "in uscita"
+  },
+  "taskStatus": {
+    "open": "aperto",
+    "done": "completato",
+    "dismissed": "annullato"
+  },
+  "actorType": {
+    "human": "manuale",
+    "automation": "automatico"
   }
 }

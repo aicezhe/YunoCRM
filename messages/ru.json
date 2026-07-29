@@ -122,5 +122,74 @@
     "colDaysCold": "Дней без контакта",
     "unassigned": "Не назначен",
     "daysCold": "{count, number} дн."
+  },
+  "search": {
+    "searchButton": "Искать",
+    "showFullList": "Показать весь список",
+    "smartSearch": "Умный поиск",
+    "smartSearchHint": "— понимает смысл, а не только точные слова",
+    "kbdHint": "чтобы показать список всех компаний",
+    "placeholder": "Поиск компаний по названию, отрасли или описанию...",
+    "placeholderPhrase1": "Поиск компаний по названию...",
+    "placeholderPhrase2": "Например: поставщик автозапчастей в Ломбардии",
+    "placeholderPhrase3": "Например: семейная логистическая компания",
+    "error": "Что-то пошло не так при поиске. Попробуйте ещё раз.",
+    "unconfiguredTitle": "Умный поиск ещё не настроен.",
+    "unconfiguredNoKey": "На сервере не задан VOYAGE_API_KEY, поэтому запросы нельзя превратить в эмбеддинги.",
+    "unconfiguredNoEmbeddings": "Ни одна компания ещё не проиндексирована — запустите скрипт embed-companies один раз.",
+    "unconfiguredFooter": "Пока что работает обычный поиск.",
+    "emptyNoQuery": "Компаний пока нет.",
+    "emptySmart": "По запросу «{query}» ничего не найдено — попробуйте отключить умный поиск для точного совпадения.",
+    "emptyNormal": "Нет результатов по запросу «{query}».",
+    "resultCount": "{count, plural, one {# результат} few {# результата} many {# результатов} other {# результатов}}",
+    "matchPct": "совпадение {pct}%",
+    "matchedVia": "Найдено через: {name}",
+    "press": "Нажмите"
+  },
+  "companyDetail": {
+    "back": "Назад",
+    "stageHistory": "История этапов",
+    "noStageHistory": "Истории этапов пока нет.",
+    "createdAs": "Создан на этапе «{stage}»",
+    "transition": "{from} → {to}",
+    "tasks": "Задачи",
+    "noTasks": "Задач нет.",
+    "due": "Срок {date}",
+    "unassigned": "Не назначен",
+    "interactions": "Взаимодействия",
+    "noInteractions": "Взаимодействий пока не зафиксировано.",
+    "notFound": "Не удалось найти эту компанию.",
+    "loadError": "Не удалось загрузить компанию. Попробуйте ещё раз.",
+    "noProspect": "Для этой компании пока нет проспекта.",
+    "knownContact": "Известный контакт",
+    "matchedVia": "Найдено через: {name}",
+    "stage": "Этап",
+    "channel": "Канал",
+    "owner": "Ответственный",
+    "created": "Создан",
+    "lostReason": "Причина проигрыша:",
+    "noContacts": "Контактов нет.",
+    "prospects": "Проспекты",
+    "prospect": "Проспект",
+    "contacts": "Контакты"
+  },
+  "interactionType": {
+    "email": "письмо",
+    "call": "звонок",
+    "meeting": "встреча",
+    "note": "заметка"
+  },
+  "interactionDirection": {
+    "inbound": "входящее",
+    "outbound": "исходящее"
+  },
+  "taskStatus": {
+    "open": "открыта",
+    "done": "выполнена",
+    "dismissed": "отменена"
+  },
+  "actorType": {
+    "human": "вручную",
+    "automation": "автоматически"
   }
 }

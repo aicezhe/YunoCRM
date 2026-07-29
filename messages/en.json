@@ -121,5 +121,74 @@
     "colDaysCold": "Days cold",
     "unassigned": "Unassigned",
     "daysCold": "{count, number}d"
+  },
+  "search": {
+    "searchButton": "Search",
+    "showFullList": "Show full list",
+    "smartSearch": "Smart search",
+    "smartSearchHint": "— understands meaning, not just exact words",
+    "kbdHint": "for the full company list",
+    "placeholder": "Search companies by name, industry, or description...",
+    "placeholderPhrase1": "Search companies by name...",
+    "placeholderPhrase2": "Try: automotive supplier in Lombardy",
+    "placeholderPhrase3": "Try: family-owned logistics company",
+    "error": "Something went wrong running that search. Try again.",
+    "unconfiguredTitle": "Smart search isn't set up yet.",
+    "unconfiguredNoKey": "The server has no VOYAGE_API_KEY, so queries can't be turned into embeddings.",
+    "unconfiguredNoEmbeddings": "No company has been embedded yet — run the embed-companies script once.",
+    "unconfiguredFooter": "Normal search works in the meantime.",
+    "emptyNoQuery": "No companies yet.",
+    "emptySmart": "No companies found for \"{query}\" — try turning off Smart search for an exact match.",
+    "emptyNormal": "No results for \"{query}\".",
+    "resultCount": "{count, plural, one {# result} other {# results}}",
+    "matchPct": "{pct}% match",
+    "matchedVia": "Matched via: {name}",
+    "press": "Press"
+  },
+  "companyDetail": {
+    "back": "Back",
+    "stageHistory": "Stage history",
+    "noStageHistory": "No stage history yet.",
+    "createdAs": "Created as {stage}",
+    "transition": "{from} → {to}",
+    "tasks": "Tasks",
+    "noTasks": "No tasks.",
+    "due": "Due {date}",
+    "unassigned": "Unassigned",
+    "interactions": "Interactions",
+    "noInteractions": "No interactions logged yet.",
+    "notFound": "We couldn't find that company.",
+    "loadError": "Couldn't load this company right now. Try again.",
+    "noProspect": "No prospect record for this company yet.",
+    "knownContact": "Known contact",
+    "matchedVia": "Matched via: {name}",
+    "stage": "Stage",
+    "channel": "Channel",
+    "owner": "Owner",
+    "created": "Created",
+    "lostReason": "Lost reason:",
+    "noContacts": "No contacts on file.",
+    "prospects": "Prospects",
+    "prospect": "Prospect",
+    "contacts": "Contacts"
+  },
+  "interactionType": {
+    "email": "email",
+    "call": "call",
+    "meeting": "meeting",
+    "note": "note"
+  },
+  "interactionDirection": {
+    "inbound": "inbound",
+    "outbound": "outbound"
+  },
+  "taskStatus": {
+    "open": "open",
+    "done": "done",
+    "dismissed": "dismissed"
+  },
+  "actorType": {
+    "human": "human",
+    "automation": "automation"
   }
 }
