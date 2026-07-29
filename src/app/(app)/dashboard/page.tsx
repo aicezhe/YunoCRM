@@ -4,6 +4,7 @@ import { Calendar, Mail, Phone, StickyNote, type LucideIcon } from "lucide-react
 import { db } from "@/db";
 import { users } from "../../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
+import { AccessDeniedToast } from "./access-denied-toast";
 import { SectionCard } from "./section-card";
 import {
   getDataAsOf,
@@ -125,6 +126,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 sm:px-6">
+      <Suspense fallback={null}>
+        <AccessDeniedToast />
+      </Suspense>
+
       <div className="pt-6 pb-8 sm:pt-8 sm:pb-10">
         <h1 className="text-3xl font-semibold tracking-tight break-words text-gray-900 sm:text-4xl lg:text-5xl">
           Hello, {name}
