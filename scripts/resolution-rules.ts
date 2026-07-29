@@ -85,6 +85,32 @@ export function isWebsiteLeadEmail(email: EmailPayload): boolean {
 // --- Company name extraction ----------------------------------------------
 
 /**
+ * Strips stray CJK/other non-Latin characters wedged into an otherwise
+ * Latin-script company name — the seed data carries one such record
+ * ("Meccatronica友 Robotics"). Only fires when the name is predominantly
+ * Latin, so a genuinely non-Latin name is left untouched rather than
+ * mangled.
+ */
+export function cleanCompanyName(name: string): string {
+  const latinLetters = (name.match(/[A-Za-zÀ-ÿ]/g) ?? []).length;
+  const foreign = name.match(/[　-鿿가-힯]/g) ?? [];
+  if (foreign.length === 0 || latinLetters < foreign.length * 3) return name.trim();
+  return name.replace(/[　-鿿가-힯]/g, "").replace(/\s{2,}/g, " ").trim();
+}
+
+/**
+ * True when a company's stored name is just a placeholder derived from its
+ * domain, so a real name found in a later message should replace it.
+ * resolve.ts names a company after its domain whenever the first message it
+ * sees carries no recognizable company name; later messages in the same
+ * thread often do.
+ */
+export function isPlaceholderCompanyName(name: string, domain: string | null): boolean {
+  if (!domain) return false;
+  return name.trim().toLowerCase() === domain.trim().toLowerCase();
+}
+
+/**
  * Pulls the company name out of the dataset's templated subjects.
  * Ordered from most to least specific; all patterns verified against data.
  */

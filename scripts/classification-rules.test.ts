@@ -121,6 +121,36 @@ describe("external_bulk", () => {
   });
 });
 
+describe("recruiting", () => {
+  const jobAd = mustFindEmail(
+    (e) => e.from === "recruiting@bigconsulting.com",
+    "recruiting@bigconsulting.com job advert"
+  );
+
+  it("ignores a careers pitch from a recruiting@ role account", () => {
+    // Found in a data audit: these three messages were reaching
+    // default_processed, which made resolve.ts create a bigconsulting.com
+    // company and a Lead prospect — a job ad sitting in the sales funnel.
+    const { outcome, matchedRule } = classifyRow(emailRow(jobAd), emptyContext());
+    expect(outcome).toBe("ignored");
+    expect(matchedRule).toBe("recruiting");
+  });
+
+  it("still lets a real sales thread through when the subject is not a job pitch", () => {
+    // The rule needs BOTH a hiring role account and a careers subject, so a
+    // prospect whose contact happens to sit in HR is not silently dropped.
+    const businessSubject: EmailPayload = { ...jobAd, subject: "Proposta commerciale Yuno — Big Consulting" };
+    const { outcome } = classifyRow(emailRow(businessSubject), emptyContext());
+    expect(outcome).not.toBe("ignored");
+  });
+
+  it("does not fire on a Yuno sender even with a careers subject", () => {
+    const internalHire: EmailPayload = { ...jobAd, from: "hr@yunoai.io", to: ["giulia@yunoai.io"], cc: [] };
+    const { matchedRule } = classifyRow(emailRow(internalHire), emptyContext());
+    expect(matchedRule).not.toBe("recruiting");
+  });
+});
+
 describe("internal_email", () => {
   const internal = mustFindEmail((e) => e.subject === "budget infra Q3", 'internal email "budget infra Q3"');
 

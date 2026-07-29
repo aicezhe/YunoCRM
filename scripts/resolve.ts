@@ -43,7 +43,9 @@ import { isYunoAddress, splitEmail, type CalendarPayload, type EmailPayload } fr
 import {
   channelForFirstTouch,
   companyNameFromBody,
+  cleanCompanyName,
   companyNameFromSubject,
+  isPlaceholderCompanyName,
   emailDirection,
   emailStageSignal,
   eventStageSignal,
@@ -68,6 +70,8 @@ interface CompanyRec {
   name: string;
   domain: string | null;
   isNew: boolean;
+  /** Existing row whose placeholder name a later message replaced. */
+  renamed?: boolean;
 }
 interface ContactRec {
   id: string;
@@ -194,10 +198,24 @@ async function main() {
   let skippedAlreadyResolved = 0;
   let skippedNoCounterparty = 0;
 
+  /**
+   * Events are processed oldest-first, so the first message from a domain
+   * decides the company name — and that message often carries no name at
+   * all, leaving the company called after its domain. When a later message
+   * does reveal a real name, it replaces that placeholder instead of being
+   * discarded (audit found borsalab.io / capitalgate.eu stuck this way).
+   */
   function getOrCreateCompany(domain: string, name: string | null, ts: string): CompanyRec {
+    const clean = name ? cleanCompanyName(name) : null;
     const existing = companyByDomain.get(domain);
-    if (existing) return existing;
-    const rec: CompanyRec = { id: randomUUID(), name: name ?? domain, domain, isNew: true };
+    if (existing) {
+      if (clean && isPlaceholderCompanyName(existing.name, existing.domain)) {
+        existing.name = clean;
+        existing.renamed = true;
+      }
+      return existing;
+    }
+    const rec: CompanyRec = { id: randomUUID(), name: clean ?? domain, domain, isNew: true };
     companyByDomain.set(domain, rec);
     companyById.set(rec.id, rec);
     return rec;
@@ -435,6 +453,13 @@ async function main() {
       .values(chunk.map((c) => ({ id: c.id, name: c.name, domain: c.domain })))
       .onConflictDoNothing({ target: companies.domain })
   );
+  // Placeholder names replaced by a real one found in a later message. Only
+  // ever upgrades domain-shaped placeholders, so a name a human set by hand
+  // through the quarantine screen is never overwritten.
+  const renamedCompanies = [...companyById.values()].filter((c) => !c.isNew && c.renamed);
+  for (const c of renamedCompanies) {
+    await db.update(companies).set({ name: c.name }).where(eq(companies.id, c.id));
+  }
   await insertChunked(newContacts, (chunk) =>
     db
       .insert(contacts)
@@ -500,6 +525,11 @@ async function main() {
     { entity: "stage_transitions", created: newTransitions.length },
     { entity: "tasks (follow-up)", created: newTasks.length },
   ]);
+
+  if (renamedCompanies.length) {
+    console.log(`\nCompanies renamed off a domain placeholder: ${renamedCompanies.length}`);
+    for (const c of renamedCompanies) console.log(`  ${c.domain} -> "${c.name}"`);
+  }
 
   const stageCounts = new Map<string, number>();
   for (const p of prospectByCompany.values()) {

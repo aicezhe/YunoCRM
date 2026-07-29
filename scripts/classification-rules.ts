@@ -14,6 +14,16 @@
 export const YUNO_DOMAIN = "yunoai.io"; // DECISIONS.md §1
 export const PERSONAL_DOMAINS = ["gmail.com", "libero.it", "outlook.com"]; // DECISIONS.md §3, rule `personal_domain`
 export const BULK_LOCAL_PARTS = ["noreply", "newsletter", "events", "billing", "notifications"]; // DECISIONS.md §3, rule `external_bulk`
+
+// Role accounts that send hiring/careers mail. Not in DECISIONS.md: found
+// during a data audit — recruiting@bigconsulting.com's "Opportunità di
+// carriera" was creating a company and a Lead prospect, putting a job ad in
+// the sales funnel. Deliberately narrow: the sender must BOTH be a hiring
+// role account AND the subject must look like a job pitch, so a real
+// prospect whose contact happens to sit in HR still comes through.
+export const RECRUITING_LOCAL_PARTS = ["recruiting", "recruitment", "hr", "jobs", "careers", "talent"];
+export const RECRUITING_SUBJECT_PATTERN =
+  /(opportunit[àa]\s+di\s+carriera|offerta\s+di\s+lavoro|posizione\s+aperta|candidatur|job\s+opportunit|career\s+opportunit|we'?re\s+hiring)/i;
 export const WEBSITE_LEAD_BODY_PATTERN = /Nome:|Email:|Azienda:|Messaggio:|UTM source:/; // DECISIONS.md §2.1
 
 export type Outcome = "ignored" | "processed" | "quarantined";
@@ -113,7 +123,7 @@ export function isReschedule(row: RawEventRow, ctx: ClassificationContext): bool
 
 // --- Rule registry — ordered, first match wins (DECISIONS.md §3) ----------
 //
-// `default_processed` (priority 11) is not in DECISIONS.md's table. Without
+// `default_processed` (priority 12) is not in DECISIONS.md's table. Without
 // it, known_contact/known_domain can only match once companies/contacts are
 // populated — on a first run (both tables empty) essentially all legitimate
 // external correspondence would fall through to `unresolved` and flood
@@ -157,9 +167,25 @@ export const externalBulkRule: Rule = {
   },
 };
 
+export const recruitingRule: Rule = {
+  id: "recruiting",
+  priority: 5,
+  outcome: "ignored",
+  predicate: (row) => {
+    if (row.source !== "email") return false;
+    const payload = asEmailPayload(row);
+    const { local, domain } = splitEmail(payload.from);
+    if (domain === YUNO_DOMAIN) return false;
+    return (
+      RECRUITING_LOCAL_PARTS.includes(normalizeLocalPart(local)) &&
+      RECRUITING_SUBJECT_PATTERN.test(payload.subject.replace(/^\s*(re|fwd?|r)\s*:\s*/i, ""))
+    );
+  },
+};
+
 export const internalEmailRule: Rule = {
   id: "internal_email",
-  priority: 5,
+  priority: 6,
   outcome: "ignored",
   predicate: (row) => {
     if (row.source !== "email") return false;
@@ -170,14 +196,14 @@ export const internalEmailRule: Rule = {
 
 export const internalEventRule: Rule = {
   id: "internal_event",
-  priority: 6,
+  priority: 7,
   outcome: "ignored",
   predicate: (row) => row.source === "calendar" && asCalendarPayload(row).attendees.every(isYunoAddress),
 };
 
 export const cancelledEventRule: Rule = {
   id: "cancelled_event",
-  priority: 7,
+  priority: 8,
   outcome: "ignored",
   predicate: (row) => row.source === "calendar" && asCalendarPayload(row).status === "cancelled",
   detail: (row, ctx) => (isReschedule(row, ctx) ? "cancelled_event:reschedule" : "cancelled_event:final"),
@@ -185,7 +211,7 @@ export const cancelledEventRule: Rule = {
 
 export const knownContactRule: Rule = {
   id: "known_contact",
-  priority: 8,
+  priority: 9,
   outcome: "processed",
   predicate: (row, ctx) =>
     row.source === "email" && ctx.knownContactEmails.has(asEmailPayload(row).from.toLowerCase()),
@@ -193,7 +219,7 @@ export const knownContactRule: Rule = {
 
 export const knownDomainRule: Rule = {
   id: "known_domain",
-  priority: 9,
+  priority: 10,
   outcome: "processed",
   predicate: (row, ctx) => {
     if (row.source !== "email") return false;
@@ -204,14 +230,14 @@ export const knownDomainRule: Rule = {
 
 export const personalDomainRule: Rule = {
   id: "personal_domain",
-  priority: 10,
+  priority: 11,
   outcome: "quarantined",
   predicate: (row) => row.source === "email" && PERSONAL_DOMAINS.includes(splitEmail(asEmailPayload(row).from).domain),
 };
 
 export const defaultProcessedRule: Rule = {
   id: "default_processed",
-  priority: 11,
+  priority: 12,
   outcome: "processed",
   predicate: (row) => {
     if (row.source === "email") return true;
@@ -222,7 +248,7 @@ export const defaultProcessedRule: Rule = {
 
 export const unresolvedRule: Rule = {
   id: "unresolved",
-  priority: 12,
+  priority: 13,
   outcome: "quarantined",
   predicate: () => true,
 };
@@ -232,6 +258,7 @@ export const RULES: Rule[] = [
   websiteLeadRule,
   autoReplyRule,
   externalBulkRule,
+  recruitingRule,
   internalEmailRule,
   internalEventRule,
   cancelledEventRule,

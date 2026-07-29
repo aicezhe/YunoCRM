@@ -12,6 +12,7 @@
     "classify": "tsx --env-file=.env.local scripts/classify.ts",
     "resolve": "tsx --env-file=.env.local scripts/resolve.ts",
     "enrich": "tsx --env-file=.env.local scripts/enrich-quarantine.ts",
+    "audit-filtering": "tsx --env-file=.env.local scripts/audit-filtering.ts",
     "embed-companies": "tsx --env-file=.env.local scripts/embed-companies.ts",
     "seed-users": "tsx --env-file=.env.local scripts/seed-users.ts",
     "test": "vitest run"
