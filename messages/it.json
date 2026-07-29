@@ -228,5 +228,26 @@
     "companyGone": "Quell'azienda non esiste più.",
     "linkFailed": "Impossibile collegare questo elemento. Riprova.",
     "discardFailed": "Impossibile scartare questo elemento. Riprova."
+  },
+  "users": {
+    "title": "Utenti",
+    "subtitle": "Gestisci i membri del team, i ruoli e le responsabilità.",
+    "inviteUser": "Invita utente",
+    "sendInvite": "Invia invito",
+    "cancel": "Annulla",
+    "emailPlaceholder": "nome@azienda.com",
+    "joined": "Iscritto il {date}",
+    "toggleRoleTitle": "Clicca per cambiare ruolo"
+  },
+  "roles": {
+    "admin": "admin",
+    "member": "membro"
+  },
+  "usersActions": {
+    "userNotFound": "Utente non trovato.",
+    "cannotDemoteLastAdmin": "Non puoi retrocedere l'unico admin rimasto — promuovi prima qualcun altro.",
+    "invalidEmail": "Inserisci un indirizzo email valido.",
+    "emailTaken": "Esiste già un utente con questa email.",
+    "missingAdminCredentials": "Al server mancano le credenziali admin di Supabase."
   }
 }

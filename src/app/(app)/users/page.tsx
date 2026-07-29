@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { users } from "../../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
@@ -19,13 +20,13 @@ export default async function UsersPage() {
     : [];
   if (row?.role !== "admin") redirect("/dashboard?denied=users");
 
-  const allUsers = await getAllUsers();
+  const [allUsers, t] = await Promise.all([getAllUsers(), getTranslations("users")]);
 
   return (
     <>
       <div className="mx-auto max-w-3xl px-5 pt-6 sm:px-6 sm:pt-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Users</h1>
-        <p className="mt-2 max-w-xl text-sm text-gray-500">Manage team members, roles, and who owns what.</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">{t("title")}</h1>
+        <p className="mt-2 max-w-xl text-sm text-gray-500">{t("subtitle")}</p>
       </div>
 
       <div className="mx-auto max-w-3xl px-5 pt-6 pb-4 sm:px-6">

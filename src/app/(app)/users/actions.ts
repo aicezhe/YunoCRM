@@ -2,6 +2,7 @@
 
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 import { db } from "@/db";
 import { users } from "../../../../drizzle/schema";
@@ -14,8 +15,9 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 const TEST_PASSWORD = "YunoCRM2026!";
 
 export async function updateUserRole(userId: string, newRole: "admin" | "member"): Promise<ActionResult> {
+  const t = await getTranslations("usersActions");
   const [target] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
-  if (!target) return { ok: false, error: "User not found." };
+  if (!target) return { ok: false, error: t("userNotFound") };
   if (target.role === newRole) return { ok: true };
 
   if (target.role === "admin" && newRole === "member") {
@@ -24,7 +26,7 @@ export async function updateUserRole(userId: string, newRole: "admin" | "member"
       .from(users)
       .where(eq(users.role, "admin"));
     if (count <= 1) {
-      return { ok: false, error: "Can't demote the only remaining admin — promote someone else first." };
+      return { ok: false, error: t("cannotDemoteLastAdmin") };
     }
   }
 
@@ -34,15 +36,16 @@ export async function updateUserRole(userId: string, newRole: "admin" | "member"
 }
 
 export async function inviteUser(email: string, role: "admin" | "member"): Promise<ActionResult> {
+  const t = await getTranslations("usersActions");
   const trimmedEmail = email.trim().toLowerCase();
-  if (!trimmedEmail || !trimmedEmail.includes("@")) return { ok: false, error: "Enter a valid email address." };
+  if (!trimmedEmail || !trimmedEmail.includes("@")) return { ok: false, error: t("invalidEmail") };
 
   const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, trimmedEmail));
-  if (existing) return { ok: false, error: "A user with that email already exists." };
+  if (existing) return { ok: false, error: t("emailTaken") };
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) return { ok: false, error: "Server is missing Supabase admin credentials." };
+  if (!url || !serviceKey) return { ok: false, error: t("missingAdminCredentials") };
 
   const admin = createSupabaseAdminClient(url, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },

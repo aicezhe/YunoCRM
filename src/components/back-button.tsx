@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /** Goes back to whatever list opened this view (search results or a
  * dashboard table), rather than a hardcoded route. */
 export function BackButton({ fallbackHref }: { fallbackHref: string }) {
   const router = useRouter();
+  const t = useTranslations("companyDetail");
 
   return (
     <button
@@ -17,7 +19,7 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
       className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-gray-500 transition hover:text-[#5B4FE9] sm:min-h-0"
     >
       <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-      Back
+      {t("back")}
     </button>
   );
 }

@@ -228,5 +228,26 @@
     "companyGone": "That company no longer exists.",
     "linkFailed": "Couldn't link this item. Try again.",
     "discardFailed": "Couldn't discard this item. Try again."
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage team members, roles, and who owns what.",
+    "inviteUser": "Invite user",
+    "sendInvite": "Send invite",
+    "cancel": "Cancel",
+    "emailPlaceholder": "name@company.com",
+    "joined": "Joined {date}",
+    "toggleRoleTitle": "Click to toggle role"
+  },
+  "roles": {
+    "admin": "admin",
+    "member": "member"
+  },
+  "usersActions": {
+    "userNotFound": "User not found.",
+    "cannotDemoteLastAdmin": "Can't demote the only remaining admin — promote someone else first.",
+    "invalidEmail": "Enter a valid email address.",
+    "emailTaken": "A user with that email already exists.",
+    "missingAdminCredentials": "Server is missing Supabase admin credentials."
   }
 }
