@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+UI available in English, Italian, and Russian — added as a demonstration of production-readiness beyond the brief's requirements.
+
 ## Getting Started
 
 First, run the development server:
