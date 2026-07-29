@@ -13,5 +13,14 @@
     "invalidEmail": "Введите корректный email",
     "missingPassword": "Введите пароль",
     "wrongCredentials": "Неверный email или пароль"
+  },
+  "nav": {
+    "dashboard": "Обзор",
+    "search": "Поиск",
+    "quarantine": "Карантин",
+    "users": "Команда",
+    "signOut": "Выйти",
+    "primary": "Основная",
+    "backToDashboard": "Обзор"
   }
 }

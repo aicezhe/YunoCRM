@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "./locale-switcher";
 import { NAV_ITEMS } from "./nav-items";
 import { SignOutButton } from "./sign-out-button";
@@ -27,6 +28,7 @@ export function Sidebar({
   email: string | undefined;
 }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
@@ -39,7 +41,7 @@ export function Sidebar({
         </span>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3" aria-label="Primary">
+      <nav className="flex-1 space-y-1 px-3" aria-label={t("primary")}>
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
@@ -57,7 +59,7 @@ export function Sidebar({
               }
             >
               <Icon className="h-4.5 w-4.5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{t(item.labelKey)}</span>
               {badge > 0 && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#5B4FE9] px-1.5 text-[11px] font-semibold text-white">
                   {badge > 9 ? "9+" : badge}

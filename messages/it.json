@@ -13,5 +13,14 @@
     "invalidEmail": "Inserisci un indirizzo email valido",
     "missingPassword": "Inserisci la password",
     "wrongCredentials": "Email o password non validi"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "search": "Cerca",
+    "quarantine": "Quarantena",
+    "users": "Utenti",
+    "signOut": "Esci",
+    "primary": "Principale",
+    "backToDashboard": "Dashboard"
   }
 }

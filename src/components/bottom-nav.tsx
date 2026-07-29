@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { NAV_ITEMS } from "./nav-items";
 
 /**
@@ -18,12 +19,13 @@ export function BottomNav({
   quarantineOpenCount: number;
 }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 flex border-t border-[#E4DFFC] bg-gradient-to-t from-[#EEEBFF] to-[#F3F0FD]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
-      aria-label="Primary"
+      aria-label={t("primary")}
     >
       <div className="mx-auto flex w-full max-w-5xl items-stretch justify-around px-2">
         {items.map((item) => {
@@ -49,7 +51,7 @@ export function BottomNav({
                 )}
               </span>
               <span className={active ? "text-[11px] font-medium text-[#5B4FE9]" : "text-[11px] font-medium"}>
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </Link>
           );
