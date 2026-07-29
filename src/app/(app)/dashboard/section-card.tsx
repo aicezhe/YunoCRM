@@ -1,11 +1,16 @@
 import Link from "next/link";
+import { Caveat } from "next/font/google";
 import { ArrowUpRight } from "lucide-react";
+
+const caveat = Caveat({ subsets: ["latin"], weight: ["700"] });
 
 /**
  * A dashboard section tile: a live stat (real number + short caption, not
  * a decorative icon) top-left, a delicate corner arrow, and the section
- * title bottom-right in caps. Flat, lightly-tinted background with a crisp
- * border — no gradient wash.
+ * title bottom-right — hand-marked with a highlighter-style swipe (an
+ * irregular purple blob, slightly rotated, in a casual script font)
+ * instead of plain uppercase text. Flat, lightly-tinted card background
+ * with a crisp border — the highlight is the only color accent.
  */
 export function SectionCard({
   href,
@@ -39,7 +44,16 @@ export function SectionCard({
         </span>
       </div>
 
-      <h2 className="self-end text-2xl font-bold tracking-wide text-gray-900 uppercase sm:text-3xl">{title}</h2>
+      <h2 className="self-end">
+        <span
+          className={
+            caveat.className +
+            " inline-block -rotate-2 rounded-[1.3em_0.4em_1.2em_0.5em] bg-[#5B4FE9] px-4 py-0.5 text-4xl text-white uppercase shadow-sm transition-transform duration-300 group-hover:rotate-0 sm:text-5xl"
+          }
+        >
+          {title}
+        </span>
+      </h2>
     </Link>
   );
 }
