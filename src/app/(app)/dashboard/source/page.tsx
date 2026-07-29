@@ -1,11 +1,13 @@
+import { BackToDashboard } from "../back-to-dashboard";
 import { getSourceReport } from "./queries";
 import { ChannelDonut } from "./channel-donut";
 import { UtmDonut } from "./utm-donut";
 
 function Header() {
   return (
-    <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-6 sm:pt-8">
-      <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Source</h1>
+    <div className="mx-auto max-w-5xl px-5 pt-4 sm:px-6 sm:pt-6">
+      <BackToDashboard />
+      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Source</h1>
       <p className="mt-2 max-w-xl text-sm text-gray-500">
         Where do our prospects come from, and which channels convert best?
       </p>

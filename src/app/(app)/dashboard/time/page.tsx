@@ -1,3 +1,4 @@
+import { BackToDashboard } from "../back-to-dashboard";
 import { getTimeReport, type StageDuration } from "./queries";
 
 function DurationTable({ stages }: { stages: StageDuration[] }) {
@@ -46,8 +47,9 @@ export default async function TimePage() {
 
   return (
     <>
-      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-6 sm:pt-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Time</h1>
+      <div className="mx-auto max-w-5xl px-5 pt-4 sm:px-6 sm:pt-6">
+        <BackToDashboard />
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Time</h1>
         <p className="mt-2 max-w-xl text-sm text-gray-500">
           How long do prospects spend in each stage on average? Where do they get stuck?
         </p>
