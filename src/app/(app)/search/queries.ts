@@ -21,7 +21,14 @@ export type SearchResultCompany = {
  * "contact" card. */
 export type SearchResult = SearchResultCompany;
 
-export type SearchReport = { state: "ok"; results: SearchResult[] } | { state: "empty"; query: string } | { state: "error" };
+export type SearchReport =
+  | { state: "ok"; results: SearchResult[] }
+  | { state: "empty"; query: string }
+  | { state: "error" }
+  /** Smart search specifically: VOYAGE_API_KEY is missing or no company has
+   * been embedded yet. A setup gap, not a failure — worth saying plainly
+   * instead of showing the generic "something went wrong". */
+  | { state: "unconfigured"; reason: "no_api_key" | "no_embeddings" };
 
 const RESULT_LIMIT = 50;
 const ALL_COMPANIES_LIMIT = 200;
@@ -166,6 +173,13 @@ async function embedQuery(query: string): Promise<number[]> {
  * embed meaningfully, so they're left to the exact-match mode. */
 export async function searchSmart(query: string): Promise<SearchReport> {
   try {
+    if (!process.env.VOYAGE_API_KEY) return { state: "unconfigured", reason: "no_api_key" };
+
+    const [{ embedded }] = await db.execute<{ embedded: number }>(
+      sql`select count(*) filter (where embedding is not null)::int as embedded from companies`
+    );
+    if (embedded === 0) return { state: "unconfigured", reason: "no_embeddings" };
+
     const vector = await embedQuery(query);
     const vectorLiteral = JSON.stringify(vector);
 

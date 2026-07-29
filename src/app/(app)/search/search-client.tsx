@@ -256,6 +256,18 @@ export function SearchClient() {
             </p>
           )}
 
+          {!isPending && report?.state === "unconfigured" && (
+            <div className="rounded-2xl bg-amber-50 px-5 py-4 text-sm text-amber-900">
+              <p className="font-medium">Smart search isn&apos;t set up yet.</p>
+              <p className="mt-1 text-amber-800">
+                {report.reason === "no_api_key"
+                  ? "The server has no VOYAGE_API_KEY, so queries can't be turned into embeddings."
+                  : "No company has been embedded yet — run the embed-companies script once."}{" "}
+                Normal search works in the meantime.
+              </p>
+            </div>
+          )}
+
           {!isPending && report?.state === "empty" && (
             <p className="rounded-2xl bg-white px-5 py-6 text-sm text-gray-500 shadow-sm">
               {report.query

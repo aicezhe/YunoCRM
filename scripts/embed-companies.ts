@@ -5,7 +5,9 @@
  * dataset, so each company's embedding text is built from what actually
  * exists: its name, domain, and its most recent/active prospect's channel
  * and funnel stage (the same "pick one prospect per company" rule the
- * search query itself uses — see src/app/(app)/search/queries.ts).
+ * search query itself uses — see src/app/(app)/search/queries.ts), plus
+ * the plain-English industry hints ./embedding-rules.ts derives from the
+ * Italian trade name so an English or Russian query can reach it.
  *
  * Idempotent: only companies with embedding IS NULL are processed, so
  * re-running never re-embeds (and re-bills) companies that already have one.
@@ -17,6 +19,7 @@ import { VoyageAIClient } from "voyageai";
 import { sql } from "drizzle-orm";
 import { db, client } from "../src/db";
 import { companies } from "../drizzle/schema";
+import { embeddingText } from "./embedding-rules";
 
 const EMBED_MODEL = "voyage-3-lite";
 const BATCH_SIZE = 128; // Voyage's per-request input list cap.
@@ -57,14 +60,6 @@ async function loadCompaniesWithoutEmbedding(): Promise<CompanyToEmbed[]> {
   return rows;
 }
 
-function embeddingText(c: CompanyToEmbed): string {
-  const parts = [c.name];
-  if (c.domain) parts.push(c.domain);
-  if (c.channel) parts.push(`${c.channel} channel`);
-  if (c.stage) parts.push(`stage: ${c.stage}`);
-  return parts.join(". ");
-}
-
 async function main() {
   const pending = await loadCompaniesWithoutEmbedding();
   const [{ total: totalCompanies }] = await db.execute<{ total: number }>(
@@ -74,6 +69,21 @@ async function main() {
   if (pending.length === 0) {
     console.log(`Nothing to do — all ${totalCompanies} companies already have an embedding.`);
     return;
+  }
+
+  // Lets the text the rules produce be reviewed before any API call is
+  // billed — and works without VOYAGE_API_KEY at all.
+  if (process.argv.includes("--dry-run")) {
+    console.log(`Would embed ${pending.length} of ${totalCompanies} companies. Text sent to the model:\n`);
+    for (const c of pending) console.log(`  ${embeddingText(c)}`);
+    console.log("\nNo API call was made and nothing was written.\n");
+    return;
+  }
+
+  if (!process.env.VOYAGE_API_KEY) {
+    throw new Error(
+      "VOYAGE_API_KEY is not set — add it to .env.local, or run with --dry-run to preview the text without embedding."
+    );
   }
 
   const voyage = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
