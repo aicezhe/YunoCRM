@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { eq } from "drizzle-orm";
 import { Calendar, Mail, Phone, StickyNote, type LucideIcon } from "lucide-react";
 import { db } from "@/db";
@@ -18,14 +19,19 @@ import {
 import { relativeTime } from "./relative-time";
 
 const TYPE_ICON: Record<string, LucideIcon> = { email: Mail, call: Phone, meeting: Calendar, note: StickyNote };
-const TYPE_LABEL: Record<string, string> = { email: "email", call: "call", meeting: "meeting", note: "note" };
+const KNOWN_TYPES = ["email", "call", "meeting", "note"];
 
 /** Normalizes a Metric's ok/empty/error states into a value+caption pair a
- * card can always render, instead of branching per card. */
-function metricDisplay(metric: Metric): { value: string; caption: string } {
-  if (metric.state === "ok") return { value: metric.value, caption: metric.caption };
-  if (metric.state === "empty") return { value: "–", caption: metric.caption };
-  return { value: "–", caption: "unavailable" };
+ * card can always render, instead of branching per card. The caption key
+ * and its params come from metrics.ts; ICU picks the plural form here,
+ * where the locale is known. */
+function metricDisplay(
+  metric: Metric,
+  t: (key: string, values?: Record<string, number>) => string
+): { value: string; caption: string } {
+  if (metric.state === "ok") return { value: metric.value, caption: t(metric.captionKey, metric.captionParams) };
+  if (metric.state === "empty") return { value: "–", caption: t(metric.captionKey) };
+  return { value: "–", caption: t("unavailable") };
 }
 
 /** Prefers the team member's real name; falls back to the email local part. */
@@ -41,30 +47,35 @@ async function getGreetingName(email: string | undefined): Promise<string> {
 }
 
 async function AsOfNote() {
-  const asOf = await getDataAsOf();
+  const [asOf, t, locale] = await Promise.all([getDataAsOf(), getTranslations("dashboard"), getLocale()]);
   if (!asOf) return null;
-  const formatted = new Intl.DateTimeFormat("en-GB", {
+  const formatted = new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   }).format(new Date(asOf));
-  return <p className="mt-1 text-sm text-gray-400">Pipeline data as of {formatted}</p>;
+  return <p className="mt-1 text-sm text-gray-400">{t("asOf", { date: formatted })}</p>;
 }
 
 async function RecentActivity() {
-  const [report, asOf] = await Promise.all([getRecentActivity(5), getDataAsOf()]);
+  const [report, asOf, t, locale] = await Promise.all([
+    getRecentActivity(5),
+    getDataAsOf(),
+    getTranslations("dashboard"),
+    getLocale(),
+  ]);
 
   if (report.state === "error") {
     return (
       <p className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">
-        Couldn&apos;t load recent activity right now.
+        {t("activityError")}
       </p>
     );
   }
   if (report.state === "empty") {
     return (
       <p className="rounded-2xl bg-white px-5 py-6 text-sm text-gray-500 shadow-sm">
-        No interactions logged yet — they&apos;ll show up here as they come in.
+        {t("activityEmpty")}
       </p>
     );
   }
@@ -73,7 +84,13 @@ async function RecentActivity() {
     <ul className="divide-y divide-gray-50 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
       {report.items.map((item) => {
         const Icon = TYPE_ICON[item.type] ?? StickyNote;
-        const label = TYPE_LABEL[item.type] ?? item.type;
+        // One key per type+direction rather than "direction" + "type":
+        // in Russian the adjective agrees with the noun's gender, so
+        // concatenating produces "исходящее встреча" instead of
+        // "исходящая встреча".
+        const label = KNOWN_TYPES.includes(item.type)
+          ? t(`activity.${item.type}${item.direction ? `_${item.direction}` : ""}`)
+          : item.type;
         return (
           <li key={item.id} className="flex items-center gap-3 px-4 py-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-[#5B4FE9]">
@@ -81,10 +98,10 @@ async function RecentActivity() {
             </span>
             <span className="min-w-0 flex-1 truncate text-sm text-gray-800">
               <span className="font-medium">{item.companyName}</span>
-              <span className="text-gray-400"> — {item.direction ? `${item.direction} ` : ""}{label}</span>
+              <span className="text-gray-400"> — {label}</span>
             </span>
             <span className="shrink-0 text-xs text-gray-400">
-              {asOf ? relativeTime(item.occurredAt, new Date(asOf).toISOString()) : null}
+              {asOf ? relativeTime(item.occurredAt, new Date(asOf).toISOString(), locale) : null}
             </span>
           </li>
         );
@@ -109,6 +126,7 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const t = await getTranslations("dashboard");
   const [name, sourceMetric, stageMetric, timeMetric, witheringMetric] = await Promise.all([
     getGreetingName(user?.email),
     getSourceMetric(),
@@ -118,10 +136,10 @@ export default async function DashboardPage() {
   ]);
 
   const sections = [
-    { href: "/dashboard/source", title: "Source", motif: "source" as const, ...metricDisplay(sourceMetric) },
-    { href: "/dashboard/by-stage", title: "By stage", motif: "stage" as const, ...metricDisplay(stageMetric) },
-    { href: "/dashboard/time", title: "Time", motif: "time" as const, ...metricDisplay(timeMetric) },
-    { href: "/dashboard/withering", title: "Withering", motif: "withering" as const, ...metricDisplay(witheringMetric) },
+    { href: "/dashboard/source", title: t("cardSource"), motif: "source" as const, ...metricDisplay(sourceMetric, t) },
+    { href: "/dashboard/by-stage", title: t("cardStage"), motif: "stage" as const, ...metricDisplay(stageMetric, t) },
+    { href: "/dashboard/time", title: t("cardTime"), motif: "time" as const, ...metricDisplay(timeMetric, t) },
+    { href: "/dashboard/withering", title: t("cardWithering"), motif: "withering" as const, ...metricDisplay(witheringMetric, t) },
   ];
 
   return (
@@ -132,7 +150,7 @@ export default async function DashboardPage() {
 
       <div className="pt-6 pb-8 sm:pt-8 sm:pb-10">
         <h1 className="text-3xl font-semibold tracking-tight break-words text-gray-900 sm:text-4xl lg:text-5xl">
-          Hello, {name}
+          {t("greeting", { name })}
         </h1>
         <Suspense fallback={null}>
           <AsOfNote />
@@ -153,7 +171,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8 mb-12 sm:mt-10">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">Recent activity</h2>
+        <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">{t("recentActivity")}</h2>
         <Suspense fallback={<RecentActivitySkeleton />}>
           <RecentActivity />
         </Suspense>

@@ -22,5 +22,40 @@
     "signOut": "Esci",
     "primary": "Principale",
     "backToDashboard": "Dashboard"
+  },
+  "dashboard": {
+    "greeting": "Ciao, {name}",
+    "asOf": "Dati della pipeline al {date}",
+    "recentActivity": "Attività recenti",
+    "activityError": "Non è stato possibile caricare le attività recenti.",
+    "activityEmpty": "Nessuna interazione registrata — compariranno qui man mano che arrivano.",
+    "accessDenied": "Non hai i permessi per visualizzare questa pagina.",
+    "cardSource": "Origine",
+    "cardStage": "Per fase",
+    "cardTime": "Tempi",
+    "cardWithering": "Inattivi",
+    "unavailable": "non disponibile",
+    "sourceEmpty": "ancora nessun prospect",
+    "sourceCaption": "su {count, plural, one {# canale} other {# canali}}",
+    "stageEmpty": "ancora nessun prospect",
+    "stageCaption": "aperti in pipeline",
+    "timeEmpty": "ancora nessuno storico",
+    "timeCaption": "giorni medi per fase",
+    "witheringEmpty": "nessun prospect aperto",
+    "witheringCaption": "su {active, plural, one {# aperto} other {# aperti}}, inattivi da {days}+ giorni",
+    "activity": {
+      "email_inbound": "email in entrata",
+      "email_outbound": "email in uscita",
+      "call_inbound": "chiamata in entrata",
+      "call_outbound": "chiamata in uscita",
+      "meeting_inbound": "riunione in entrata",
+      "meeting_outbound": "riunione in uscita",
+      "note_inbound": "nota",
+      "note_outbound": "nota",
+      "email": "email",
+      "call": "chiamata",
+      "meeting": "riunione",
+      "note": "nota"
+    }
   }
 }

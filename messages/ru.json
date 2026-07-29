@@ -22,5 +22,40 @@
     "signOut": "Выйти",
     "primary": "Основная",
     "backToDashboard": "Обзор"
+  },
+  "dashboard": {
+    "greeting": "Здравствуйте, {name}",
+    "asOf": "Данные воронки на {date}",
+    "recentActivity": "Последние события",
+    "activityError": "Не удалось загрузить последние события.",
+    "activityEmpty": "Взаимодействий пока нет — они появятся здесь по мере поступления.",
+    "accessDenied": "У вас нет доступа к этой странице.",
+    "cardSource": "Источники",
+    "cardStage": "По этапам",
+    "cardTime": "Сроки",
+    "cardWithering": "Остывшие",
+    "unavailable": "нет данных",
+    "sourceEmpty": "пока нет проспектов",
+    "sourceCaption": "из {count, plural, one {# канала} few {# каналов} many {# каналов} other {# каналов}}",
+    "stageEmpty": "пока нет проспектов",
+    "stageCaption": "в активной воронке",
+    "timeEmpty": "пока нет истории этапов",
+    "timeCaption": "дней на этап в среднем",
+    "witheringEmpty": "нет активных проспектов",
+    "witheringCaption": "из {active, plural, one {# активного} few {# активных} many {# активных} other {# активных}}, без контакта {days}+ дней",
+    "activity": {
+      "email_inbound": "входящее письмо",
+      "email_outbound": "исходящее письмо",
+      "call_inbound": "входящий звонок",
+      "call_outbound": "исходящий звонок",
+      "meeting_inbound": "входящая встреча",
+      "meeting_outbound": "исходящая встреча",
+      "note_inbound": "заметка",
+      "note_outbound": "заметка",
+      "email": "письмо",
+      "call": "звонок",
+      "meeting": "встреча",
+      "note": "заметка"
+    }
   }
 }

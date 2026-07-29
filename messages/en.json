@@ -22,5 +22,40 @@
     "signOut": "Sign out",
     "primary": "Primary",
     "backToDashboard": "Dashboard"
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "asOf": "Pipeline data as of {date}",
+    "recentActivity": "Recent activity",
+    "activityError": "Couldn't load recent activity right now.",
+    "activityEmpty": "No interactions logged yet — they'll show up here as they come in.",
+    "accessDenied": "You don't have permission to view this page.",
+    "cardSource": "Source",
+    "cardStage": "By stage",
+    "cardTime": "Time",
+    "cardWithering": "Withering",
+    "unavailable": "unavailable",
+    "sourceEmpty": "no prospects yet",
+    "sourceCaption": "across {count, plural, one {# channel} other {# channels}}",
+    "stageEmpty": "no prospects yet",
+    "stageCaption": "open in the pipeline",
+    "timeEmpty": "no stage history yet",
+    "timeCaption": "avg days per stage",
+    "witheringEmpty": "no open prospects",
+    "witheringCaption": "of {active, plural, one {# open} other {# open}}, cold {days}+ days",
+    "activity": {
+      "email_inbound": "inbound email",
+      "email_outbound": "outbound email",
+      "call_inbound": "inbound call",
+      "call_outbound": "outbound call",
+      "meeting_inbound": "inbound meeting",
+      "meeting_outbound": "outbound meeting",
+      "note_inbound": "note",
+      "note_outbound": "note",
+      "email": "email",
+      "call": "call",
+      "meeting": "meeting",
+      "note": "note"
+    }
   }
 }
