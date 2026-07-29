@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip, type PieSectorDataItem } from "recharts";
-import { CHANNEL_COLORS, CHANNEL_LABELS } from "./labels";
+import { useTranslations } from "next-intl";
+import { channelLabel } from "@/i18n/channel-labels";
+import { CHANNEL_COLORS } from "./labels";
 import type { ChannelRow } from "./queries";
 
 function renderActiveShape(props: PieSectorDataItem) {
@@ -10,28 +12,30 @@ function renderActiveShape(props: PieSectorDataItem) {
 }
 
 function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { payload: ChannelRow & { isBest: boolean } }[] }) {
+  const tChannel = useTranslations("channels");
+  const t = useTranslations("sourceScreen");
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
 
   return (
     <div className="tooltip-pop min-w-[250px] rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-2xl">
       <div className="flex items-center gap-2">
-        <span className="text-base font-semibold text-gray-900">{CHANNEL_LABELS[d.channel] ?? d.channel}</span>
+        <span className="text-base font-semibold text-gray-900">{channelLabel(tChannel, d.channel)}</span>
         {d.isBest && (
-          <span className="rounded-full bg-[#5B4FE9]/10 px-2 py-0.5 text-xs font-semibold text-[#5B4FE9]">Best</span>
+          <span className="rounded-full bg-[#5B4FE9]/10 px-2 py-0.5 text-xs font-semibold text-[#5B4FE9]">{t("best")}</span>
         )}
       </div>
       <dl className="mt-2.5 space-y-1.5 text-sm">
         <div className="flex items-center justify-between">
-          <dt className="text-gray-400">Prospects</dt>
+          <dt className="text-gray-400">{t("prospects")}</dt>
           <dd className="font-medium text-gray-900">{d.total}</dd>
         </div>
         <div className="flex items-center justify-between">
-          <dt className="text-gray-400">Active</dt>
+          <dt className="text-gray-400">{t("active")}</dt>
           <dd className="font-medium text-gray-900">{d.active}</dd>
         </div>
         <div className="flex items-center justify-between">
-          <dt className="text-gray-400">Won</dt>
+          <dt className="text-gray-400">{t("won")}</dt>
           <dd className="font-medium text-gray-900">{d.won}</dd>
         </div>
       </dl>
@@ -49,6 +53,8 @@ function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { pay
 }
 
 export function ChannelDonut({ channels }: { channels: ChannelRow[] }) {
+  const tChannel = useTranslations("channels");
+  const t = useTranslations("sourceScreen");
   const total = channels.reduce((sum, c) => sum + c.total, 0);
   const bestChannel = channels.find((c) => c.total > 0)?.channel;
   const data = channels.map((c) => ({ ...c, isBest: c.channel === bestChannel }));
@@ -74,7 +80,7 @@ export function ChannelDonut({ channels }: { channels: ChannelRow[] }) {
             other way around. */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-3xl font-semibold text-gray-900">{total}</span>
-          <span className="text-xs text-gray-400">Total prospects</span>
+          <span className="text-xs text-gray-400">{t("totalProspects")}</span>
         </div>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -107,7 +113,7 @@ export function ChannelDonut({ channels }: { channels: ChannelRow[] }) {
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ background: CHANNEL_COLORS[c.channel] ?? "#5B4FE9" }}
             />
-            {CHANNEL_LABELS[c.channel] ?? c.channel}
+            {channelLabel(tChannel, c.channel)}
           </span>
         ))}
       </div>

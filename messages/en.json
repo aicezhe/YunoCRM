@@ -57,5 +57,69 @@
       "meeting": "meeting",
       "note": "note"
     }
+  },
+  "channels": {
+    "website": "Website",
+    "linkedin_outbound": "LinkedIn outbound",
+    "referral": "Referral",
+    "event": "Events / trade fairs",
+    "content_inbound": "Content inbound",
+    "manual": "Manual"
+  },
+  "stages": {
+    "Lead": "Lead",
+    "Contacted": "Contacted",
+    "Demo Scheduled": "Demo Scheduled",
+    "Demo Done": "Demo Done",
+    "Trial": "Trial",
+    "Negotiation": "Negotiation",
+    "Won": "Won",
+    "Lost": "Lost"
+  },
+  "sourceScreen": {
+    "title": "Source",
+    "subtitle": "Where do our prospects come from, and which channels convert best?",
+    "error": "Couldn't load source data right now. Try refreshing the page.",
+    "empty": "No prospects yet — once some come in, channel performance will show up here.",
+    "utmHeading": "Website — by UTM source",
+    "best": "Best",
+    "prospects": "Prospects",
+    "active": "Active",
+    "won": "Won",
+    "totalProspects": "Total prospects",
+    "websiteProspects": "Website prospects"
+  },
+  "byStageScreen": {
+    "title": "By stage",
+    "subtitle": "How is the pipeline distributed across stages today?",
+    "error": "Couldn't load the pipeline breakdown right now. Try refreshing the page.",
+    "empty": "No prospects yet — the funnel will fill in once some come in.",
+    "totalProspects": "{count, plural, one {# prospect total} other {# prospects total}}",
+    "tooltipProspects": "Prospects"
+  },
+  "timeScreen": {
+    "title": "Time",
+    "subtitle": "How long do prospects spend in each stage on average? Where do they get stuck?",
+    "error": "Couldn't load stage timing right now. Try refreshing the page.",
+    "empty": "No stage history yet — timing will show up once prospects start moving through the funnel.",
+    "colStage": "Stage",
+    "colAvgDays": "Avg. days before moving on",
+    "colCompleted": "Completed transitions",
+    "colOngoing": "Ongoing (still here)",
+    "avgDays": "{count, plural, one {# day} other {# days}}",
+    "footnote": "“Ongoing” prospects are still sitting in that stage right now, so they have no completed duration yet — they're excluded from the average rather than counted as 0 days."
+  },
+  "witheringScreen": {
+    "title": "Withering",
+    "subtitle": "Which prospects have gone cold (no interaction for 14+ days)?",
+    "error": "Couldn't load cold prospects right now. Try refreshing the page.",
+    "empty": "Nice — no cold prospects right now.",
+    "colCompany": "Company",
+    "colStage": "Stage",
+    "colOwner": "Owner",
+    "colChannel": "Channel",
+    "colDaysCold": "Days cold",
+    "unassigned": "Unassigned",
+    "daysCold": "{count, number}d"
   }
 }

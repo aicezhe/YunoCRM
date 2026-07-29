@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip, type PieSectorDataItem } from "recharts";
 import { UTM_COLORS } from "./labels";
 import type { UtmRow } from "./queries";
@@ -10,6 +11,7 @@ function renderActiveShape(props: PieSectorDataItem) {
 }
 
 function UtmTooltip({ active, payload }: { active?: boolean; payload?: { payload: UtmRow }[] }) {
+  const t = useTranslations("sourceScreen");
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
 
@@ -17,7 +19,7 @@ function UtmTooltip({ active, payload }: { active?: boolean; payload?: { payload
     <div className="tooltip-pop min-w-[200px] rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-2xl">
       <p className="text-base font-semibold text-gray-900">{d.utmSource}</p>
       <div className="mt-1.5 flex items-center justify-between text-sm">
-        <span className="text-gray-400">Prospects</span>
+        <span className="text-gray-400">{t("prospects")}</span>
         <span className="font-medium text-gray-900">{d.total}</span>
       </div>
     </div>
@@ -25,6 +27,7 @@ function UtmTooltip({ active, payload }: { active?: boolean; payload?: { payload
 }
 
 export function UtmDonut({ utm }: { utm: UtmRow[] }) {
+  const t = useTranslations("sourceScreen");
   const total = utm.reduce((sum, u) => sum + u.total, 0);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -41,7 +44,7 @@ export function UtmDonut({ utm }: { utm: UtmRow[] }) {
       <div className="relative z-50 mx-auto h-[200px] max-w-[240px]">
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-semibold text-gray-900">{total}</span>
-          <span className="text-xs text-gray-400">Website prospects</span>
+          <span className="text-xs text-gray-400">{t("websiteProspects")}</span>
         </div>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

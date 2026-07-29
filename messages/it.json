@@ -57,5 +57,69 @@
       "meeting": "riunione",
       "note": "nota"
     }
+  },
+  "channels": {
+    "website": "Sito web",
+    "linkedin_outbound": "LinkedIn outbound",
+    "referral": "Passaparola",
+    "event": "Eventi / fiere",
+    "content_inbound": "Contenuti in entrata",
+    "manual": "Manuale"
+  },
+  "stages": {
+    "Lead": "Lead",
+    "Contacted": "Contattato",
+    "Demo Scheduled": "Demo pianificata",
+    "Demo Done": "Demo completata",
+    "Trial": "Prova",
+    "Negotiation": "Trattativa",
+    "Won": "Vinto",
+    "Lost": "Perso"
+  },
+  "sourceScreen": {
+    "title": "Origine",
+    "subtitle": "Da dove arrivano i nostri prospect e quali canali convertono meglio?",
+    "error": "Impossibile caricare i dati di origine. Aggiorna la pagina.",
+    "empty": "Ancora nessun prospect — non appena ne arriveranno, qui vedrai il rendimento dei canali.",
+    "utmHeading": "Sito web — per fonte UTM",
+    "best": "Migliore",
+    "prospects": "Prospect",
+    "active": "Attivi",
+    "won": "Vinti",
+    "totalProspects": "Prospect totali",
+    "websiteProspects": "Prospect dal sito"
+  },
+  "byStageScreen": {
+    "title": "Per fase",
+    "subtitle": "Come si distribuisce oggi la pipeline tra le fasi?",
+    "error": "Impossibile caricare la ripartizione della pipeline. Aggiorna la pagina.",
+    "empty": "Ancora nessun prospect — l'imbuto si popolerà non appena arriveranno.",
+    "totalProspects": "{count, plural, one {# prospect totale} other {# prospect totali}}",
+    "tooltipProspects": "Prospect"
+  },
+  "timeScreen": {
+    "title": "Tempi",
+    "subtitle": "Quanto tempo restano i prospect in ogni fase in media? Dove si bloccano?",
+    "error": "Impossibile caricare i tempi per fase. Aggiorna la pagina.",
+    "empty": "Ancora nessuno storico — i tempi appariranno non appena i prospect inizieranno a muoversi nell'imbuto.",
+    "colStage": "Fase",
+    "colAvgDays": "Giorni medi prima di avanzare",
+    "colCompleted": "Transizioni completate",
+    "colOngoing": "In corso (ancora qui)",
+    "avgDays": "{count, plural, one {# giorno} other {# giorni}}",
+    "footnote": "I prospect “in corso” si trovano ancora in quella fase, quindi non hanno ancora una durata completata — sono esclusi dalla media invece di essere contati come 0 giorni."
+  },
+  "witheringScreen": {
+    "title": "Inattivi",
+    "subtitle": "Quali prospect si sono raffreddati (nessuna interazione da 14+ giorni)?",
+    "error": "Impossibile caricare i prospect inattivi. Aggiorna la pagina.",
+    "empty": "Ottimo — nessun prospect inattivo al momento.",
+    "colCompany": "Azienda",
+    "colStage": "Fase",
+    "colOwner": "Responsabile",
+    "colChannel": "Canale",
+    "colDaysCold": "Giorni di inattività",
+    "unassigned": "Non assegnato",
+    "daysCold": "{count, number}gg"
   }
 }
