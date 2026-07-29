@@ -170,8 +170,8 @@ export function SearchClient() {
             <div
               aria-hidden
               className={
-                "pointer-events-none absolute -inset-1 rounded-3xl bg-[#5B4FE9] blur-xl transition-opacity duration-300 " +
-                (focused ? "opacity-25" : "opacity-[0.08]")
+                "pointer-events-none absolute -inset-1 rounded-3xl bg-[#5B4FE9] blur-2xl transition-opacity duration-300 " +
+                (focused ? "opacity-15" : "opacity-[0.05]")
               }
             />
             <div className="relative">
