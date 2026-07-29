@@ -11,7 +11,15 @@ import { LOCALES, LOCALE_LABELS, LOCALE_SHORT, type Locale } from "@/i18n/locale
  * the layout is what swaps the language — no router.push, so the user stays
  * exactly where they were and no route path changes.
  */
-export function LocaleSwitcher({ className = "" }: { className?: string }) {
+export function LocaleSwitcher({
+  className = "",
+  /** Which way the list opens. "up" suits the sidebar footer; "down" the
+   * login page and the mobile header, where opening up would run off-screen. */
+  open: openDirection = "up",
+}: {
+  className?: string;
+  open?: "up" | "down";
+}) {
   const current = useLocale() as Locale;
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -58,7 +66,10 @@ export function LocaleSwitcher({ className = "" }: { className?: string }) {
       {open && (
         <ul
           role="listbox"
-          className="absolute bottom-full left-0 z-50 mb-1 min-w-[9rem] overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg"
+          className={
+            "absolute right-0 z-50 min-w-[9rem] overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg " +
+            (openDirection === "up" ? "bottom-full mb-1" : "top-full mt-1")
+          }
         >
           {LOCALES.map((locale) => (
             <li key={locale}>

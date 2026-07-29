@@ -1,5 +1,17 @@
 {
   "common": {
     "languageLabel": "Язык"
+  },
+  "login": {
+    "welcome": "С возвращением",
+    "subtitle": "Войдите в рабочее пространство",
+    "email": "Email",
+    "emailPlaceholder": "имя@компания.com",
+    "password": "Пароль",
+    "submit": "Войти",
+    "submitting": "Вход…",
+    "invalidEmail": "Введите корректный email",
+    "missingPassword": "Введите пароль",
+    "wrongCredentials": "Неверный email или пароль"
   }
 }

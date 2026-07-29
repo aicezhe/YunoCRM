@@ -1,5 +1,17 @@
 {
   "common": {
     "languageLabel": "Lingua"
+  },
+  "login": {
+    "welcome": "Bentornato",
+    "subtitle": "Accedi al tuo spazio di lavoro",
+    "email": "Email",
+    "emailPlaceholder": "nome@azienda.com",
+    "password": "Password",
+    "submit": "Accedi",
+    "submitting": "Accesso in corso…",
+    "invalidEmail": "Inserisci un indirizzo email valido",
+    "missingPassword": "Inserisci la password",
+    "wrongCredentials": "Email o password non validi"
   }
 }

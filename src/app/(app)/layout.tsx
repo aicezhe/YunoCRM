@@ -53,7 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex items-center gap-2 sm:gap-3">
           {/* The email is the first thing to go when width is scarce. */}
           <span className="hidden truncate text-sm text-gray-500 sm:inline">{user?.email}</span>
-          <LocaleSwitcher />
+          <LocaleSwitcher open="down" />
           <SignOutButton />
         </div>
       </header>

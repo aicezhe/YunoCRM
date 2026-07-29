@@ -1,5 +1,17 @@
 {
   "common": {
     "languageLabel": "Language"
+  },
+  "login": {
+    "welcome": "Welcome back",
+    "subtitle": "Log in to your workspace",
+    "email": "Email",
+    "emailPlaceholder": "you@company.com",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "invalidEmail": "Please enter a valid email address",
+    "missingPassword": "Please enter your password",
+    "wrongCredentials": "Invalid email or password"
   }
 }
