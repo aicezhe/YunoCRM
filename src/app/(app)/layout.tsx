@@ -1,46 +1,39 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { users, quarantineItems } from "../../../drizzle/schema";
-import { createClient } from "@/lib/supabase/server";
+import { quarantineItems } from "../../../drizzle/schema";
+import { getCurrentAppUser } from "@/lib/auth/current-user";
 import { SignOutButton } from "@/components/sign-out-button";
 import { BottomNav } from "@/components/bottom-nav";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Sidebar } from "@/components/sidebar";
 
-/** Shared shell for every protected route: a mobile top bar + BottomNav
- * below md, a desktop Sidebar at md and up — see NAV_ITEMS for the single
- * source of truth both read from. */
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let isAdmin = false;
-  let name = user?.email?.split("@")[0] ?? "there";
-  if (user?.email) {
-    try {
-      const [row] = await db
-        .select({ name: users.name, role: users.role })
-        .from(users)
-        .where(eq(users.email, user.email));
-      isAdmin = row?.role === "admin";
-      if (row?.name) name = row.name;
-    } catch (err) {
-      console.error("[app-layout] user lookup failed:", err);
-    }
-  }
-
-  let quarantineOpenCount = 0;
+async function getQuarantineOpenCount(): Promise<number> {
   try {
     const [row] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(quarantineItems)
       .where(eq(quarantineItems.status, "open"));
-    quarantineOpenCount = row?.count ?? 0;
+    return row?.count ?? 0;
   } catch (err) {
     console.error("[app-layout] quarantine count failed:", err);
+    return 0;
   }
+}
+
+/** Shared shell for every protected route: a mobile top bar + BottomNav
+ * below md, a desktop Sidebar at md and up — see NAV_ITEMS for the single
+ * source of truth both read from. */
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  // getCurrentAppUser() is React-cache()'d, so this doesn't cost a second
+  // auth round-trip when the page below also calls it (dashboard/page.tsx,
+  // users/page.tsx) — both hit the same memoized call within this request.
+  // Runs alongside the quarantine count instead of after it: two unrelated
+  // queries no longer wait on each other in sequence.
+  const [appUser, quarantineOpenCount] = await Promise.all([getCurrentAppUser(), getQuarantineOpenCount()]);
+
+  const isAdmin = appUser?.role === "admin";
+  const name = appUser?.name ?? "there";
+  const email = appUser?.email;
 
   return (
     <div className="min-h-dvh bg-[#FCFBFF] font-sans">
@@ -52,13 +45,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </span>
         <div className="flex items-center gap-2 sm:gap-3">
           {/* The email is the first thing to go when width is scarce. */}
-          <span className="hidden truncate text-sm text-gray-500 sm:inline">{user?.email}</span>
+          <span className="hidden truncate text-sm text-gray-500 sm:inline">{email}</span>
           <LocaleSwitcher open="down" />
           <SignOutButton />
         </div>
       </header>
 
-      <Sidebar isAdmin={isAdmin} quarantineOpenCount={quarantineOpenCount} name={name} email={user?.email} />
+      <Sidebar isAdmin={isAdmin} quarantineOpenCount={quarantineOpenCount} name={name} email={email} />
 
       {/* pb clears the fixed mobile BottomNav; md:ml clears the fixed
           desktop Sidebar instead, and md:pb-0 since there's no bottom nav

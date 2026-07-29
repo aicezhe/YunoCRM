@@ -1,26 +1,19 @@
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { db } from "@/db";
-import { users } from "../../../../drizzle/schema";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAppUser } from "@/lib/auth/current-user";
 import { getAllUsers } from "./queries";
 import { UsersClient } from "./users-client";
 
 /** Admin-only, matching the BottomNav visibility rule — enforced here too in
  * case someone hits the URL directly instead of clicking the (hidden) tab. */
 export default async function UsersPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const [row] = user?.email
-    ? await db.select({ role: users.role }).from(users).where(eq(users.email, user.email))
-    : [];
-  if (row?.role !== "admin") redirect("/dashboard?denied=users");
-
-  const [allUsers, t] = await Promise.all([getAllUsers(), getTranslations("users")]);
+  // Cached alongside the layout's own call — see src/lib/auth/current-user.ts.
+  const [appUser, allUsers, t] = await Promise.all([
+    getCurrentAppUser(),
+    getAllUsers(),
+    getTranslations("users"),
+  ]);
+  if (appUser?.role !== "admin") redirect("/dashboard?denied=users");
 
   return (
     <>

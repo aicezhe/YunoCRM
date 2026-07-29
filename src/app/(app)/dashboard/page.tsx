@@ -1,10 +1,7 @@
 import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { eq } from "drizzle-orm";
 import { Calendar, Mail, Phone, StickyNote, type LucideIcon } from "lucide-react";
-import { db } from "@/db";
-import { users } from "../../../../drizzle/schema";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAppUser } from "@/lib/auth/current-user";
 import { AccessDeniedToast } from "./access-denied-toast";
 import { SectionCard } from "./section-card";
 import {
@@ -34,16 +31,11 @@ function metricDisplay(
   return { value: "–", caption: t("unavailable") };
 }
 
-/** Prefers the team member's real name; falls back to the email local part. */
-async function getGreetingName(email: string | undefined): Promise<string> {
-  if (!email) return "there";
-  try {
-    const [row] = await db.select({ name: users.name }).from(users).where(eq(users.email, email));
-    if (row?.name) return row.name.split(" ")[0];
-  } catch (err) {
-    console.error("[dashboard] name lookup failed:", err);
-  }
-  return email.split("@")[0];
+/** First name only, for the greeting — getCurrentAppUser() carries the full
+ * name since Sidebar/BottomNav show that instead. */
+function firstNameOf(appUser: Awaited<ReturnType<typeof getCurrentAppUser>>): string {
+  if (!appUser) return "there";
+  return appUser.name.split(" ")[0] || appUser.email.split("@")[0];
 }
 
 async function AsOfNote() {
@@ -121,19 +113,17 @@ function RecentActivitySkeleton() {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const t = await getTranslations("dashboard");
-  const [name, sourceMetric, stageMetric, timeMetric, witheringMetric] = await Promise.all([
-    getGreetingName(user?.email),
+  // getCurrentAppUser() is cache()'d — this call reuses the layout's fetch
+  // for the same request instead of paying for auth.getUser() a second time.
+  const [appUser, t, sourceMetric, stageMetric, timeMetric, witheringMetric] = await Promise.all([
+    getCurrentAppUser(),
+    getTranslations("dashboard"),
     getSourceMetric(),
     getStageMetric(),
     getTimeMetric(),
     getWitheringMetric(),
   ]);
+  const name = firstNameOf(appUser);
 
   const sections = [
     { href: "/dashboard/source", title: t("cardSource"), motif: "source" as const, ...metricDisplay(sourceMetric, t) },
