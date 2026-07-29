@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LocaleSwitcher } from "./locale-switcher";
 import { NAV_ITEMS } from "./nav-items";
 import { SignOutButton } from "./sign-out-button";
 
@@ -70,8 +71,9 @@ export function Sidebar({
       <div className="border-t border-[#DDD6FA] px-4 py-4">
         <p className="truncate px-2 text-sm font-medium text-gray-900">{name}</p>
         {email && <p className="truncate px-2 text-xs text-gray-400">{email}</p>}
-        <div className="mt-3 px-2">
+        <div className="mt-3 flex items-center gap-2 px-2">
           <SignOutButton />
+          <LocaleSwitcher />
         </div>
       </div>
     </aside>
