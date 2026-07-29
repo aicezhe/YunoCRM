@@ -3,15 +3,6 @@ import { db } from "@/db";
 import { quarantineItems, rawEvents } from "../../../../drizzle/schema";
 import type { CalendarPayload, EmailPayload } from "../../../../scripts/classification-rules";
 
-/** Human-readable version of quarantine_items.reason (the classifier rule
- * id) — only two rules ever quarantine (see classification-rules.ts), but
- * this falls back to the raw id for forward-compatibility rather than
- * silently hiding an unrecognized reason. */
-const REASON_LABELS: Record<string, string> = {
-  personal_domain: "Sent from a personal email address",
-  unresolved: "Couldn't be automatically matched",
-};
-
 export type PgTrgmCandidate = { companyId: string; name: string; similarity: number };
 export type AiSuggestion = {
   action: "create_prospect" | "link_to_existing" | "discard";
@@ -22,8 +13,10 @@ export type AiSuggestion = {
 
 export type QuarantineDisplayItem = {
   id: string;
+  /** Raw classifier rule id (e.g. "personal_domain") — translated for
+   * display via the "quarantineReasons" dictionary at render time, not
+   * baked into a label here, so this stays locale-agnostic. */
   reason: string;
-  reasonLabel: string;
   source: "email" | "calendar";
   subject: string;
   preview: string;
@@ -87,7 +80,6 @@ export async function getOpenQuarantineItems(): Promise<QuarantineReport> {
       return {
         id: r.id,
         reason: r.reason,
-        reasonLabel: REASON_LABELS[r.reason] ?? r.reason,
         source: r.source as "email" | "calendar",
         ...display,
         candidates: (candidatesRaw?.matches ?? []).map((m) => ({

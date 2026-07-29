@@ -2,7 +2,10 @@ import { LayoutGrid, Search, ShieldAlert, Users, type LucideIcon } from "lucide-
 
 export type NavItem = {
   href: string;
-  label: string;
+  /** Key under the "nav" namespace — resolved by each nav component, since
+   * this module is imported by Server and Client Components alike and must
+   * stay free of hooks. */
+  labelKey: "dashboard" | "search" | "quarantine" | "users";
   icon: LucideIcon;
   /** Only rendered (BottomNav and Sidebar alike) when the viewer is an admin. */
   adminOnly?: boolean;
@@ -12,8 +15,8 @@ export type NavItem = {
  * Sidebar — one list so the admin-only Users rule lives in exactly one
  * place instead of being duplicated per nav variant. */
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/quarantine", label: "Quarantine", icon: ShieldAlert },
-  { href: "/users", label: "Users", icon: Users, adminOnly: true },
+  { href: "/dashboard", labelKey: "dashboard", icon: LayoutGrid },
+  { href: "/search", labelKey: "search", icon: Search },
+  { href: "/quarantine", labelKey: "quarantine", icon: ShieldAlert },
+  { href: "/users", labelKey: "users", icon: Users, adminOnly: true },
 ];

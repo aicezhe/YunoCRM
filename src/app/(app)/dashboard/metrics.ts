@@ -13,9 +13,15 @@ import { db } from "@/db";
  * render an ok / empty / error state without one failed query taking down
  * the whole page.
  */
+/**
+ * Captions are returned as a translation key plus its parameters, not as a
+ * finished string: these run on the server, where the caption's plural form
+ * depends on the viewer's locale (Russian needs three forms for "channel").
+ * The page resolves them through next-intl, so ICU does the plural work.
+ */
 export type Metric =
-  | { state: "ok"; value: string; caption: string }
-  | { state: "empty"; caption: string }
+  | { state: "ok"; value: string; captionKey: string; captionParams?: Record<string, number> }
+  | { state: "empty"; captionKey: string }
   | { state: "error" };
 
 /** DECISIONS.md §8: a prospect is "cold" after this long with no interaction. */
@@ -53,11 +59,12 @@ export async function getSourceMetric(): Promise<Metric> {
       from prospects
     `);
     const { total = 0, channels = 0 } = rows[0] ?? {};
-    if (total === 0) return { state: "empty", caption: "no prospects yet" };
+    if (total === 0) return { state: "empty", captionKey: "sourceEmpty" };
     return {
       state: "ok",
       value: String(total),
-      caption: `across ${channels} ${channels === 1 ? "channel" : "channels"}`,
+      captionKey: "sourceCaption",
+      captionParams: { count: channels },
     };
   } catch (err) {
     return failed("source", err);
@@ -74,8 +81,8 @@ export async function getStageMetric(): Promise<Metric> {
       from prospects
     `);
     const { active = 0, total = 0 } = rows[0] ?? {};
-    if (total === 0) return { state: "empty", caption: "no prospects yet" };
-    return { state: "ok", value: String(active), caption: "open in the pipeline" };
+    if (total === 0) return { state: "empty", captionKey: "stageEmpty" };
+    return { state: "ok", value: String(active), captionKey: "stageCaption" };
   } catch (err) {
     return failed("by stage", err);
   }
@@ -100,9 +107,9 @@ export async function getTimeMetric(): Promise<Metric> {
     `);
     const avgDays = rows[0]?.avg_days;
     if (avgDays === null || avgDays === undefined) {
-      return { state: "empty", caption: "no stage history yet" };
+      return { state: "empty", captionKey: "timeEmpty" };
     }
-    return { state: "ok", value: String(avgDays), caption: "avg days per stage" };
+    return { state: "ok", value: String(avgDays), captionKey: "timeCaption" };
   } catch (err) {
     return failed("time", err);
   }
@@ -123,11 +130,12 @@ export async function getWitheringMetric(): Promise<Metric> {
       where current_stage not in ('Won', 'Lost')
     `);
     const { cold = 0, active = 0 } = rows[0] ?? {};
-    if (active === 0) return { state: "empty", caption: "no open prospects" };
+    if (active === 0) return { state: "empty", captionKey: "witheringEmpty" };
     return {
       state: "ok",
       value: String(cold),
-      caption: `of ${active} open, cold ${COLD_THRESHOLD_DAYS}+ days`,
+      captionKey: "witheringCaption",
+      captionParams: { active, days: COLD_THRESHOLD_DAYS },
     };
   } catch (err) {
     return failed("withering", err);

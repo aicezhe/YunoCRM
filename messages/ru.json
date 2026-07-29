@@ -1,0 +1,254 @@
+{
+  "common": {
+    "languageLabel": "Язык"
+  },
+  "login": {
+    "welcome": "С возвращением",
+    "subtitle": "Войдите в рабочее пространство",
+    "email": "Email",
+    "emailPlaceholder": "имя@компания.com",
+    "password": "Пароль",
+    "submit": "Войти",
+    "submitting": "Вход…",
+    "invalidEmail": "Введите корректный email",
+    "missingPassword": "Введите пароль",
+    "wrongCredentials": "Неверный email или пароль"
+  },
+  "nav": {
+    "dashboard": "Обзор",
+    "search": "Поиск",
+    "quarantine": "Карантин",
+    "users": "Команда",
+    "signOut": "Выйти",
+    "primary": "Основная",
+    "backToDashboard": "Обзор"
+  },
+  "dashboard": {
+    "greeting": "Здравствуйте, {name}",
+    "asOf": "Данные воронки на {date}",
+    "recentActivity": "Последние события",
+    "activityError": "Не удалось загрузить последние события.",
+    "activityEmpty": "Взаимодействий пока нет — они появятся здесь по мере поступления.",
+    "accessDenied": "У вас нет доступа к этой странице.",
+    "cardSource": "Источники",
+    "cardStage": "По этапам",
+    "cardTime": "Сроки",
+    "cardWithering": "Остывшие",
+    "unavailable": "нет данных",
+    "sourceEmpty": "пока нет проспектов",
+    "sourceCaption": "из {count, plural, one {# канала} few {# каналов} many {# каналов} other {# каналов}}",
+    "stageEmpty": "пока нет проспектов",
+    "stageCaption": "в активной воронке",
+    "timeEmpty": "пока нет истории этапов",
+    "timeCaption": "дней на этап в среднем",
+    "witheringEmpty": "нет активных проспектов",
+    "witheringCaption": "из {active, plural, one {# активного} few {# активных} many {# активных} other {# активных}}, без контакта {days}+ дней",
+    "activity": {
+      "email_inbound": "входящее письмо",
+      "email_outbound": "исходящее письмо",
+      "call_inbound": "входящий звонок",
+      "call_outbound": "исходящий звонок",
+      "meeting_inbound": "входящая встреча",
+      "meeting_outbound": "исходящая встреча",
+      "note_inbound": "заметка",
+      "note_outbound": "заметка",
+      "email": "письмо",
+      "call": "звонок",
+      "meeting": "встреча",
+      "note": "заметка"
+    }
+  },
+  "channels": {
+    "website": "Сайт",
+    "linkedin_outbound": "LinkedIn (исходящие)",
+    "referral": "Рекомендации",
+    "event": "Мероприятия и выставки",
+    "content_inbound": "Входящий контент",
+    "manual": "Вручную"
+  },
+  "stages": {
+    "Lead": "Лид",
+    "Contacted": "Контакт установлен",
+    "Demo Scheduled": "Демо назначено",
+    "Demo Done": "Демо проведено",
+    "Trial": "Пробный период",
+    "Negotiation": "Переговоры",
+    "Won": "Выигран",
+    "Lost": "Проигран"
+  },
+  "sourceScreen": {
+    "title": "Источники",
+    "subtitle": "Откуда приходят проспекты и какие каналы конвертируют лучше всего?",
+    "error": "Не удалось загрузить данные по источникам. Обновите страницу.",
+    "empty": "Проспектов пока нет — как только они появятся, здесь будет видна эффективность каналов.",
+    "utmHeading": "Сайт — по UTM-источнику",
+    "best": "Лучший",
+    "prospects": "Проспектов",
+    "active": "Активных",
+    "won": "Выиграно",
+    "totalProspects": "Всего проспектов",
+    "websiteProspects": "Проспектов с сайта"
+  },
+  "byStageScreen": {
+    "title": "По этапам",
+    "subtitle": "Как воронка распределена по этапам сегодня?",
+    "error": "Не удалось загрузить разбивку по этапам. Обновите страницу.",
+    "empty": "Проспектов пока нет — воронка заполнится, как только они появятся.",
+    "totalProspects": "Всего {count, plural, one {# проспект} few {# проспекта} many {# проспектов} other {# проспектов}}",
+    "tooltipProspects": "Проспектов"
+  },
+  "timeScreen": {
+    "title": "Сроки",
+    "subtitle": "Сколько в среднем проспект проводит на каждом этапе? Где случаются задержки?",
+    "error": "Не удалось загрузить данные по срокам. Обновите страницу.",
+    "empty": "Истории по этапам пока нет — сроки появятся, как только проспекты начнут двигаться по воронке.",
+    "colStage": "Этап",
+    "colAvgDays": "Ср. дней до перехода",
+    "colCompleted": "Завершённых переходов",
+    "colOngoing": "Ещё на этапе",
+    "avgDays": "{count, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
+    "footnote": "Проспекты «ещё на этапе» до сих пор там находятся, поэтому у них ещё нет завершённой длительности — они не входят в среднее и не считаются как 0 дней.",
+    "avgDaysFraction": "{count, number} дня"
+  },
+  "witheringScreen": {
+    "title": "Остывшие",
+    "subtitle": "Какие проспекты остыли (нет взаимодействия 14+ дней)?",
+    "error": "Не удалось загрузить остывших проспектов. Обновите страницу.",
+    "empty": "Отлично — остывших проспектов сейчас нет.",
+    "colCompany": "Компания",
+    "colStage": "Этап",
+    "colOwner": "Ответственный",
+    "colChannel": "Канал",
+    "colDaysCold": "Дней без контакта",
+    "unassigned": "Не назначен",
+    "daysCold": "{count, number} дн."
+  },
+  "search": {
+    "searchButton": "Искать",
+    "showFullList": "Показать весь список",
+    "smartSearch": "Умный поиск",
+    "smartSearchHint": "— понимает смысл, а не только точные слова",
+    "kbdHint": "чтобы показать список всех компаний",
+    "placeholder": "Поиск компаний по названию, отрасли или описанию...",
+    "placeholderPhrase1": "Поиск компаний по названию...",
+    "placeholderPhrase2": "Например: поставщик автозапчастей в Ломбардии",
+    "placeholderPhrase3": "Например: семейная логистическая компания",
+    "error": "Что-то пошло не так при поиске. Попробуйте ещё раз.",
+    "unconfiguredTitle": "Умный поиск ещё не настроен.",
+    "unconfiguredNoKey": "На сервере не задан VOYAGE_API_KEY, поэтому запросы нельзя превратить в эмбеддинги.",
+    "unconfiguredNoEmbeddings": "Ни одна компания ещё не проиндексирована — запустите скрипт embed-companies один раз.",
+    "unconfiguredFooter": "Пока что работает обычный поиск.",
+    "emptyNoQuery": "Компаний пока нет.",
+    "emptySmart": "По запросу «{query}» ничего не найдено — попробуйте отключить умный поиск для точного совпадения.",
+    "emptyNormal": "Нет результатов по запросу «{query}».",
+    "resultCount": "{count, plural, one {# результат} few {# результата} many {# результатов} other {# результатов}}",
+    "matchPct": "совпадение {pct}%",
+    "matchedVia": "Найдено через: {name}",
+    "press": "Нажмите"
+  },
+  "companyDetail": {
+    "back": "Назад",
+    "stageHistory": "История этапов",
+    "noStageHistory": "Истории этапов пока нет.",
+    "createdAs": "Создан на этапе «{stage}»",
+    "transition": "{from} → {to}",
+    "tasks": "Задачи",
+    "noTasks": "Задач нет.",
+    "due": "Срок {date}",
+    "unassigned": "Не назначен",
+    "interactions": "Взаимодействия",
+    "noInteractions": "Взаимодействий пока не зафиксировано.",
+    "notFound": "Не удалось найти эту компанию.",
+    "loadError": "Не удалось загрузить компанию. Попробуйте ещё раз.",
+    "noProspect": "Для этой компании пока нет проспекта.",
+    "knownContact": "Известный контакт",
+    "matchedVia": "Найдено через: {name}",
+    "stage": "Этап",
+    "channel": "Канал",
+    "owner": "Ответственный",
+    "created": "Создан",
+    "lostReason": "Причина проигрыша:",
+    "noContacts": "Контактов нет.",
+    "prospects": "Проспекты",
+    "prospect": "Проспект",
+    "contacts": "Контакты"
+  },
+  "interactionType": {
+    "email": "письмо",
+    "call": "звонок",
+    "meeting": "встреча",
+    "note": "заметка"
+  },
+  "interactionDirection": {
+    "inbound": "входящее",
+    "outbound": "исходящее"
+  },
+  "taskStatus": {
+    "open": "открыта",
+    "done": "выполнена",
+    "dismissed": "отменена"
+  },
+  "actorType": {
+    "human": "вручную",
+    "automation": "автоматически"
+  },
+  "quarantine": {
+    "title": "Карантин",
+    "subtitle": "Необработанные события, которые автоматический конвейер не смог уверенно распознать сам — нужно решение человека.",
+    "loadError": "Не удалось загрузить очередь карантина. Обновите страницу.",
+    "allClear": "Всё чисто",
+    "allClearSubtitle": "Сейчас ничего не требует внимания.",
+    "aiSuggestion": "Подсказка ИИ",
+    "guess": "Предположение:",
+    "didYouMean": "Возможно, вы имели в виду: {name}?",
+    "createNewCompany": "Создать компанию",
+    "linkToExisting": "Привязать к существующей",
+    "discard": "Отклонить",
+    "confirm": "Подтвердить",
+    "cancel": "Отмена",
+    "loading": "Загрузка…",
+    "noMatches": "Совпадений нет.",
+    "companyNamePlaceholder": "Название компании",
+    "domainPlaceholder": "Домен (необязательно)",
+    "searchCompaniesPlaceholder": "Поиск компаний..."
+  },
+  "quarantineReasons": {
+    "personal_domain": "Отправлено с личного email-адреса",
+    "unresolved": "Не удалось сопоставить автоматически"
+  },
+  "confidence": {
+    "high": "высокая",
+    "medium": "средняя",
+    "low": "низкая"
+  },
+  "quarantineActions": {
+    "nameRequired": "Укажите название компании.",
+    "itemNotOpen": "Эта запись уже не открыта.",
+    "domainConflict": "Компания с таким доменом уже существует — используйте «Привязать к существующей».",
+    "createFailed": "Не удалось создать компанию. Попробуйте ещё раз.",
+    "companyGone": "Эта компания больше не существует.",
+    "linkFailed": "Не удалось привязать запись. Попробуйте ещё раз.",
+    "discardFailed": "Не удалось отклонить запись. Попробуйте ещё раз."
+  },
+  "users": {
+    "title": "Команда",
+    "subtitle": "Управляйте участниками команды, ролями и зонами ответственности.",
+    "inviteUser": "Пригласить",
+    "sendInvite": "Отправить приглашение",
+    "cancel": "Отмена",
+    "emailPlaceholder": "имя@компания.com",
+    "joined": "Присоединился {date}",
+    "toggleRoleTitle": "Нажмите, чтобы изменить роль"
+  },
+  "roles": {
+    "admin": "админ",
+    "member": "участник"
+  },
+  "usersActions": {
+    "userNotFound": "Пользователь не найден.",
+    "cannotDemoteLastAdmin": "Нельзя понизить единственного администратора — сначала назначьте другого.",
+    "invalidEmail": "Введите корректный email.",
+    "emailTaken": "Пользователь с таким email уже существует.",
+    "missingAdminCredentials": "На сервере не настроены административные ключи Supabase."
+  }
+}

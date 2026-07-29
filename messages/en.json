@@ -1,0 +1,253 @@
+{
+  "common": {
+    "languageLabel": "Language"
+  },
+  "login": {
+    "welcome": "Welcome back",
+    "subtitle": "Log in to your workspace",
+    "email": "Email",
+    "emailPlaceholder": "you@company.com",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "invalidEmail": "Please enter a valid email address",
+    "missingPassword": "Please enter your password",
+    "wrongCredentials": "Invalid email or password"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "search": "Search",
+    "quarantine": "Quarantine",
+    "users": "Users",
+    "signOut": "Sign out",
+    "primary": "Primary",
+    "backToDashboard": "Dashboard"
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "asOf": "Pipeline data as of {date}",
+    "recentActivity": "Recent activity",
+    "activityError": "Couldn't load recent activity right now.",
+    "activityEmpty": "No interactions logged yet — they'll show up here as they come in.",
+    "accessDenied": "You don't have permission to view this page.",
+    "cardSource": "Source",
+    "cardStage": "By stage",
+    "cardTime": "Time",
+    "cardWithering": "Withering",
+    "unavailable": "unavailable",
+    "sourceEmpty": "no prospects yet",
+    "sourceCaption": "across {count, plural, one {# channel} other {# channels}}",
+    "stageEmpty": "no prospects yet",
+    "stageCaption": "open in the pipeline",
+    "timeEmpty": "no stage history yet",
+    "timeCaption": "avg days per stage",
+    "witheringEmpty": "no open prospects",
+    "witheringCaption": "of {active, plural, one {# open} other {# open}}, cold {days}+ days",
+    "activity": {
+      "email_inbound": "inbound email",
+      "email_outbound": "outbound email",
+      "call_inbound": "inbound call",
+      "call_outbound": "outbound call",
+      "meeting_inbound": "inbound meeting",
+      "meeting_outbound": "outbound meeting",
+      "note_inbound": "note",
+      "note_outbound": "note",
+      "email": "email",
+      "call": "call",
+      "meeting": "meeting",
+      "note": "note"
+    }
+  },
+  "channels": {
+    "website": "Website",
+    "linkedin_outbound": "LinkedIn outbound",
+    "referral": "Referral",
+    "event": "Events / trade fairs",
+    "content_inbound": "Content inbound",
+    "manual": "Manual"
+  },
+  "stages": {
+    "Lead": "Lead",
+    "Contacted": "Contacted",
+    "Demo Scheduled": "Demo Scheduled",
+    "Demo Done": "Demo Done",
+    "Trial": "Trial",
+    "Negotiation": "Negotiation",
+    "Won": "Won",
+    "Lost": "Lost"
+  },
+  "sourceScreen": {
+    "title": "Source",
+    "subtitle": "Where do our prospects come from, and which channels convert best?",
+    "error": "Couldn't load source data right now. Try refreshing the page.",
+    "empty": "No prospects yet — once some come in, channel performance will show up here.",
+    "utmHeading": "Website — by UTM source",
+    "best": "Best",
+    "prospects": "Prospects",
+    "active": "Active",
+    "won": "Won",
+    "totalProspects": "Total prospects",
+    "websiteProspects": "Website prospects"
+  },
+  "byStageScreen": {
+    "title": "By stage",
+    "subtitle": "How is the pipeline distributed across stages today?",
+    "error": "Couldn't load the pipeline breakdown right now. Try refreshing the page.",
+    "empty": "No prospects yet — the funnel will fill in once some come in.",
+    "totalProspects": "{count, plural, one {# prospect total} other {# prospects total}}",
+    "tooltipProspects": "Prospects"
+  },
+  "timeScreen": {
+    "title": "Time",
+    "subtitle": "How long do prospects spend in each stage on average? Where do they get stuck?",
+    "error": "Couldn't load stage timing right now. Try refreshing the page.",
+    "empty": "No stage history yet — timing will show up once prospects start moving through the funnel.",
+    "colStage": "Stage",
+    "colAvgDays": "Avg. days before moving on",
+    "colCompleted": "Completed transitions",
+    "colOngoing": "Ongoing (still here)",
+    "avgDays": "{count, plural, one {# day} other {# days}}",
+    "footnote": "“Ongoing” prospects are still sitting in that stage right now, so they have no completed duration yet — they're excluded from the average rather than counted as 0 days."
+  },
+  "witheringScreen": {
+    "title": "Withering",
+    "subtitle": "Which prospects have gone cold (no interaction for 14+ days)?",
+    "error": "Couldn't load cold prospects right now. Try refreshing the page.",
+    "empty": "Nice — no cold prospects right now.",
+    "colCompany": "Company",
+    "colStage": "Stage",
+    "colOwner": "Owner",
+    "colChannel": "Channel",
+    "colDaysCold": "Days cold",
+    "unassigned": "Unassigned",
+    "daysCold": "{count, number}d"
+  },
+  "search": {
+    "searchButton": "Search",
+    "showFullList": "Show full list",
+    "smartSearch": "Smart search",
+    "smartSearchHint": "— understands meaning, not just exact words",
+    "kbdHint": "for the full company list",
+    "placeholder": "Search companies by name, industry, or description...",
+    "placeholderPhrase1": "Search companies by name...",
+    "placeholderPhrase2": "Try: automotive supplier in Lombardy",
+    "placeholderPhrase3": "Try: family-owned logistics company",
+    "error": "Something went wrong running that search. Try again.",
+    "unconfiguredTitle": "Smart search isn't set up yet.",
+    "unconfiguredNoKey": "The server has no VOYAGE_API_KEY, so queries can't be turned into embeddings.",
+    "unconfiguredNoEmbeddings": "No company has been embedded yet — run the embed-companies script once.",
+    "unconfiguredFooter": "Normal search works in the meantime.",
+    "emptyNoQuery": "No companies yet.",
+    "emptySmart": "No companies found for \"{query}\" — try turning off Smart search for an exact match.",
+    "emptyNormal": "No results for \"{query}\".",
+    "resultCount": "{count, plural, one {# result} other {# results}}",
+    "matchPct": "{pct}% match",
+    "matchedVia": "Matched via: {name}",
+    "press": "Press"
+  },
+  "companyDetail": {
+    "back": "Back",
+    "stageHistory": "Stage history",
+    "noStageHistory": "No stage history yet.",
+    "createdAs": "Created as {stage}",
+    "transition": "{from} → {to}",
+    "tasks": "Tasks",
+    "noTasks": "No tasks.",
+    "due": "Due {date}",
+    "unassigned": "Unassigned",
+    "interactions": "Interactions",
+    "noInteractions": "No interactions logged yet.",
+    "notFound": "We couldn't find that company.",
+    "loadError": "Couldn't load this company right now. Try again.",
+    "noProspect": "No prospect record for this company yet.",
+    "knownContact": "Known contact",
+    "matchedVia": "Matched via: {name}",
+    "stage": "Stage",
+    "channel": "Channel",
+    "owner": "Owner",
+    "created": "Created",
+    "lostReason": "Lost reason:",
+    "noContacts": "No contacts on file.",
+    "prospects": "Prospects",
+    "prospect": "Prospect",
+    "contacts": "Contacts"
+  },
+  "interactionType": {
+    "email": "email",
+    "call": "call",
+    "meeting": "meeting",
+    "note": "note"
+  },
+  "interactionDirection": {
+    "inbound": "inbound",
+    "outbound": "outbound"
+  },
+  "taskStatus": {
+    "open": "open",
+    "done": "done",
+    "dismissed": "dismissed"
+  },
+  "actorType": {
+    "human": "human",
+    "automation": "automation"
+  },
+  "quarantine": {
+    "title": "Quarantine",
+    "subtitle": "Raw events the automation pipeline couldn't confidently resolve on its own, waiting for a human call.",
+    "loadError": "Couldn't load the quarantine queue right now. Try refreshing the page.",
+    "allClear": "All clear",
+    "allClearSubtitle": "Nothing needs your attention right now.",
+    "aiSuggestion": "AI suggestion",
+    "guess": "Guess:",
+    "didYouMean": "Did you mean: {name}?",
+    "createNewCompany": "Create new company",
+    "linkToExisting": "Link to existing",
+    "discard": "Discard",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "noMatches": "No matches.",
+    "companyNamePlaceholder": "Company name",
+    "domainPlaceholder": "Domain (optional)",
+    "searchCompaniesPlaceholder": "Search companies..."
+  },
+  "quarantineReasons": {
+    "personal_domain": "Sent from a personal email address",
+    "unresolved": "Couldn't be automatically matched"
+  },
+  "confidence": {
+    "high": "high",
+    "medium": "medium",
+    "low": "low"
+  },
+  "quarantineActions": {
+    "nameRequired": "Company name is required.",
+    "itemNotOpen": "This item is no longer open.",
+    "domainConflict": "A company with that domain already exists — use Link to existing instead.",
+    "createFailed": "Couldn't create the company. Try again.",
+    "companyGone": "That company no longer exists.",
+    "linkFailed": "Couldn't link this item. Try again.",
+    "discardFailed": "Couldn't discard this item. Try again."
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage team members, roles, and who owns what.",
+    "inviteUser": "Invite user",
+    "sendInvite": "Send invite",
+    "cancel": "Cancel",
+    "emailPlaceholder": "name@company.com",
+    "joined": "Joined {date}",
+    "toggleRoleTitle": "Click to toggle role"
+  },
+  "roles": {
+    "admin": "admin",
+    "member": "member"
+  },
+  "usersActions": {
+    "userNotFound": "User not found.",
+    "cannotDemoteLastAdmin": "Can't demote the only remaining admin — promote someone else first.",
+    "invalidEmail": "Enter a valid email address.",
+    "emailTaken": "A user with that email already exists.",
+    "missingAdminCredentials": "Server is missing Supabase admin credentials."
+  }
+}

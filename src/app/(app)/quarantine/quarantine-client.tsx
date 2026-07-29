@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, CheckCircle2, Mail, Sparkles } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { createCompanyAndResolve, discardQuarantineItem, linkToExistingAndResolve, listCompaniesForLink } from "./actions";
 import type { QuarantineDisplayItem } from "./queries";
 
@@ -13,8 +14,8 @@ const CONFIDENCE_STYLES: Record<string, string> = {
   low: "bg-gray-200 text-gray-600",
 };
 
-function fmtDateTime(value: string) {
-  return new Intl.DateTimeFormat("en-GB", {
+function fmtDateTime(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -24,19 +25,24 @@ function fmtDateTime(value: string) {
 }
 
 function EmptyState() {
+  const t = useTranslations("quarantine");
   return (
     <div className="flex flex-col items-center gap-3 rounded-3xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm">
       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-green-600">
         <CheckCircle2 className="h-7 w-7" strokeWidth={1.75} />
       </span>
-      <h2 className="text-lg font-semibold text-gray-900">All clear</h2>
-      <p className="max-w-sm text-sm text-gray-500">Nothing needs your attention right now.</p>
+      <h2 className="text-lg font-semibold text-gray-900">{t("allClear")}</h2>
+      <p className="max-w-sm text-sm text-gray-500">{t("allClearSubtitle")}</p>
     </div>
   );
 }
 
 function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onResolved: () => void }) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("quarantine");
+  const tReason = useTranslations("quarantineReasons");
+  const tConfidence = useTranslations("confidence");
   const [mode, setMode] = useState<"idle" | "create" | "link">("idle");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +92,13 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
   const Icon = item.source === "email" ? Mail : Calendar;
   const filteredCompanies = (companyList ?? []).filter((c) => c.name.toLowerCase().includes(linkQuery.toLowerCase())).slice(0, 8);
 
+  let reasonLabel: string;
+  try {
+    reasonLabel = tReason(item.reason);
+  } catch {
+    reasonLabel = item.reason;
+  }
+
   return (
     <motion.div
       layout
@@ -102,28 +115,28 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-gray-900">{item.subject}</p>
           <p className="text-xs text-gray-400">
-            {item.fromLabel} · {fmtDateTime(item.occurredAt)}
+            {item.fromLabel} · {fmtDateTime(item.occurredAt, locale)}
           </p>
         </div>
       </div>
 
       <p className="mt-3 rounded-2xl bg-gray-50 px-4 py-3 text-sm text-gray-600">{item.preview}…</p>
 
-      <p className="mt-3 text-xs font-medium text-gray-500">{item.reasonLabel}</p>
+      <p className="mt-3 text-xs font-medium text-gray-500">{reasonLabel}</p>
 
       {item.suggestion && (
         <div className="mt-3 rounded-2xl border border-[#5B4FE9]/15 bg-[#5B4FE9]/5 p-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-[#5B4FE9]" strokeWidth={1.75} />
-            <span className="text-sm font-semibold text-gray-900">AI suggestion</span>
+            <span className="text-sm font-semibold text-gray-900">{t("aiSuggestion")}</span>
             <span className={"ml-auto rounded-full px-2 py-0.5 text-xs font-medium " + CONFIDENCE_STYLES[item.suggestion.confidence]}>
-              {item.suggestion.confidence}
+              {tConfidence(item.suggestion.confidence)}
             </span>
           </div>
           <p className="mt-2 text-sm text-gray-600">{item.suggestion.rationale}</p>
           {item.suggestion.companyGuess && (
             <p className="mt-1 text-xs text-gray-500">
-              Guess: <span className="font-medium text-gray-700">{item.suggestion.companyGuess}</span>
+              {t("guess")} <span className="font-medium text-gray-700">{item.suggestion.companyGuess}</span>
             </p>
           )}
         </div>
@@ -138,7 +151,7 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
               onClick={() => handleLink(c.companyId)}
               className="rounded-full border border-[#5B4FE9]/25 bg-white px-3 py-1.5 text-xs font-medium text-[#5B4FE9] transition hover:bg-[#5B4FE9]/5 disabled:opacity-50"
             >
-              Did you mean: {c.name}?
+              {t("didYouMean", { name: c.name })}
             </button>
           ))}
         </div>
@@ -153,21 +166,21 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
             disabled={isPending}
             className="min-h-9 rounded-xl bg-[#5B4FE9] px-4 text-sm font-semibold text-white transition hover:bg-[#4B3FE0] disabled:opacity-60"
           >
-            Create new company
+            {t("createNewCompany")}
           </button>
           <button
             onClick={openLinkMode}
             disabled={isPending}
             className="min-h-9 rounded-xl border border-[#5B4FE9]/25 bg-white px-4 text-sm font-semibold text-[#5B4FE9] transition hover:bg-[#5B4FE9]/5 disabled:opacity-60"
           >
-            Link to existing
+            {t("linkToExisting")}
           </button>
           <button
             onClick={handleDiscard}
             disabled={isPending}
             className="min-h-9 rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-500 transition hover:bg-gray-50 disabled:opacity-60"
           >
-            Discard
+            {t("discard")}
           </button>
         </div>
       )}
@@ -177,14 +190,14 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Company name"
+            placeholder={t("companyNamePlaceholder")}
             autoFocus
             className="min-h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-[#5B4FE9]/50 focus:ring-2 focus:ring-[#5B4FE9]/10"
           />
           <input
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
-            placeholder="Domain (optional)"
+            placeholder={t("domainPlaceholder")}
             className="min-h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-[#5B4FE9]/50 focus:ring-2 focus:ring-[#5B4FE9]/10"
           />
           <div className="flex gap-2 pt-1">
@@ -193,14 +206,14 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
               disabled={isPending || !name.trim()}
               className="min-h-9 rounded-xl bg-[#5B4FE9] px-4 text-sm font-semibold text-white transition hover:bg-[#4B3FE0] disabled:opacity-60"
             >
-              Confirm
+              {t("confirm")}
             </button>
             <button
               onClick={() => setMode("idle")}
               disabled={isPending}
               className="min-h-9 rounded-xl px-4 text-sm font-medium text-gray-500 hover:bg-gray-100"
             >
-              Cancel
+              {t("cancel")}
             </button>
           </div>
         </div>
@@ -211,12 +224,12 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
           <input
             value={linkQuery}
             onChange={(e) => setLinkQuery(e.target.value)}
-            placeholder="Search companies..."
+            placeholder={t("searchCompaniesPlaceholder")}
             autoFocus
             className="min-h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-[#5B4FE9]/50 focus:ring-2 focus:ring-[#5B4FE9]/10"
           />
           <div className="max-h-44 space-y-1 overflow-y-auto">
-            {companyList === null && <p className="px-1 py-2 text-xs text-gray-400">Loading…</p>}
+            {companyList === null && <p className="px-1 py-2 text-xs text-gray-400">{t("loading")}</p>}
             {companyList !== null &&
               filteredCompanies.map((c) => (
                 <button
@@ -229,7 +242,7 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
                 </button>
               ))}
             {companyList !== null && filteredCompanies.length === 0 && (
-              <p className="px-1 py-2 text-xs text-gray-400">No matches.</p>
+              <p className="px-1 py-2 text-xs text-gray-400">{t("noMatches")}</p>
             )}
           </div>
           <button
@@ -237,7 +250,7 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
             disabled={isPending}
             className="min-h-9 rounded-xl px-4 text-sm font-medium text-gray-500 hover:bg-gray-100"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       )}

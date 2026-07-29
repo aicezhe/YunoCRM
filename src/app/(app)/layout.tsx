@@ -4,6 +4,7 @@ import { users, quarantineItems } from "../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { BottomNav } from "@/components/bottom-nav";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Sidebar } from "@/components/sidebar";
 
 /** Shared shell for every protected route: a mobile top bar + BottomNav
@@ -49,9 +50,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <span className="text-lg font-semibold tracking-tight text-[#5B4FE9] sm:text-xl">
           Yuno<span className="text-gray-900">CRM</span>
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* The email is the first thing to go when width is scarce. */}
           <span className="hidden truncate text-sm text-gray-500 sm:inline">{user?.email}</span>
+          <LocaleSwitcher open="down" />
           <SignOutButton />
         </div>
       </header>

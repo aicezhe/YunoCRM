@@ -1,12 +1,3 @@
-/** Shared between the channel donut, the UTM donut, and their tooltips. */
-export const CHANNEL_LABELS: Record<string, string> = {
-  website: "Website",
-  linkedin_outbound: "LinkedIn outbound",
-  referral: "Referral",
-  event: "Events / trade fairs",
-  content_inbound: "Content inbound",
-};
-
 /** Fixed per channel (not per rank), so a channel keeps the same shade
  * regardless of where it lands in the conversion-sorted list. */
 export const CHANNEL_COLORS: Record<string, string> = {

@@ -3,30 +3,17 @@
 import { useEffect, useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search as SearchIcon, Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { runSearch } from "./actions";
 import { CompanyOverlay } from "./company-overlay";
+import { channelLabel } from "@/i18n/channel-labels";
 import { displayedText, initialTypewriterState, nextTypewriterState, tickDelayMs } from "./typewriter-core";
 import type { SearchReport, SearchResult } from "./queries";
-
-const CHANNEL_LABELS: Record<string, string> = {
-  website: "Website",
-  linkedin_outbound: "LinkedIn outbound",
-  referral: "Referral",
-  event: "Events / trade fairs",
-  content_inbound: "Content inbound",
-  manual: "Manual",
-};
 
 const STAGE_COLORS: Record<string, string> = {
   Won: "bg-green-100 text-green-700",
   Lost: "bg-gray-200 text-gray-600",
 };
-
-const PLACEHOLDER_PHRASES = [
-  "Search companies by name...",
-  "Try: automotive supplier in Lombardy",
-  "Try: family-owned logistics company",
-];
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -48,6 +35,9 @@ const gridVariants = {
 };
 
 function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: React.MouseEvent) => void }) {
+  const t = useTranslations("search");
+  const tStage = useTranslations("stages");
+  const tChannel = useTranslations("channels");
   return (
     <motion.a
       href={`/companies/${result.id}`}
@@ -63,7 +53,7 @@ function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: Reac
         </span>
         {result.similarity !== undefined && (
           <span className="shrink-0 rounded-full bg-[#5B4FE9]/10 px-2 py-0.5 text-xs font-medium text-[#5B4FE9]">
-            {Math.round(result.similarity * 100)}% match
+            {t("matchPct", { pct: Math.round(result.similarity * 100) })}
           </span>
         )}
       </div>
@@ -73,16 +63,16 @@ function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: Reac
           <span
             className={"rounded-full px-2 py-0.5 text-xs font-medium " + (STAGE_COLORS[result.stage] ?? "bg-[#5B4FE9]/10 text-[#5B4FE9]")}
           >
-            {result.stage}
+            {tStage(result.stage)}
           </span>
         )}
         {result.channel && (
-          <span className="text-xs text-gray-400">{CHANNEL_LABELS[result.channel] ?? result.channel}</span>
+          <span className="text-xs text-gray-400">{channelLabel(tChannel, result.channel)}</span>
         )}
       </div>
       {result.matchedContact && (
         <p className="text-xs text-[#5B4FE9]">
-          Matched via: {result.matchedContact.name ?? result.matchedContact.email}
+          {t("matchedVia", { name: result.matchedContact.name ?? result.matchedContact.email })}
         </p>
       )}
     </motion.a>
@@ -100,6 +90,7 @@ function ResultsSkeleton() {
 }
 
 export function SearchClient() {
+  const t = useTranslations("search");
   const [query, setQuery] = useState("");
   const [smart, setSmart] = useState(false);
   const [report, setReport] = useState<SearchReport | null>(null);
@@ -109,14 +100,16 @@ export function SearchClient() {
   const [expanded, setExpanded] = useState<SearchResult | null>(null);
   const hasSearched = report !== null || isPending;
 
+  const placeholderPhrases = [t("placeholderPhrase1"), t("placeholderPhrase2"), t("placeholderPhrase3")];
+
   // Animated placeholder — stops as soon as the user has typed anything.
   useEffect(() => {
     if (query.length > 0) return;
     let state = initialTypewriterState();
     let timeoutId: ReturnType<typeof setTimeout>;
     function tick() {
-      state = nextTypewriterState(state, PLACEHOLDER_PHRASES);
-      setPlaceholderText(displayedText(state, PLACEHOLDER_PHRASES));
+      state = nextTypewriterState(state, placeholderPhrases);
+      setPlaceholderText(displayedText(state, placeholderPhrases));
       timeoutId = setTimeout(tick, tickDelayMs(state));
     }
     timeoutId = setTimeout(tick, 70);
@@ -191,7 +184,7 @@ export function SearchClient() {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                placeholder={placeholderText || "Search companies by name, industry, or description..."}
+                placeholder={placeholderText || t("placeholder")}
                 className="min-h-12 w-full rounded-2xl border border-white/70 bg-white/60 pr-4 pl-11 text-[16px] text-gray-900 shadow-sm outline-none backdrop-blur-md placeholder:text-gray-400 focus:border-[#5B4FE9]/40 focus:bg-white/80 focus:ring-4 focus:ring-[#5B4FE9]/10"
               />
             </div>
@@ -202,7 +195,7 @@ export function SearchClient() {
               disabled={isPending}
               className="min-h-12 shrink-0 rounded-2xl bg-[#5B4FE9] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4B3FE0] disabled:opacity-60"
             >
-              Search
+              {t("searchButton")}
             </button>
             <button
               type="button"
@@ -210,7 +203,7 @@ export function SearchClient() {
               disabled={isPending}
               className="min-h-12 shrink-0 rounded-2xl border border-[#5B4FE9]/25 bg-white/50 px-4 text-sm font-semibold text-[#5B4FE9] shadow-sm backdrop-blur-sm transition hover:bg-[#5B4FE9]/5 disabled:opacity-60 md:hidden"
             >
-              Show full list
+              {t("showFullList")}
             </button>
           </div>
         </form>
@@ -232,17 +225,17 @@ export function SearchClient() {
               }
             />
           </span>
-          Smart search
-          <span className="text-xs text-gray-400">— understands meaning, not just exact words</span>
+          {t("smartSearch")}
+          <span className="text-xs text-gray-400">{t("smartSearchHint")}</span>
         </label>
 
         <p className="mt-2 hidden text-xs text-gray-400 md:block">
-          Press <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⌘</kbd>
+          {t("press")} <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⌘</kbd>
           {" "}
           <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⇧</kbd>
           {" "}
           <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">F</kbd>
-          {" "}for the full company list
+          {" "}{t("kbdHint")}
         </p>
       </div>
 
@@ -251,19 +244,15 @@ export function SearchClient() {
           {isPending && <ResultsSkeleton />}
 
           {!isPending && report?.state === "error" && (
-            <p className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">
-              Something went wrong running that search. Try again.
-            </p>
+            <p className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">{t("error")}</p>
           )}
 
           {!isPending && report?.state === "unconfigured" && (
             <div className="rounded-2xl bg-amber-50 px-5 py-4 text-sm text-amber-900">
-              <p className="font-medium">Smart search isn&apos;t set up yet.</p>
+              <p className="font-medium">{t("unconfiguredTitle")}</p>
               <p className="mt-1 text-amber-800">
-                {report.reason === "no_api_key"
-                  ? "The server has no VOYAGE_API_KEY, so queries can't be turned into embeddings."
-                  : "No company has been embedded yet — run the embed-companies script once."}{" "}
-                Normal search works in the meantime.
+                {report.reason === "no_api_key" ? t("unconfiguredNoKey") : t("unconfiguredNoEmbeddings")}{" "}
+                {t("unconfiguredFooter")}
               </p>
             </div>
           )}
@@ -272,17 +261,15 @@ export function SearchClient() {
             <p className="rounded-2xl bg-white px-5 py-6 text-sm text-gray-500 shadow-sm">
               {report.query
                 ? smart
-                  ? `No companies found for "${report.query}" — try turning off Smart search for an exact match.`
-                  : `No results for "${report.query}".`
-                : "No companies yet."}
+                  ? t("emptySmart", { query: report.query })
+                  : t("emptyNormal", { query: report.query })
+                : t("emptyNoQuery")}
             </p>
           )}
 
           {!isPending && report?.state === "ok" && (
             <>
-              <p className="mb-3 text-xs text-gray-400">
-                {report.results.length} result{report.results.length === 1 ? "" : "s"}
-              </p>
+              <p className="mb-3 text-xs text-gray-400">{t("resultCount", { count: report.results.length })}</p>
               <motion.div
                 initial="hidden"
                 animate="visible"

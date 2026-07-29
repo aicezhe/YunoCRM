@@ -2,13 +2,21 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ParticleField } from "@/components/particle-field";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Supabase's own wire string for a bad email/password pair. Compared
+ * against, never displayed — so it must stay in English regardless of the
+ * UI locale, or the check silently stops matching. */
+const SUPABASE_BAD_CREDENTIALS = "Invalid login credentials";
+
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,11 +27,11 @@ export default function LoginPage() {
     setError(null);
 
     if (!EMAIL_RE.test(email.trim())) {
-      setError("Please enter a valid email address");
+      setError(t("invalidEmail"));
       return;
     }
     if (!password) {
-      setError("Please enter your password");
+      setError(t("missingPassword"));
       return;
     }
 
@@ -35,11 +43,7 @@ export default function LoginPage() {
     });
 
     if (authError) {
-      setError(
-        authError.message === "Invalid login credentials"
-          ? "Invalid email or password"
-          : authError.message
-      );
+      setError(authError.message === SUPABASE_BAD_CREDENTIALS ? t("wrongCredentials") : authError.message);
       setLoading(false);
       return;
     }
@@ -52,15 +56,21 @@ export default function LoginPage() {
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-gradient-to-br from-[#EEEBFF] via-[#F7F5FF] to-white px-4 py-8 font-sans">
       <ParticleField className="pointer-events-none absolute inset-0 h-full w-full" />
 
+      {/* Reachable before signing in — otherwise the language can only be
+          changed from inside the app. */}
+      <div className="absolute top-4 right-4 z-20 sm:top-6 sm:right-6">
+        <LocaleSwitcher open="down" />
+      </div>
+
       <div className="relative z-10 w-full max-w-md rounded-3xl bg-white/80 p-7 shadow-[0_20px_60px_-15px_rgba(91,79,233,0.25)] backdrop-blur-sm sm:p-10">
         <div className="mb-8 text-center">
           <span className="text-2xl font-semibold tracking-tight text-[#5B4FE9]">
             Yuno<span className="text-gray-900">CRM</span>
           </span>
           <h1 className="mt-6 text-3xl font-semibold tracking-tight text-gray-900">
-            Welcome back
+            {t("welcome")}
           </h1>
-          <p className="mt-2 text-sm text-gray-500">Log in to your workspace</p>
+          <p className="mt-2 text-sm text-gray-500">{t("subtitle")}</p>
         </div>
 
         {/* Inputs are 16px on phones and 14px from sm up: below 16px, iOS
@@ -68,7 +78,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
-              Email
+              {t("email")}
             </label>
             <input
               id="email"
@@ -80,14 +90,14 @@ export default function LoginPage() {
               spellCheck={false}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
+              placeholder={t("emailPlaceholder")}
               className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none transition focus:border-[#5B4FE9] focus:ring-4 focus:ring-[#5B4FE9]/10 sm:text-sm"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
-              Password
+              {t("password")}
             </label>
             <input
               id="password"
@@ -111,7 +121,7 @@ export default function LoginPage() {
                 className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
               />
             )}
-            {loading ? "Logging in…" : "Log in"}
+            {loading ? t("submitting") : t("submit")}
           </button>
 
           <p

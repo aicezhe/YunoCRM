@@ -1,0 +1,253 @@
+{
+  "common": {
+    "languageLabel": "Lingua"
+  },
+  "login": {
+    "welcome": "Bentornato",
+    "subtitle": "Accedi al tuo spazio di lavoro",
+    "email": "Email",
+    "emailPlaceholder": "nome@azienda.com",
+    "password": "Password",
+    "submit": "Accedi",
+    "submitting": "Accesso in corso…",
+    "invalidEmail": "Inserisci un indirizzo email valido",
+    "missingPassword": "Inserisci la password",
+    "wrongCredentials": "Email o password non validi"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "search": "Cerca",
+    "quarantine": "Quarantena",
+    "users": "Utenti",
+    "signOut": "Esci",
+    "primary": "Principale",
+    "backToDashboard": "Dashboard"
+  },
+  "dashboard": {
+    "greeting": "Ciao, {name}",
+    "asOf": "Dati della pipeline al {date}",
+    "recentActivity": "Attività recenti",
+    "activityError": "Non è stato possibile caricare le attività recenti.",
+    "activityEmpty": "Nessuna interazione registrata — compariranno qui man mano che arrivano.",
+    "accessDenied": "Non hai i permessi per visualizzare questa pagina.",
+    "cardSource": "Origine",
+    "cardStage": "Per fase",
+    "cardTime": "Tempi",
+    "cardWithering": "Inattivi",
+    "unavailable": "non disponibile",
+    "sourceEmpty": "ancora nessun prospect",
+    "sourceCaption": "su {count, plural, one {# canale} other {# canali}}",
+    "stageEmpty": "ancora nessun prospect",
+    "stageCaption": "aperti in pipeline",
+    "timeEmpty": "ancora nessuno storico",
+    "timeCaption": "giorni medi per fase",
+    "witheringEmpty": "nessun prospect aperto",
+    "witheringCaption": "su {active, plural, one {# aperto} other {# aperti}}, inattivi da {days}+ giorni",
+    "activity": {
+      "email_inbound": "email in entrata",
+      "email_outbound": "email in uscita",
+      "call_inbound": "chiamata in entrata",
+      "call_outbound": "chiamata in uscita",
+      "meeting_inbound": "riunione in entrata",
+      "meeting_outbound": "riunione in uscita",
+      "note_inbound": "nota",
+      "note_outbound": "nota",
+      "email": "email",
+      "call": "chiamata",
+      "meeting": "riunione",
+      "note": "nota"
+    }
+  },
+  "channels": {
+    "website": "Sito web",
+    "linkedin_outbound": "LinkedIn outbound",
+    "referral": "Passaparola",
+    "event": "Eventi / fiere",
+    "content_inbound": "Contenuti in entrata",
+    "manual": "Manuale"
+  },
+  "stages": {
+    "Lead": "Lead",
+    "Contacted": "Contattato",
+    "Demo Scheduled": "Demo pianificata",
+    "Demo Done": "Demo completata",
+    "Trial": "Prova",
+    "Negotiation": "Trattativa",
+    "Won": "Vinto",
+    "Lost": "Perso"
+  },
+  "sourceScreen": {
+    "title": "Origine",
+    "subtitle": "Da dove arrivano i nostri prospect e quali canali convertono meglio?",
+    "error": "Impossibile caricare i dati di origine. Aggiorna la pagina.",
+    "empty": "Ancora nessun prospect — non appena ne arriveranno, qui vedrai il rendimento dei canali.",
+    "utmHeading": "Sito web — per fonte UTM",
+    "best": "Migliore",
+    "prospects": "Prospect",
+    "active": "Attivi",
+    "won": "Vinti",
+    "totalProspects": "Prospect totali",
+    "websiteProspects": "Prospect dal sito"
+  },
+  "byStageScreen": {
+    "title": "Per fase",
+    "subtitle": "Come si distribuisce oggi la pipeline tra le fasi?",
+    "error": "Impossibile caricare la ripartizione della pipeline. Aggiorna la pagina.",
+    "empty": "Ancora nessun prospect — l'imbuto si popolerà non appena arriveranno.",
+    "totalProspects": "{count, plural, one {# prospect totale} other {# prospect totali}}",
+    "tooltipProspects": "Prospect"
+  },
+  "timeScreen": {
+    "title": "Tempi",
+    "subtitle": "Quanto tempo restano i prospect in ogni fase in media? Dove si bloccano?",
+    "error": "Impossibile caricare i tempi per fase. Aggiorna la pagina.",
+    "empty": "Ancora nessuno storico — i tempi appariranno non appena i prospect inizieranno a muoversi nell'imbuto.",
+    "colStage": "Fase",
+    "colAvgDays": "Giorni medi prima di avanzare",
+    "colCompleted": "Transizioni completate",
+    "colOngoing": "In corso (ancora qui)",
+    "avgDays": "{count, plural, one {# giorno} other {# giorni}}",
+    "footnote": "I prospect “in corso” si trovano ancora in quella fase, quindi non hanno ancora una durata completata — sono esclusi dalla media invece di essere contati come 0 giorni."
+  },
+  "witheringScreen": {
+    "title": "Inattivi",
+    "subtitle": "Quali prospect si sono raffreddati (nessuna interazione da 14+ giorni)?",
+    "error": "Impossibile caricare i prospect inattivi. Aggiorna la pagina.",
+    "empty": "Ottimo — nessun prospect inattivo al momento.",
+    "colCompany": "Azienda",
+    "colStage": "Fase",
+    "colOwner": "Responsabile",
+    "colChannel": "Canale",
+    "colDaysCold": "Giorni di inattività",
+    "unassigned": "Non assegnato",
+    "daysCold": "{count, number}gg"
+  },
+  "search": {
+    "searchButton": "Cerca",
+    "showFullList": "Mostra elenco completo",
+    "smartSearch": "Ricerca smart",
+    "smartSearchHint": "— comprende il significato, non solo le parole esatte",
+    "kbdHint": "per l'elenco completo delle aziende",
+    "placeholder": "Cerca aziende per nome, settore o descrizione...",
+    "placeholderPhrase1": "Cerca aziende per nome...",
+    "placeholderPhrase2": "Prova: fornitore automotive in Lombardia",
+    "placeholderPhrase3": "Prova: azienda di logistica a conduzione familiare",
+    "error": "Qualcosa è andato storto durante la ricerca. Riprova.",
+    "unconfiguredTitle": "La ricerca smart non è ancora configurata.",
+    "unconfiguredNoKey": "Il server non ha una VOYAGE_API_KEY, quindi le query non possono diventare embedding.",
+    "unconfiguredNoEmbeddings": "Nessuna azienda è ancora stata elaborata — esegui una volta lo script embed-companies.",
+    "unconfiguredFooter": "Nel frattempo la ricerca normale funziona.",
+    "emptyNoQuery": "Ancora nessuna azienda.",
+    "emptySmart": "Nessuna azienda trovata per \"{query}\" — prova a disattivare la ricerca smart per una corrispondenza esatta.",
+    "emptyNormal": "Nessun risultato per \"{query}\".",
+    "resultCount": "{count, plural, one {# risultato} other {# risultati}}",
+    "matchPct": "corrispondenza {pct}%",
+    "matchedVia": "Trovato tramite: {name}",
+    "press": "Premi"
+  },
+  "companyDetail": {
+    "back": "Indietro",
+    "stageHistory": "Storico fasi",
+    "noStageHistory": "Ancora nessuno storico.",
+    "createdAs": "Creato come {stage}",
+    "transition": "{from} → {to}",
+    "tasks": "Attività",
+    "noTasks": "Nessuna attività.",
+    "due": "Scadenza {date}",
+    "unassigned": "Non assegnato",
+    "interactions": "Interazioni",
+    "noInteractions": "Nessuna interazione registrata.",
+    "notFound": "Impossibile trovare questa azienda.",
+    "loadError": "Impossibile caricare questa azienda. Riprova.",
+    "noProspect": "Ancora nessun prospect per questa azienda.",
+    "knownContact": "Contatto noto",
+    "matchedVia": "Trovato tramite: {name}",
+    "stage": "Fase",
+    "channel": "Canale",
+    "owner": "Responsabile",
+    "created": "Creato",
+    "lostReason": "Motivo perdita:",
+    "noContacts": "Nessun contatto registrato.",
+    "prospects": "Prospect",
+    "prospect": "Prospect",
+    "contacts": "Contatti"
+  },
+  "interactionType": {
+    "email": "email",
+    "call": "chiamata",
+    "meeting": "riunione",
+    "note": "nota"
+  },
+  "interactionDirection": {
+    "inbound": "in entrata",
+    "outbound": "in uscita"
+  },
+  "taskStatus": {
+    "open": "aperto",
+    "done": "completato",
+    "dismissed": "annullato"
+  },
+  "actorType": {
+    "human": "manuale",
+    "automation": "automatico"
+  },
+  "quarantine": {
+    "title": "Quarantena",
+    "subtitle": "Eventi grezzi che la pipeline automatica non è riuscita a risolvere con certezza, in attesa di una decisione umana.",
+    "loadError": "Impossibile caricare la coda di quarantena. Aggiorna la pagina.",
+    "allClear": "Tutto a posto",
+    "allClearSubtitle": "Al momento non c'è nulla che richieda attenzione.",
+    "aiSuggestion": "Suggerimento AI",
+    "guess": "Ipotesi:",
+    "didYouMean": "Forse intendevi: {name}?",
+    "createNewCompany": "Crea nuova azienda",
+    "linkToExisting": "Collega a esistente",
+    "discard": "Scarta",
+    "confirm": "Conferma",
+    "cancel": "Annulla",
+    "loading": "Caricamento…",
+    "noMatches": "Nessuna corrispondenza.",
+    "companyNamePlaceholder": "Nome azienda",
+    "domainPlaceholder": "Dominio (opzionale)",
+    "searchCompaniesPlaceholder": "Cerca aziende..."
+  },
+  "quarantineReasons": {
+    "personal_domain": "Inviato da un indirizzo email personale",
+    "unresolved": "Non è stato possibile trovare una corrispondenza automatica"
+  },
+  "confidence": {
+    "high": "alta",
+    "medium": "media",
+    "low": "bassa"
+  },
+  "quarantineActions": {
+    "nameRequired": "Il nome dell'azienda è obbligatorio.",
+    "itemNotOpen": "Questo elemento non è più aperto.",
+    "domainConflict": "Esiste già un'azienda con questo dominio — usa invece Collega a esistente.",
+    "createFailed": "Impossibile creare l'azienda. Riprova.",
+    "companyGone": "Quell'azienda non esiste più.",
+    "linkFailed": "Impossibile collegare questo elemento. Riprova.",
+    "discardFailed": "Impossibile scartare questo elemento. Riprova."
+  },
+  "users": {
+    "title": "Utenti",
+    "subtitle": "Gestisci i membri del team, i ruoli e le responsabilità.",
+    "inviteUser": "Invita utente",
+    "sendInvite": "Invia invito",
+    "cancel": "Annulla",
+    "emailPlaceholder": "nome@azienda.com",
+    "joined": "Iscritto il {date}",
+    "toggleRoleTitle": "Clicca per cambiare ruolo"
+  },
+  "roles": {
+    "admin": "admin",
+    "member": "membro"
+  },
+  "usersActions": {
+    "userNotFound": "Utente non trovato.",
+    "cannotDemoteLastAdmin": "Non puoi retrocedere l'unico admin rimasto — promuovi prima qualcun altro.",
+    "invalidEmail": "Inserisci un indirizzo email valido.",
+    "emailTaken": "Esiste già un utente con questa email.",
+    "missingAdminCredentials": "Al server mancano le credenziali admin di Supabase."
+  }
+}
