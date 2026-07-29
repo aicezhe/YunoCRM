@@ -208,7 +208,7 @@ export function SearchClient() {
           </div>
         </form>
 
-        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-500">
+        <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 text-sm text-gray-500">
           <span
             role="switch"
             aria-checked={smart}
@@ -229,7 +229,7 @@ export function SearchClient() {
           <span className="text-xs text-gray-400">{t("smartSearchHint")}</span>
         </label>
 
-        <p className="mt-2 hidden text-xs text-gray-400 md:block">
+        <p className="mt-2 hidden text-center text-xs text-gray-400 md:block">
           {t("press")} <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⌘</kbd>
           {" "}
           <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⇧</kbd>

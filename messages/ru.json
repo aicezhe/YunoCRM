@@ -12,7 +12,9 @@
     "submitting": "Вход…",
     "invalidEmail": "Введите корректный email",
     "missingPassword": "Введите пароль",
-    "wrongCredentials": "Неверный email или пароль"
+    "wrongCredentials": "Неверный email или пароль",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль"
   },
   "nav": {
     "dashboard": "Обзор",

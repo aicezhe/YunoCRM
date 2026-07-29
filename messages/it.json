@@ -12,7 +12,9 @@
     "submitting": "Accesso in corso…",
     "invalidEmail": "Inserisci un indirizzo email valido",
     "missingPassword": "Inserisci la password",
-    "wrongCredentials": "Email o password non validi"
+    "wrongCredentials": "Email o password non validi",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password"
   },
   "nav": {
     "dashboard": "Dashboard",
