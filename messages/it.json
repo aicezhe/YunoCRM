@@ -190,5 +190,43 @@
   "actorType": {
     "human": "manuale",
     "automation": "automatico"
+  },
+  "quarantine": {
+    "title": "Quarantena",
+    "subtitle": "Eventi grezzi che la pipeline automatica non è riuscita a risolvere con certezza, in attesa di una decisione umana.",
+    "loadError": "Impossibile caricare la coda di quarantena. Aggiorna la pagina.",
+    "allClear": "Tutto a posto",
+    "allClearSubtitle": "Al momento non c'è nulla che richieda attenzione.",
+    "aiSuggestion": "Suggerimento AI",
+    "guess": "Ipotesi:",
+    "didYouMean": "Forse intendevi: {name}?",
+    "createNewCompany": "Crea nuova azienda",
+    "linkToExisting": "Collega a esistente",
+    "discard": "Scarta",
+    "confirm": "Conferma",
+    "cancel": "Annulla",
+    "loading": "Caricamento…",
+    "noMatches": "Nessuna corrispondenza.",
+    "companyNamePlaceholder": "Nome azienda",
+    "domainPlaceholder": "Dominio (opzionale)",
+    "searchCompaniesPlaceholder": "Cerca aziende..."
+  },
+  "quarantineReasons": {
+    "personal_domain": "Inviato da un indirizzo email personale",
+    "unresolved": "Non è stato possibile trovare una corrispondenza automatica"
+  },
+  "confidence": {
+    "high": "alta",
+    "medium": "media",
+    "low": "bassa"
+  },
+  "quarantineActions": {
+    "nameRequired": "Il nome dell'azienda è obbligatorio.",
+    "itemNotOpen": "Questo elemento non è più aperto.",
+    "domainConflict": "Esiste già un'azienda con questo dominio — usa invece Collega a esistente.",
+    "createFailed": "Impossibile creare l'azienda. Riprova.",
+    "companyGone": "Quell'azienda non esiste più.",
+    "linkFailed": "Impossibile collegare questo elemento. Riprova.",
+    "discardFailed": "Impossibile scartare questo elemento. Riprova."
   }
 }

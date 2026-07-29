@@ -190,5 +190,43 @@
   "actorType": {
     "human": "human",
     "automation": "automation"
+  },
+  "quarantine": {
+    "title": "Quarantine",
+    "subtitle": "Raw events the automation pipeline couldn't confidently resolve on its own, waiting for a human call.",
+    "loadError": "Couldn't load the quarantine queue right now. Try refreshing the page.",
+    "allClear": "All clear",
+    "allClearSubtitle": "Nothing needs your attention right now.",
+    "aiSuggestion": "AI suggestion",
+    "guess": "Guess:",
+    "didYouMean": "Did you mean: {name}?",
+    "createNewCompany": "Create new company",
+    "linkToExisting": "Link to existing",
+    "discard": "Discard",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "noMatches": "No matches.",
+    "companyNamePlaceholder": "Company name",
+    "domainPlaceholder": "Domain (optional)",
+    "searchCompaniesPlaceholder": "Search companies..."
+  },
+  "quarantineReasons": {
+    "personal_domain": "Sent from a personal email address",
+    "unresolved": "Couldn't be automatically matched"
+  },
+  "confidence": {
+    "high": "high",
+    "medium": "medium",
+    "low": "low"
+  },
+  "quarantineActions": {
+    "nameRequired": "Company name is required.",
+    "itemNotOpen": "This item is no longer open.",
+    "domainConflict": "A company with that domain already exists — use Link to existing instead.",
+    "createFailed": "Couldn't create the company. Try again.",
+    "companyGone": "That company no longer exists.",
+    "linkFailed": "Couldn't link this item. Try again.",
+    "discardFailed": "Couldn't discard this item. Try again."
   }
 }
