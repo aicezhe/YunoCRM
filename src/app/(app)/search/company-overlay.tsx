@@ -132,18 +132,25 @@ export function CompanyOverlay({
   matchedContact?: { name: string | null; email: string } | null;
   onClose: () => void;
 }) {
-  const [state, setState] = useState<
-    { status: "loading" } | { status: "ok"; data: CompanyDetail } | { status: "error" } | { status: "not_found" }
-  >({ status: "loading" });
+  // The loaded id is carried in the state itself rather than reset by a
+  // synchronous setState at the top of the effect: that reset re-rendered
+  // every mount for no reason, and while a stale result was in flight the
+  // overlay would briefly show the previous company's data.
+  const [loaded, setLoaded] = useState<
+    | { id: string; status: "ok"; data: CompanyDetail }
+    | { id: string; status: "error" }
+    | { id: string; status: "not_found" }
+    | null
+  >(null);
+  const state = loaded?.id === companyId ? loaded : ({ status: "loading" } as const);
 
   useEffect(() => {
     let cancelled = false;
-    setState({ status: "loading" });
     loadCompanyOverlay(companyId).then((result) => {
       if (cancelled) return;
-      if (result.state === "ok") setState({ status: "ok", data: result.data });
-      else if (result.state === "not_found") setState({ status: "not_found" });
-      else setState({ status: "error" });
+      if (result.state === "ok") setLoaded({ id: companyId, status: "ok", data: result.data });
+      else if (result.state === "not_found") setLoaded({ id: companyId, status: "not_found" });
+      else setLoaded({ id: companyId, status: "error" });
     });
     return () => {
       cancelled = true;

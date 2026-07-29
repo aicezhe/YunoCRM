@@ -33,9 +33,18 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 320, damping: 26 } },
 };
 
+// The whole grid should finish revealing within this budget. A fixed
+// per-card delay does not survive a long list: at 0.07s each, "Show full
+// list" (76 companies) took 5.3s to finish appearing even though the data
+// had arrived in under half a second, which reads as the app being slow.
+const REVEAL_BUDGET_S = 0.5;
+const MAX_STAGGER_S = 0.07;
+
 const gridVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
+  visible: (count: number) => ({
+    transition: { staggerChildren: Math.min(MAX_STAGGER_S, REVEAL_BUDGET_S / Math.max(count, 1)) },
+  }),
 };
 
 function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: React.MouseEvent) => void }) {
@@ -265,6 +274,7 @@ export function SearchClient() {
               <motion.div
                 initial="hidden"
                 animate="visible"
+                custom={report.results.length}
                 variants={gridVariants}
                 className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
