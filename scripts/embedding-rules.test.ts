@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { INDUSTRY_TERMS, embeddingText, industryHints } from "./embedding-rules";
+import { INDUSTRY_TERMS, embeddingText, industryHints, industryHintsRu } from "./embedding-rules";
 
 describe("industryHints", () => {
   it("translates the Italian trade term into English industry hints", () => {
@@ -32,9 +32,41 @@ describe("industryHints", () => {
   it("every rule actually fires on the real company it cites", () => {
     // Guards against a regex that was tightened or a name that changed:
     // each entry documents the dataset company that justifies it.
-    for (const { term, example, hints } of INDUSTRY_TERMS) {
+    for (const { term, example, en, ru } of INDUSTRY_TERMS) {
       expect(term.test(example), `${term} should match its example "${example}"`).toBe(true);
-      expect(industryHints(example), `"${example}" should get its own hints`).toEqual(expect.arrayContaining(hints));
+      expect(industryHints(example), `"${example}" should get its English hints`).toEqual(expect.arrayContaining(en));
+      expect(industryHintsRu(example), `"${example}" should get its Russian hints`).toEqual(expect.arrayContaining(ru));
+    }
+  });
+});
+
+describe("industryHintsRu", () => {
+  it("gives Russian terms so a Cyrillic query can reach the company", () => {
+    expect(industryHintsRu("Caseificio Valpadana")).toContain("сыроварня");
+    expect(industryHintsRu("Fonderia Valchiavenna")).toContain("литейное производство");
+    expect(industryHintsRu("Trasporti Eccezionali TEV")).toContain("грузоперевозки");
+    expect(industryHintsRu("Studio Legale Aureli")).toContain("юридическая фирма");
+    expect(industryHintsRu("Vini Colline Toscane")).toContain("винодельня");
+  });
+
+  it("has an English and a Russian hint list of the same shape for every rule", () => {
+    for (const rule of INDUSTRY_TERMS) {
+      expect(rule.en.length, `${rule.example}: missing English hints`).toBeGreaterThan(0);
+      expect(rule.ru.length, `${rule.example}: missing Russian hints`).toBeGreaterThan(0);
+    }
+  });
+
+  it("contains no stray characters from another script", () => {
+    // The seed data already shipped one mojibake company name
+    // ("Meccatronica友 Robotics"); this keeps the same class of defect from
+    // creeping into the hand-written vocabulary.
+    for (const rule of INDUSTRY_TERMS) {
+      for (const hint of rule.ru) {
+        expect(hint, `${rule.example}: CJK character in "${hint}"`).not.toMatch(/[　-鿿가-힯]/);
+        expect(hint, `${rule.example}: Latin/Cyrillic mixed inside a word in "${hint}"`).not.toMatch(
+          /[а-яё][a-z]|[a-z][а-яё]/i
+        );
+      }
     }
   });
 });
