@@ -5,7 +5,11 @@ export default function UsersLoading() {
       <div className="mt-4 h-9 w-32 rounded bg-gray-200" />
       <div className="mt-2 h-4 w-64 max-w-full rounded bg-gray-100" />
 
-      <div className="mt-8 h-64 rounded-3xl bg-white shadow-sm" />
+      <div className="mt-8 space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-[76px] rounded-2xl bg-white shadow-sm" />
+        ))}
+      </div>
     </div>
   );
 }

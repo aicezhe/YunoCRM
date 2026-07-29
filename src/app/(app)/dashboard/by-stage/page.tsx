@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getStageReport } from "./queries";
 import { FunnelChart } from "./funnel-chart";
 
@@ -8,15 +6,8 @@ export default async function ByStagePage() {
 
   return (
     <>
-      <div className="mx-auto max-w-5xl px-5 pt-4 sm:px-6 sm:pt-6">
-        <Link
-          href="/dashboard"
-          className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-gray-500 transition hover:text-[#5B4FE9] sm:min-h-0"
-        >
-          <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-          Dashboard
-        </Link>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">By stage</h1>
+      <div className="mx-auto max-w-5xl px-5 pt-6 sm:px-6 sm:pt-8">
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">By stage</h1>
         <p className="mt-2 max-w-xl text-sm text-gray-500">
           How is the pipeline distributed across stages today?
         </p>

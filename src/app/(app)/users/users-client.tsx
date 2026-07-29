@@ -26,7 +26,7 @@ function RoleToggle({ user }: { user: UserRow }) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-end gap-1">
       <button
         onClick={toggle}
         disabled={isPending}
@@ -45,7 +45,7 @@ function RoleToggle({ user }: { user: UserRow }) {
         )}
         {user.role}
       </button>
-      {error && <p className="max-w-[14rem] text-xs text-red-600">{error}</p>}
+      {error && <p className="max-w-[14rem] text-right text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -122,6 +122,37 @@ function InviteForm() {
   );
 }
 
+/** Initials for the avatar chip — first letter of the first two words. */
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function UserCard({ user }: { user: UserRow }) {
+  return (
+    <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-[0_14px_32px_-28px_rgba(91,79,233,0.5)] transition duration-300 hover:-translate-y-0.5 hover:border-[#5B4FE9]/25 hover:shadow-[0_18px_38px_-26px_rgba(91,79,233,0.4)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-sm font-semibold text-[#5B4FE9]">
+        {initials(user.name)}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-gray-900">{user.name}</p>
+        <p className="truncate text-sm text-gray-500">{user.email}</p>
+        <p className="mt-0.5 text-xs text-gray-400 sm:hidden">Joined {fmtDate(user.createdAt)}</p>
+      </div>
+
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <RoleToggle user={user} />
+        <p className="hidden text-xs text-gray-400 sm:block">Joined {fmtDate(user.createdAt)}</p>
+      </div>
+    </div>
+  );
+}
+
 export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   return (
     <div className="space-y-5">
@@ -129,31 +160,10 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
         <InviteForm />
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-xs font-medium tracking-wide text-gray-400 uppercase">
-                <th className="px-5 py-4">Name</th>
-                <th className="px-5 py-4">Email</th>
-                <th className="px-5 py-4">Role</th>
-                <th className="px-5 py-4">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {initialUsers.map((user, i) => (
-                <tr key={user.id} className={i !== initialUsers.length - 1 ? "border-b border-gray-50" : ""}>
-                  <td className="px-5 py-4 font-medium text-gray-900">{user.name}</td>
-                  <td className="px-5 py-4 text-gray-500">{user.email}</td>
-                  <td className="px-5 py-4">
-                    <RoleToggle user={user} />
-                  </td>
-                  <td className="px-5 py-4 text-gray-500">{fmtDate(user.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="space-y-3">
+        {initialUsers.map((user) => (
+          <UserCard key={user.id} user={user} />
+        ))}
       </div>
     </div>
   );
