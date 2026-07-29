@@ -96,7 +96,7 @@ export function SectionCard({
 
       <span
         aria-hidden
-        className="pointer-events-none absolute top-1/2 right-5 h-20 w-20 -translate-y-1/2 text-[#5B4FE9]/30 transition-colors duration-300 group-hover:text-[#5B4FE9]/60 sm:right-7 sm:h-24 sm:w-24"
+        className="pointer-events-none absolute right-5 bottom-5 h-20 w-20 text-[#5B4FE9]/30 transition-colors duration-300 group-hover:text-[#5B4FE9]/60 sm:right-7 sm:bottom-6 sm:h-24 sm:w-24"
       >
         <MotifArt motif={motif} />
       </span>
@@ -106,7 +106,7 @@ export function SectionCard({
       </p>
 
       <div className="mt-auto">
-        <p className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">{value}</p>
+        <p className="text-4xl font-medium tracking-tight text-gray-900 sm:text-5xl">{value}</p>
         <p className="mt-1.5 text-xs font-medium text-gray-500">{caption}</p>
       </div>
     </Link>
