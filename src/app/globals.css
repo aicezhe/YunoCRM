@@ -41,3 +41,82 @@ body {
 .tooltip-pop {
   animation: tooltip-pop 120ms ease-out;
 }
+
+/* Dashboard section-card motifs — small geometric SVG animations, one per
+   section. All rotation origins are in viewBox units (every motif uses a
+   0 0 96 96 viewBox), hence transform-box: view-box. */
+@keyframes motif-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes motif-grow {
+  0%,
+  100% {
+    transform: scaleY(0.65);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes motif-fall {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+
+@keyframes motif-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.motif-orbit {
+  animation: motif-rotate 18s linear infinite;
+  transform-box: view-box;
+  transform-origin: 48px 48px;
+}
+
+.motif-sweep {
+  animation: motif-rotate 9s linear infinite;
+  transform-box: view-box;
+  transform-origin: 48px 48px;
+}
+
+.motif-grow {
+  animation: motif-grow 2.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.motif-fall {
+  animation: motif-fall 3s ease-in-out infinite;
+}
+
+.motif-pulse {
+  animation: motif-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motif-orbit,
+  .motif-sweep,
+  .motif-grow,
+  .motif-fall,
+  .motif-pulse {
+    animation: none;
+  }
+}

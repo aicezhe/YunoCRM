@@ -118,10 +118,10 @@ export default async function DashboardPage() {
   ]);
 
   const sections = [
-    { href: "/dashboard/source", title: "Source", ...metricDisplay(sourceMetric) },
-    { href: "/dashboard/by-stage", title: "By stage", ...metricDisplay(stageMetric) },
-    { href: "/dashboard/time", title: "Time", ...metricDisplay(timeMetric) },
-    { href: "/dashboard/withering", title: "Withering", ...metricDisplay(witheringMetric) },
+    { href: "/dashboard/source", title: "Source", motif: "source" as const, ...metricDisplay(sourceMetric) },
+    { href: "/dashboard/by-stage", title: "By stage", motif: "stage" as const, ...metricDisplay(stageMetric) },
+    { href: "/dashboard/time", title: "Time", motif: "time" as const, ...metricDisplay(timeMetric) },
+    { href: "/dashboard/withering", title: "Withering", motif: "withering" as const, ...metricDisplay(witheringMetric) },
   ];
 
   return (
@@ -147,6 +147,7 @@ export default async function DashboardPage() {
             title={section.title}
             value={section.value}
             caption={section.caption}
+            motif={section.motif}
           />
         ))}
       </div>
