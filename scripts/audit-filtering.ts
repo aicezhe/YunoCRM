@@ -1,18 +1,30 @@
 /**
- * Read-only preview of what the filtering fixes would change.
+ * Preview — and optionally apply — the filtering fixes.
  *
  * Runs the CURRENT rule registry against every raw_event already in the
  * database and diffs the result against what is stored, then reports the
  * company-name repairs (placeholder backfill + stray-character cleanup)
- * that resolve.ts would now apply. Writes nothing — this exists so the
- * changes can be reviewed before any pipeline re-run touches real data.
+ * that resolve.ts would now apply.
  *
- * Run: npm run audit-filtering
+ * Without --apply it writes nothing, so the changes can be reviewed before
+ * anything touches real data. With --apply it performs exactly what the
+ * preview listed, and nothing else:
+ *   - reclassifies the events whose OUTCOME changes (label-only drift is
+ *     left alone — rewriting 135 audit trails to say the same thing adds
+ *     no information and loses the record of what the first run decided),
+ *   - deletes the company/prospect/contact rows that only exist because a
+ *     now-filtered event was previously let through,
+ *   - renames placeholder and stray-character company names.
+ *
+ * A plain `npm run resolve` cannot do the last two: it skips raw_events
+ * that already have an interaction, so historic rows are never revisited.
+ *
+ * Run: npm run audit-filtering [-- --apply]
  */
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db, client } from "../src/db";
-import { companies, contacts, rawEvents } from "../drizzle/schema";
+import { companies, contacts, interactions, prospects, rawEvents } from "../drizzle/schema";
 import {
   classifyRow,
   splitEmail,
@@ -57,13 +69,22 @@ function heading(text: string) {
 }
 
 async function main() {
+  const apply = process.argv.includes("--apply");
   const all = await db.select().from(rawEvents);
   const ctx = await buildContext(all as RawEventRow[]);
 
   // --- 1. Reclassification diff -----------------------------------------
   // Rows already resolved by hand through the quarantine screen are skipped:
   // their matched_rule records a human decision, not a rule outcome.
-  const changes: { subject: string; from: string; to: string; sender: string }[] = [];
+  const changes: {
+    id: string;
+    subject: string;
+    from: string;
+    to: string;
+    sender: string;
+    outcome: string;
+    matchedRule: string;
+  }[] = [];
   for (const row of all as RawEventRow[]) {
     if (row.status !== "pending" && String((row as { matchedRule?: string }).matchedRule ?? "").startsWith("quarantine_")) {
       continue;
@@ -73,10 +94,13 @@ async function main() {
     if (outcome !== row.status || matchedRule !== storedRule) {
       const p = row.payload as EmailPayload & CalendarPayload;
       changes.push({
+        id: row.id,
         subject: p.subject ?? p.title ?? "(no subject)",
         sender: p.from ?? p.organizer ?? "",
         from: `${row.status}/${storedRule}`,
         to: `${outcome}/${matchedRule}`,
+        outcome,
+        matchedRule,
       });
     }
   }
@@ -108,28 +132,34 @@ async function main() {
   const emails = (all as RawEventRow[]).filter((r) => r.source === "email");
 
   heading("2. Company names — placeholder backfill");
-  let backfills = 0;
+  const renames: { id: string; from: string; to: string }[] = [];
+  // Companies whose every message is now filtered out: they only exist
+  // because a now-ignored event was previously let through.
+  const orphaned: { id: string; name: string }[] = [];
+  const nowIgnoredIds = new Set(real.filter((c) => c.outcome === "ignored").map((c) => c.id));
+
   for (const co of companyRows) {
     if (!isPlaceholderCompanyName(co.name, co.domain)) continue;
     // The name resolve.ts would find by scanning every later message from
     // this domain, not just the first one it happened to see.
     let found: string | null = null;
-    for (const ev of emails) {
+    const fromDomain = emails.filter((ev) => splitEmail((ev.payload as EmailPayload).from).domain === co.domain);
+    for (const ev of fromDomain) {
       const p = ev.payload as EmailPayload;
-      if (splitEmail(p.from).domain !== co.domain) continue;
       found = companyNameFromSubject(p.subject) ?? companyNameFromBody(p.body);
       if (found) break;
     }
     if (found) {
-      backfills++;
+      renames.push({ id: co.id, from: co.name, to: cleanCompanyName(found) });
       console.log(`  "${co.name}"  ->  "${cleanCompanyName(found)}"`);
+    } else if (fromDomain.length > 0 && fromDomain.every((ev) => nowIgnoredIds.has(ev.id))) {
+      orphaned.push({ id: co.id, name: co.name });
+      console.log(`  "${co.name}"  ->  every message from this domain is now filtered out (see §4)`);
     } else {
       console.log(`  "${co.name}"  ->  (no name found in any message — stays as is)`);
     }
   }
-  if (backfills === 0 && companyRows.every((c) => !isPlaceholderCompanyName(c.name, c.domain))) {
-    console.log("  (nothing)");
-  }
+  if (companyRows.every((c) => !isPlaceholderCompanyName(c.name, c.domain))) console.log("  (nothing)");
 
   // --- 3. Stray-character cleanup ---------------------------------------
   heading("3. Company names — stray-character cleanup");
@@ -138,12 +168,67 @@ async function main() {
     const fixed = cleanCompanyName(co.name);
     if (fixed !== co.name) {
       cleaned++;
+      renames.push({ id: co.id, from: co.name, to: fixed });
       console.log(`  "${co.name}"  ->  "${fixed}"`);
     }
   }
   if (cleaned === 0) console.log("  (nothing)");
 
-  console.log("\nNothing was written to the database.\n");
+  // --- 4. Rows to remove -------------------------------------------------
+  heading(`4. Rows built from now-filtered events — ${orphaned.length} company/companies`);
+  for (const o of orphaned) {
+    const [prospect] = await db.select({ id: prospects.id }).from(prospects).where(eq(prospects.companyId, o.id));
+    const contactRows = await db.select({ id: contacts.id }).from(contacts).where(eq(contacts.companyId, o.id));
+    const interactionCount = prospect
+      ? (await db.select({ id: interactions.id }).from(interactions).where(eq(interactions.prospectId, prospect.id)))
+          .length
+      : 0;
+    console.log(
+      `  "${o.name}": 1 company, ${prospect ? 1 : 0} prospect, ${contactRows.length} contact(s), ` +
+        `${interactionCount} interaction(s) (+ their stage transitions and tasks, by cascade)`
+    );
+  }
+  if (orphaned.length === 0) console.log("  (nothing)");
+
+  if (!apply) {
+    console.log("\nNothing was written to the database. Re-run with --apply to perform the above.\n");
+    return;
+  }
+
+  // --- Apply -------------------------------------------------------------
+  heading("Applying");
+
+  for (const c of real) {
+    await db
+      .update(rawEvents)
+      .set({ status: c.outcome, matchedRule: c.matchedRule })
+      .where(eq(rawEvents.id, c.id));
+  }
+  console.log(`  reclassified ${real.length} raw_event(s)`);
+
+  for (const o of orphaned) {
+    // prospects -> interactions/stage_transitions/tasks cascade; contacts and
+    // prospects both RESTRICT the company, so they go first.
+    const prospectRows = await db.select({ id: prospects.id }).from(prospects).where(eq(prospects.companyId, o.id));
+    if (prospectRows.length) {
+      await db.delete(prospects).where(
+        inArray(
+          prospects.id,
+          prospectRows.map((p) => p.id)
+        )
+      );
+    }
+    await db.delete(contacts).where(eq(contacts.companyId, o.id));
+    await db.delete(companies).where(eq(companies.id, o.id));
+    console.log(`  removed "${o.name}" and everything hanging off it`);
+  }
+
+  for (const r of renames) {
+    await db.update(companies).set({ name: r.to }).where(eq(companies.id, r.id));
+    console.log(`  renamed "${r.from}" -> "${r.to}"`);
+  }
+
+  console.log("\nDone.\n");
 }
 
 main()
