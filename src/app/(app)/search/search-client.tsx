@@ -132,6 +132,22 @@ export function SearchClient() {
     runQuery("", false);
   }
 
+  // Desktop equivalent of the mobile-only "Show full list" button — the
+  // button takes real space next to Search/Smart search on a wide screen
+  // where a shortcut is more natural, so it's hidden there (md:hidden) in
+  // favor of ⌘⇧F.
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.metaKey && e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        showFullList();
+      }
+    }
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function openResult(e: React.MouseEvent, result: SearchResult) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let the browser open a new tab
     e.preventDefault();
@@ -183,7 +199,7 @@ export function SearchClient() {
               type="button"
               onClick={showFullList}
               disabled={isPending}
-              className="min-h-12 shrink-0 rounded-2xl border border-[#5B4FE9]/25 bg-white/50 px-4 text-sm font-semibold text-[#5B4FE9] shadow-sm backdrop-blur-sm transition hover:bg-[#5B4FE9]/5 disabled:opacity-60"
+              className="min-h-12 shrink-0 rounded-2xl border border-[#5B4FE9]/25 bg-white/50 px-4 text-sm font-semibold text-[#5B4FE9] shadow-sm backdrop-blur-sm transition hover:bg-[#5B4FE9]/5 disabled:opacity-60 md:hidden"
             >
               Show full list
             </button>
@@ -210,6 +226,15 @@ export function SearchClient() {
           Smart search
           <span className="text-xs text-gray-400">— understands meaning, not just exact words</span>
         </label>
+
+        <p className="mt-2 hidden text-xs text-gray-400 md:block">
+          Press <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⌘</kbd>
+          {" "}
+          <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">⇧</kbd>
+          {" "}
+          <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] font-medium text-gray-600 shadow-sm">F</kbd>
+          {" "}for the full company list
+        </p>
       </div>
 
       {hasSearched && !expanded && (
