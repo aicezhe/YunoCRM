@@ -1,32 +1,31 @@
 import { Suspense } from "react";
 import { eq } from "drizzle-orm";
-import {
-  BarChart3,
-  Calendar,
-  Clock,
-  Mail,
-  Phone,
-  Radio,
-  StickyNote,
-  TrendingDown,
-  type LucideIcon,
-} from "lucide-react";
+import { Calendar, Mail, Phone, StickyNote, type LucideIcon } from "lucide-react";
 import { db } from "@/db";
 import { users } from "../../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
-import { SectionCard, type WashVariant } from "./section-card";
-import { getDataAsOf, getRecentActivity } from "./metrics";
+import { SectionCard } from "./section-card";
+import {
+  getDataAsOf,
+  getRecentActivity,
+  getSourceMetric,
+  getStageMetric,
+  getTimeMetric,
+  getWitheringMetric,
+  type Metric,
+} from "./metrics";
 import { relativeTime } from "./relative-time";
-
-const SECTIONS: { href: string; title: string; icon: LucideIcon; wash: WashVariant }[] = [
-  { href: "/dashboard/source", title: "Source", icon: Radio, wash: "top-right" },
-  { href: "/dashboard/by-stage", title: "By stage", icon: BarChart3, wash: "bottom-right" },
-  { href: "/dashboard/time", title: "Time", icon: Clock, wash: "bottom-left" },
-  { href: "/dashboard/withering", title: "Withering", icon: TrendingDown, wash: "right-center" },
-];
 
 const TYPE_ICON: Record<string, LucideIcon> = { email: Mail, call: Phone, meeting: Calendar, note: StickyNote };
 const TYPE_LABEL: Record<string, string> = { email: "email", call: "call", meeting: "meeting", note: "note" };
+
+/** Normalizes a Metric's ok/empty/error states into a value+caption pair a
+ * card can always render, instead of branching per card. */
+function metricDisplay(metric: Metric): { value: string; caption: string } {
+  if (metric.state === "ok") return { value: metric.value, caption: metric.caption };
+  if (metric.state === "empty") return { value: "–", caption: metric.caption };
+  return { value: "–", caption: "unavailable" };
+}
 
 /** Prefers the team member's real name; falls back to the email local part. */
 async function getGreetingName(email: string | undefined): Promise<string> {
@@ -108,7 +107,21 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const name = await getGreetingName(user?.email);
+
+  const [name, sourceMetric, stageMetric, timeMetric, witheringMetric] = await Promise.all([
+    getGreetingName(user?.email),
+    getSourceMetric(),
+    getStageMetric(),
+    getTimeMetric(),
+    getWitheringMetric(),
+  ]);
+
+  const sections = [
+    { href: "/dashboard/source", title: "Source", ...metricDisplay(sourceMetric) },
+    { href: "/dashboard/by-stage", title: "By stage", ...metricDisplay(stageMetric) },
+    { href: "/dashboard/time", title: "Time", ...metricDisplay(timeMetric) },
+    { href: "/dashboard/withering", title: "Withering", ...metricDisplay(witheringMetric) },
+  ];
 
   return (
     <div className="mx-auto max-w-5xl px-5 sm:px-6">
@@ -122,13 +135,13 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
-        {SECTIONS.map((section) => (
+        {sections.map((section) => (
           <SectionCard
             key={section.href}
             href={section.href}
             title={section.title}
-            icon={section.icon}
-            wash={section.wash}
+            value={section.value}
+            caption={section.caption}
           />
         ))}
       </div>
