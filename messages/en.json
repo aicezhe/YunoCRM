@@ -120,7 +120,11 @@
     "colCompleted": "Completed transitions",
     "colOngoing": "Ongoing (still here)",
     "avgDays": "{count, plural, one {# day} other {# days}}",
-    "footnote": "“Ongoing” prospects are still sitting in that stage right now, so they have no completed duration yet — they're excluded from the average rather than counted as 0 days."
+    "footnote": "“Ongoing” prospects are still sitting in that stage right now, so they have no completed duration yet — they're excluded from the average rather than counted as 0 days.",
+    "slowest": "Slowest",
+    "flipToCounts": "{stage}: show what the average was computed from",
+    "flipToAverage": "{stage}: show the average",
+    "backNote": "Ongoing prospects have no completed duration yet, so they are excluded from the average."
   },
   "witheringScreen": {
     "title": "Withering",

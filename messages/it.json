@@ -120,7 +120,11 @@
     "colCompleted": "Transizioni completate",
     "colOngoing": "In corso (ancora qui)",
     "avgDays": "{count, plural, one {# giorno} other {# giorni}}",
-    "footnote": "I prospect “in corso” si trovano ancora in quella fase, quindi non hanno ancora una durata completata — sono esclusi dalla media invece di essere contati come 0 giorni."
+    "footnote": "I prospect “in corso” si trovano ancora in quella fase, quindi non hanno ancora una durata completata — sono esclusi dalla media invece di essere contati come 0 giorni.",
+    "slowest": "Più lenta",
+    "flipToCounts": "{stage}: mostra su cosa è calcolata la media",
+    "flipToAverage": "{stage}: mostra la media",
+    "backNote": "I prospect ancora in corso non hanno una durata completata, quindi restano fuori dalla media."
   },
   "witheringScreen": {
     "title": "Inattivi",
