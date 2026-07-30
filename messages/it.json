@@ -273,5 +273,14 @@
     "emailTaken": "Esiste già un utente con questa email.",
     "missingAdminCredentials": "Al server mancano le credenziali admin di Supabase.",
     "notAllowed": "Solo gli amministratori possono gestire gli utenti."
+  },
+  "errorPage": {
+    "title": "Qualcosa è andato storto",
+    "body": "Il caricamento della schermata è fallito. L'errore è stato registrato; spesso basta riprovare.",
+    "reference": "Riferimento: {digest}",
+    "retry": "Riprova",
+    "backToDashboard": "Torna alla dashboard",
+    "notFoundTitle": "Pagina non trovata",
+    "notFoundBody": "Questo URL non esiste. Potrebbe essere stato rinominato o il link non è più valido."
   }
 }

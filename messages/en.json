@@ -273,5 +273,14 @@
     "emailTaken": "A user with that email already exists.",
     "missingAdminCredentials": "Server is missing Supabase admin credentials.",
     "notAllowed": "Only admins can manage users."
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "That screen failed to load. The error has been logged; retrying often clears it.",
+    "reference": "Reference: {digest}",
+    "retry": "Try again",
+    "backToDashboard": "Back to dashboard",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "That URL doesn't exist. It may have been renamed, or the link is out of date."
   }
 }
