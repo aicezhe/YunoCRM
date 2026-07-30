@@ -50,12 +50,18 @@ async function AsOfNote() {
 }
 
 async function RecentActivity() {
-  const [report, asOf, t, locale] = await Promise.all([
+  const [report, t, locale] = await Promise.all([
     getRecentActivity(5),
-    getDataAsOf(),
     getTranslations("dashboard"),
     getLocale(),
   ]);
+
+  // Anchored to the wall clock, unlike the metrics above. "Cold for 14+ days"
+  // and "days per stage" measure distances inside the history, so they use
+  // the dataset's own newest event. This is a feed of what has happened
+  // lately, and a reader takes "now" literally — anchoring it to the data
+  // made a three-week-old event announce itself as just-happened.
+  const now = new Date().toISOString();
 
   if (report.state === "error") {
     return (
@@ -93,7 +99,7 @@ async function RecentActivity() {
               <span className="text-gray-400"> — {label}</span>
             </span>
             <span className="shrink-0 text-xs text-gray-400">
-              {asOf ? relativeTime(item.occurredAt, new Date(asOf).toISOString(), locale) : null}
+              {relativeTime(item.occurredAt, now, locale)}
             </span>
           </li>
         );

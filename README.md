@@ -105,15 +105,19 @@ read once and does not have to be scrolled past every day.
 
 Two things are worth knowing before the dashboard surprises you.
 
-**Time is measured against the data, not the clock.** The seeded history runs
-7 Jan – 9 Jul 2026. "Cold", "days in stage" and the relative timestamps in
-Recent activity are all measured from the newest event in the dataset, not from
-today — otherwise every prospect would read as stale purely because the fixture
-is not live. The date this is anchored to is printed under the greeting
-("Funnel data as of …").
+**Analytics are measured against the data; the activity feed is not.** The
+seeded history runs 7 Jan – 9 Jul 2026. "Cold" and "days in stage" measure
+distances *inside* that history, so they are anchored to the newest event in
+the dataset rather than to today — otherwise every prospect would read as
+stale purely because the fixture is not live. The anchor date is printed under
+the greeting ("Funnel data as of …").
 
-One visible consequence: the top row of Recent activity always reads *now*,
-because it *is* the reference point.
+Recent activity is the exception, and deliberately so: it answers "what has
+happened lately", and a reader takes *now* literally. Anchoring it to the data
+made the newest event announce itself as just-happened when it was three weeks
+old. It uses the wall clock, so on a stale fixture it honestly reads "21 days
+ago" — which is itself worth knowing, since it says nothing has been ingested
+in three weeks.
 
 **Withering flags 54 of 57 open prospects, and that is correct.** The 393
 seeded interactions are spread fairly evenly across those six months, with only

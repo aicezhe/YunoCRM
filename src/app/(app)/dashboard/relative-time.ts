@@ -1,8 +1,11 @@
 /**
- * Formats how long ago `occurredAt` was, relative to `asOf` — the dataset's
- * own newest interaction, not the wall clock. Same reasoning as
- * COLD_THRESHOLD_DAYS in metrics.ts: the seed data ends mid-2026, so
- * `Date.now()` would make everything read as "N months ago".
+ * Formats how long ago `occurredAt` was, relative to whatever `asOf` the
+ * caller supplies — deliberately not hardcoded, because the dashboard needs
+ * both anchors. Measures *within* the history (days per stage, cold for 14+
+ * days) pass the dataset's own newest event, otherwise a fixture that ends
+ * mid-2026 marks everything stale. Recent activity passes the wall clock,
+ * because a reader takes "now" literally and would otherwise be told a
+ * three-week-old event just happened.
  *
  * Uses Intl.RelativeTimeFormat rather than hand-built strings: Russian
  * needs three plural forms ("1 день / 2 дня / 5 дней") and Italian its own
