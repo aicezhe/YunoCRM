@@ -229,7 +229,10 @@
     "noMatches": "No matches.",
     "companyNamePlaceholder": "Company name",
     "domainPlaceholder": "Domain (optional)",
-    "searchCompaniesPlaceholder": "Search companies..."
+    "searchCompaniesPlaceholder": "Search companies...",
+    "tabOpen": "Open ({count})",
+    "tabResolved": "Resolved ({count})",
+    "resolvedByUnknown": "unknown"
   },
   "quarantineReasons": {
     "personal_domain": "Sent from a personal email address",

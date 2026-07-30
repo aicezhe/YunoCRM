@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { getOpenQuarantineItems } from "./queries";
+import { getOpenQuarantineItems, getResolvedQuarantineItems } from "./queries";
 import { QuarantineClient } from "./quarantine-client";
 
 async function Header() {
@@ -13,7 +13,11 @@ async function Header() {
 }
 
 export default async function QuarantinePage() {
-  const [report, t] = await Promise.all([getOpenQuarantineItems(), getTranslations("quarantine")]);
+  const [report, resolved, t] = await Promise.all([
+    getOpenQuarantineItems(),
+    getResolvedQuarantineItems(),
+    getTranslations("quarantine"),
+  ]);
 
   return (
     <>
@@ -22,8 +26,8 @@ export default async function QuarantinePage() {
         {report.state === "error" && (
           <p className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">{t("loadError")}</p>
         )}
-        {report.state === "empty" && <QuarantineClient initialItems={[]} />}
-        {report.state === "ok" && <QuarantineClient initialItems={report.items} />}
+        {report.state === "empty" && <QuarantineClient initialItems={[]} resolvedItems={resolved} />}
+        {report.state === "ok" && <QuarantineClient initialItems={report.items} resolvedItems={resolved} />}
       </div>
     </>
   );

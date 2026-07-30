@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, CheckCircle2, Mail, Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { createCompanyAndResolve, discardQuarantineItem, linkToExistingAndResolve, listCompaniesForLink } from "./actions";
-import type { QuarantineDisplayItem } from "./queries";
+import type { QuarantineDisplayItem, ResolvedQuarantineItem } from "./queries";
 
 const CONFIDENCE_STYLES: Record<string, string> = {
   high: "bg-green-100 text-green-700",
@@ -258,21 +258,88 @@ function QuarantineCard({ item, onResolved }: { item: QuarantineDisplayItem; onR
   );
 }
 
-export function QuarantineClient({ initialItems }: { initialItems: QuarantineDisplayItem[] }) {
+function ResolvedRow({ item }: { item: ResolvedQuarantineItem }) {
+  const t = useTranslations("quarantine");
+  const tReason = useTranslations("quarantineReasons");
+  const locale = useLocale();
+
+  return (
+    <li className="flex flex-col gap-1.5 rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-sm">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="truncate font-medium text-gray-900">{item.subject}</span>
+        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+          {tReason(item.reason)}
+        </span>
+      </div>
+      <p className="truncate text-xs text-gray-400">{item.fromLabel}</p>
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+        {/* The resolution string is stored in English by design; it is an
+            audit value, not UI copy, so it is shown verbatim. */}
+        <span className="font-medium text-[#5B4FE9]">{item.resolution}</span>
+        <span className="text-gray-300">·</span>
+        <span className="text-gray-500">{item.resolvedByName ?? item.resolvedByEmail ?? t("resolvedByUnknown")}</span>
+        {item.resolvedAt && (
+          <>
+            <span className="text-gray-300">·</span>
+            <span className="text-gray-500">{fmtDateTime(item.resolvedAt, locale)}</span>
+          </>
+        )}
+      </p>
+    </li>
+  );
+}
+
+export function QuarantineClient({
+  initialItems,
+  resolvedItems,
+}: {
+  initialItems: QuarantineDisplayItem[];
+  resolvedItems: ResolvedQuarantineItem[];
+}) {
+  const t = useTranslations("quarantine");
   const [items, setItems] = useState(initialItems);
+  const [tab, setTab] = useState<"open" | "resolved">("open");
+
+  const tabClass = (active: boolean) =>
+    "rounded-xl px-3.5 py-1.5 text-sm font-medium transition " +
+    (active ? "bg-white text-[#5B4FE9] shadow-sm" : "text-gray-500 hover:text-gray-700");
 
   return (
     <div className="space-y-4">
-      <AnimatePresence>
-        {items.map((item) => (
-          <QuarantineCard
-            key={item.id}
-            item={item}
-            onResolved={() => setItems((prev) => prev.filter((i) => i.id !== item.id))}
-          />
-        ))}
-      </AnimatePresence>
-      {items.length === 0 && <EmptyState />}
+      {/* Only worth a switcher once there is history to switch to — on a
+          fresh install every item is open and a lone "Resolved (0)" tab is
+          just chrome. */}
+      {resolvedItems.length > 0 && (
+        <div className="inline-flex gap-1 rounded-2xl bg-gray-100/70 p-1">
+          <button type="button" onClick={() => setTab("open")} className={tabClass(tab === "open")}>
+            {t("tabOpen", { count: items.length })}
+          </button>
+          <button type="button" onClick={() => setTab("resolved")} className={tabClass(tab === "resolved")}>
+            {t("tabResolved", { count: resolvedItems.length })}
+          </button>
+        </div>
+      )}
+
+      {tab === "open" ? (
+        <>
+          <AnimatePresence>
+            {items.map((item) => (
+              <QuarantineCard
+                key={item.id}
+                item={item}
+                onResolved={() => setItems((prev) => prev.filter((i) => i.id !== item.id))}
+              />
+            ))}
+          </AnimatePresence>
+          {items.length === 0 && <EmptyState />}
+        </>
+      ) : (
+        <ul className="space-y-2.5">
+          {resolvedItems.map((item) => (
+            <ResolvedRow key={item.id} item={item} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

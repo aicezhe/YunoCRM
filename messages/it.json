@@ -229,7 +229,10 @@
     "noMatches": "Nessuna corrispondenza.",
     "companyNamePlaceholder": "Nome azienda",
     "domainPlaceholder": "Dominio (opzionale)",
-    "searchCompaniesPlaceholder": "Cerca aziende..."
+    "searchCompaniesPlaceholder": "Cerca aziende...",
+    "tabOpen": "Da rivedere ({count})",
+    "tabResolved": "Risolti ({count})",
+    "resolvedByUnknown": "sconosciuto"
   },
   "quarantineReasons": {
     "personal_domain": "Inviato da un indirizzo email personale",

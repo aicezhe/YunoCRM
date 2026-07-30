@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { quarantineItems, rawEvents } from "../../../../drizzle/schema";
+import { quarantineItems, rawEvents, users } from "../../../../drizzle/schema";
 import type { CalendarPayload, EmailPayload } from "../../../../scripts/classification-rules";
 
 export type PgTrgmCandidate = { companyId: string; name: string; similarity: number };
@@ -50,6 +50,71 @@ function displayFromPayload(source: string, payload: unknown): {
     fromLabel: event.organizer,
     occurredAt: event.start,
   };
+}
+
+export type ResolvedQuarantineItem = {
+  id: string;
+  reason: string;
+  source: "email" | "calendar";
+  subject: string;
+  fromLabel: string;
+  occurredAt: string;
+  /** Written by the resolving action in English on purpose — an audit trail
+   * shouldn't depend on which locale the person happened to be using. */
+  resolution: string | null;
+  resolvedAt: string | null;
+  resolvedByName: string | null;
+  resolvedByEmail: string | null;
+};
+
+/**
+ * The history behind the queue. Resolving an item used to make it vanish
+ * from the product entirely: the trail was in the database (who, when, what
+ * they decided) but nowhere in the UI, so "who discarded that lead, and
+ * why?" could only be answered with SQL. Read-only — this shows what is
+ * already recorded, it does not change any state.
+ */
+export async function getResolvedQuarantineItems(limit = 50): Promise<ResolvedQuarantineItem[]> {
+  try {
+    const rows = await db
+      .select({
+        id: quarantineItems.id,
+        reason: quarantineItems.reason,
+        resolution: quarantineItems.resolution,
+        resolvedAt: quarantineItems.resolvedAt,
+        resolvedByName: users.name,
+        resolvedByEmail: users.email,
+        source: rawEvents.source,
+        payload: rawEvents.payload,
+      })
+      .from(quarantineItems)
+      .innerJoin(rawEvents, eq(rawEvents.id, quarantineItems.rawEventId))
+      .leftJoin(users, eq(users.id, quarantineItems.resolvedBy))
+      .where(eq(quarantineItems.status, "resolved"))
+      .orderBy(desc(quarantineItems.resolvedAt))
+      .limit(limit);
+
+    return rows.map((r) => {
+      const display = displayFromPayload(r.source, r.payload);
+      return {
+        id: r.id,
+        reason: r.reason,
+        source: r.source as "email" | "calendar",
+        subject: display.subject,
+        fromLabel: display.fromLabel,
+        occurredAt: display.occurredAt,
+        resolution: r.resolution,
+        resolvedAt: r.resolvedAt,
+        resolvedByName: r.resolvedByName,
+        resolvedByEmail: r.resolvedByEmail,
+      };
+    });
+  } catch (err) {
+    // The history is supplementary: if it fails the queue itself must still
+    // render, so this degrades to an empty list rather than an error state.
+    console.error("[quarantine] resolved history query failed:", err);
+    return [];
+  }
 }
 
 export async function getOpenQuarantineItems(): Promise<QuarantineReport> {

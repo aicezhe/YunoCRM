@@ -387,7 +387,9 @@ receives a third of the traffic is just a second inbox and gets ignored. Every
 quarantined item arrives with the reason, a suggested action and candidate
 companies, so the human decision is a click (create / link to existing /
 discard), not an investigation. In the deployed demo all 5 have since been
-resolved that way, so the queue reads empty — a fresh run leaves them open.
+resolved that way, so the queue reads empty and the screen's **Resolved** tab
+shows the trail instead — what was decided, by whom, when. A fresh run leaves
+all five open.
 
 The `personal_domain` case is the interesting one. An email from
 `cristina.ricci@libero.it` cannot be attributed by domain — `libero.it` is a

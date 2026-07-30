@@ -230,7 +230,10 @@
     "noMatches": "Совпадений нет.",
     "companyNamePlaceholder": "Название компании",
     "domainPlaceholder": "Домен (необязательно)",
-    "searchCompaniesPlaceholder": "Поиск компаний..."
+    "searchCompaniesPlaceholder": "Поиск компаний...",
+    "tabOpen": "Открытые ({count})",
+    "tabResolved": "Разобранные ({count})",
+    "resolvedByUnknown": "неизвестно"
   },
   "quarantineReasons": {
     "personal_domain": "Отправлено с личного email-адреса",
