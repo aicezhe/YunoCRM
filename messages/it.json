@@ -90,7 +90,15 @@
     "won": "Vinti",
     "winRate": "Tasso di successo",
     "totalProspects": "Prospect totali",
-    "websiteProspects": "Prospect dal sito"
+    "websiteProspects": "Prospect dal sito",
+    "notSet": "(non impostato)",
+    "segmentSubtitle": "Prospect in questo segmento",
+    "segmentClose": "Chiudi",
+    "segmentEmpty": "Nessun prospect in questo segmento.",
+    "segmentError": "Impossibile caricare il segmento. Riprova.",
+    "segmentNoOwner": "Non assegnato",
+    "segmentNoContact": "Nessun contatto",
+    "segmentTruncated": "Mostrati i primi {shown} di {total} prospect."
   },
   "byStageScreen": {
     "title": "Per fase",

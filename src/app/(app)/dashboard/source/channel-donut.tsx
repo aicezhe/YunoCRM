@@ -11,6 +11,12 @@ function renderActiveShape(props: PieSectorDataItem) {
   return <Sector {...props} outerRadius={(Number(props.outerRadius) || 0) + 8} />;
 }
 
+/** Recharts types a sector click as the rendered sector's props; the row that
+ * produced it rides along on `payload`. */
+function rowOf(item: PieSectorDataItem): ChannelRow | undefined {
+  return (item as { payload?: ChannelRow }).payload;
+}
+
 function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { payload: ChannelRow & { isBest: boolean } }[] }) {
   const tChannel = useTranslations("channels");
   const t = useTranslations("sourceScreen");
@@ -58,7 +64,13 @@ function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { pay
   );
 }
 
-export function ChannelDonut({ channels }: { channels: ChannelRow[] }) {
+export function ChannelDonut({
+  channels,
+  onSelect,
+}: {
+  channels: ChannelRow[];
+  onSelect: (channel: string) => void;
+}) {
   const tChannel = useTranslations("channels");
   const t = useTranslations("sourceScreen");
   const total = channels.reduce((sum, c) => sum + c.total, 0);
@@ -100,8 +112,17 @@ export function ChannelDonut({ channels }: { channels: ChannelRow[] }) {
               cornerRadius={4}
               activeShape={renderActiveShape}
               isAnimationActive
+              className="cursor-pointer"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
+              // The hover dim is driven by onMouseLeave, which never fires once
+              // the drawer covers the chart — so clear it on the way out.
+              onClick={(item) => {
+                const d = rowOf(item);
+                if (!d?.channel || d.total === 0) return;
+                setIsHovering(false);
+                onSelect(d.channel);
+              }}
             >
               {data.map((d) => (
                 <Cell key={d.channel} fill={CHANNEL_COLORS[d.channel] ?? "#5B4FE9"} stroke="none" />

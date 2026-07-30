@@ -90,7 +90,15 @@
     "won": "Выиграно",
     "winRate": "Доля выигранных",
     "totalProspects": "Всего проспектов",
-    "websiteProspects": "Проспектов с сайта"
+    "websiteProspects": "Проспектов с сайта",
+    "notSet": "(не задан)",
+    "segmentSubtitle": "Проспекты этого сегмента",
+    "segmentClose": "Закрыть",
+    "segmentEmpty": "В этом сегменте нет проспектов.",
+    "segmentError": "Не удалось загрузить сегмент. Попробуйте ещё раз.",
+    "segmentNoOwner": "Без ответственного",
+    "segmentNoContact": "Контакта ещё не было",
+    "segmentTruncated": "Показаны первые {shown} из {total} проспектов."
   },
   "byStageScreen": {
     "title": "По этапам",

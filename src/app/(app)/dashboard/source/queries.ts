@@ -10,7 +10,10 @@ export type ChannelRow = {
 };
 
 export type UtmRow = {
-  utmSource: string;
+  /** Raw column value — `null` is the genuine "not set" bucket. Kept unlabelled
+   * so the segment drawer can query `utm_source is null` instead of matching
+   * against a display string. */
+  utmSource: string | null;
   total: number;
 };
 
@@ -67,7 +70,7 @@ export async function getSourceReport(): Promise<SourceReport> {
       group by utm_source
       order by total desc
     `);
-    const utm: UtmRow[] = utmRows.map((r) => ({ utmSource: r.utm_source ?? "(not set)", total: r.total }));
+    const utm: UtmRow[] = utmRows.map((r) => ({ utmSource: r.utm_source, total: r.total }));
 
     return { state: "ok", channels, utm };
   } catch (err) {

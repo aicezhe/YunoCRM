@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { BackToDashboard } from "../back-to-dashboard";
 import { getSourceReport } from "./queries";
-import { ChannelDonut } from "./channel-donut";
-import { UtmDonut } from "./utm-donut";
+import { SourceCharts } from "./source-charts";
 
 async function Header() {
   const t = await getTranslations("sourceScreen");
@@ -28,24 +27,7 @@ export default async function SourcePage() {
         {report.state === "empty" && (
           <p className="rounded-2xl bg-white px-5 py-6 text-sm text-gray-500 shadow-sm">{t("empty")}</p>
         )}
-        {report.state === "ok" && (
-          <div className="space-y-8">
-            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
-              <ChannelDonut channels={report.channels} />
-            </div>
-
-            {report.utm.length > 0 && (
-              <div>
-                <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">
-                  {t("utmHeading")}
-                </h2>
-                <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
-                  <UtmDonut utm={report.utm} />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {report.state === "ok" && <SourceCharts channels={report.channels} utm={report.utm} />}
       </div>
     </>
   );

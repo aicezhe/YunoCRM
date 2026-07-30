@@ -90,7 +90,15 @@
     "won": "Won",
     "winRate": "Win rate",
     "totalProspects": "Total prospects",
-    "websiteProspects": "Website prospects"
+    "websiteProspects": "Website prospects",
+    "notSet": "(not set)",
+    "segmentSubtitle": "Prospects in this segment",
+    "segmentClose": "Close",
+    "segmentEmpty": "No prospects in this segment.",
+    "segmentError": "Couldn't load this segment. Try again.",
+    "segmentNoOwner": "Unassigned",
+    "segmentNoContact": "No contact yet",
+    "segmentTruncated": "Showing the first {shown} of {total} prospects."
   },
   "byStageScreen": {
     "title": "By stage",
