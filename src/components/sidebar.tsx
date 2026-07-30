@@ -35,7 +35,16 @@ export function Sidebar({
     <aside
       className={`fixed inset-y-0 left-0 z-40 hidden ${SIDEBAR_WIDTH} flex-col border-r border-[#E4DFFC] bg-gradient-to-b from-[#EEEBFF] to-[#E9E4FC] backdrop-blur-md md:flex`}
     >
-      <div className="px-6 py-6">
+      {/* The official YunoAI mark is a 75-dot halftone grid — it needs ~56px
+          of height to stay legible (below that the dot columns collapse into
+          a smudge), so the sidebar stacks it above the wordmark rather than
+          shrinking it into the text row. The mobile bar keeps text only. */}
+      <div className="flex flex-col items-start gap-2.5 px-6 py-6">
+        {/* Plain <img>, not next/image: the optimizer passes SVG through
+            untouched, so <Image> would add JS and config for zero gain on a
+            6KB static file. alt="" since the wordmark below already names it. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/yuno-mark.svg" alt="" aria-hidden width={83} height={56} className="h-14 w-auto" />
         <span className="text-lg font-semibold tracking-tight text-[#5B4FE9]">
           Yuno<span className="text-gray-900">CRM</span>
         </span>
