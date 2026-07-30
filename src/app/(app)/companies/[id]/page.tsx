@@ -1,6 +1,7 @@
-import { Mail, User } from "lucide-react";
+import { User } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BackButton } from "@/components/back-button";
+import { CopyEmail } from "@/components/copy-email";
 import { channelLabel } from "@/i18n/channel-labels";
 import { getCompanyDetail, type ProspectDetail } from "./queries";
 
@@ -209,10 +210,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   {c.name ?? c.email}
                   {c.title && <span className="font-normal text-gray-400">· {c.title}</span>}
                 </p>
-                <p className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                  <Mail className="h-3.5 w-3.5 text-gray-400" strokeWidth={2} />
-                  {c.email}
-                </p>
+                <CopyEmail email={c.email} className="mt-1 max-w-full text-xs text-gray-500" />
               </li>
             ))}
           </ul>

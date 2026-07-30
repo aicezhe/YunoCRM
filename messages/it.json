@@ -1,6 +1,9 @@
 {
   "common": {
-    "languageLabel": "Lingua"
+    "languageLabel": "Lingua",
+    "copyEmail": "Copia {email}",
+    "copied": "Copiato",
+    "copyFailed": "Copia non riuscita"
   },
   "login": {
     "welcome": "Bentornato",

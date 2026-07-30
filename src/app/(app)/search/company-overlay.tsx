@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { loadCompanyOverlay } from "./actions";
+import { CopyEmail } from "@/components/copy-email";
 import { channelLabel } from "@/i18n/channel-labels";
 import type { CompanyDetail, ProspectDetail } from "../companies/[id]/queries";
 
@@ -256,10 +257,7 @@ export function CompanyOverlay({
                       <span className="text-sm text-gray-400">· {featuredContact.title}</span>
                     )}
                   </p>
-                  <p className="mt-0.5 flex items-center gap-1.5 truncate text-sm text-gray-500">
-                    <Mail className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                    {featuredContact.email}
-                  </p>
+                  <CopyEmail email={featuredContact.email} className="mt-0.5 max-w-full text-sm text-gray-500" />
                 </div>
                 <span className="flex shrink-0 items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
                   <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2} />

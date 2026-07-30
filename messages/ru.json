@@ -1,6 +1,9 @@
 {
   "common": {
-    "languageLabel": "Язык"
+    "languageLabel": "Язык",
+    "copyEmail": "Скопировать {email}",
+    "copied": "Скопировано",
+    "copyFailed": "Не удалось скопировать"
   },
   "login": {
     "welcome": "С возвращением",
