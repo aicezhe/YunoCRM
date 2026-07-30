@@ -153,10 +153,12 @@ export async function searchNormal(query: string): Promise<SearchReport> {
   }
 }
 
-// Cosine similarity below this is treated as noise rather than a real
-// match. Voyage's raw scores haven't been observed on this dataset yet
-// (embedding requires VOYAGE_API_KEY) — revisit once real query/company
-// similarity scores are available.
+// Cosine similarity below this is treated as noise rather than a real match.
+// Measured on this dataset: the Russian query "винодельня" scores 0.566
+// against Vini Colline Toscane (the one winery) and 0.369 against the next
+// company down, so 0.5 sits in the gap — but with only ~0.07 of headroom on
+// the match side. Worth re-checking against more query/company pairs before
+// trusting it as a general boundary.
 const SMART_SIMILARITY_THRESHOLD = 0.5;
 const SMART_RESULT_LIMIT = 10;
 const EMBED_MODEL = "voyage-3-lite";

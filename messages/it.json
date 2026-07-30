@@ -88,6 +88,7 @@
     "prospects": "Prospect",
     "active": "Attivi",
     "won": "Vinti",
+    "winRate": "Tasso di successo",
     "totalProspects": "Prospect totali",
     "websiteProspects": "Prospect dal sito"
   },

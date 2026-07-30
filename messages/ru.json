@@ -88,6 +88,7 @@
     "prospects": "Проспектов",
     "active": "Активных",
     "won": "Выиграно",
+    "winRate": "Доля выигранных",
     "totalProspects": "Всего проспектов",
     "websiteProspects": "Проспектов с сайта"
   },

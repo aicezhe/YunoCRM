@@ -93,7 +93,13 @@ export function SearchClient() {
   const t = useTranslations("search");
   const [query, setQuery] = useState("");
   const [smart, setSmart] = useState(false);
-  const [report, setReport] = useState<SearchReport | null>(null);
+  // The report is kept together with the mode that produced it, as one atom.
+  // The empty state's wording differs for smart vs normal, and reading that
+  // off the live `smart` toggle meant flipping the switch after a search
+  // silently rewrote the explanation for a result it never re-ran.
+  const [result, setResult] = useState<{ report: SearchReport; smart: boolean } | null>(null);
+  const report = result?.report ?? null;
+  const reportSmart = result?.smart ?? false;
   const [isPending, startTransition] = useTransition();
   const [focused, setFocused] = useState(false);
   const [placeholderText, setPlaceholderText] = useState("");
@@ -119,8 +125,8 @@ export function SearchClient() {
 
   function runQuery(q: string, smartMode: boolean) {
     startTransition(async () => {
-      const result = await runSearch(q, smartMode);
-      setReport(result);
+      const found = await runSearch(q, smartMode);
+      setResult({ report: found, smart: smartMode });
     });
   }
 
@@ -260,7 +266,7 @@ export function SearchClient() {
           {!isPending && report?.state === "empty" && (
             <p className="rounded-2xl bg-white px-5 py-6 text-sm text-gray-500 shadow-sm">
               {report.query
-                ? smart
+                ? reportSmart
                   ? t("emptySmart", { query: report.query })
                   : t("emptyNormal", { query: report.query })
                 : t("emptyNoQuery")}

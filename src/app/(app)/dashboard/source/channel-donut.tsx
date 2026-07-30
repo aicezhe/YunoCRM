@@ -39,14 +39,20 @@ function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { pay
           <dd className="font-medium text-gray-900">{d.won}</dd>
         </div>
       </dl>
-      <div className="mt-3.5 flex items-center gap-2">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+      {/* Labelled like the rows above it: on its own the bare percentage read
+          as "share of the donut" rather than won-out-of-total for this
+          channel. */}
+      <div className="mt-3.5">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-400">{t("winRate")}</span>
+          <span className="font-semibold text-gray-900">{d.conversionPct}%</span>
+        </div>
+        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-gray-100">
           <div
             className="h-full rounded-full bg-[#5B4FE9]"
             style={{ width: `${Math.min(d.conversionPct, 100)}%` }}
           />
         </div>
-        <span className="text-xs font-semibold text-gray-900">{d.conversionPct}%</span>
       </div>
     </div>
   );

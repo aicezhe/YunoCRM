@@ -1,0 +1,24 @@
+-- Drop the IVFFlat index on companies.embedding: at this table's size it
+-- doesn't merely degrade recall, it returns ZERO rows.
+--
+-- 20260727200008 created it with `lists = 100` against a table holding 76
+-- companies, reasoning that the plan should "hold up as the table grows".
+-- The cost of that was not paid later, it was paid immediately. IVFFlat
+-- assigns every row to one of `lists` k-means cells and, at the default
+-- probes = 1, scans only the single cell nearest the query vector. With 100
+-- cells over 76 rows most cells are empty, so a query vector whose nearest
+-- centroid owns an empty cell matches nothing at all.
+--
+-- Measured before writing this, with enable_seqscan = off to force the index:
+-- 20 out of 20 random query vectors returned 0 rows (min 0, avg 0, max 0).
+-- Smart search only ever appeared to work when the planner ignored the index
+-- and seq-scanned; adding a lateral join to the query was enough to flip it
+-- to an index scan and silently return "nothing found" for every query.
+--
+-- A sequential scan over 76 rows is both exact and faster than an ANN probe.
+-- pgvector sizes `lists` at roughly rows/1000, i.e. 1 list here, which is a
+-- seq scan with extra bookkeeping. Reintroduce an index when the table is
+-- large enough to need one (tens of thousands of rows), size `lists` from the
+-- real row count at that time, and verify recall against exact results rather
+-- than assuming it.
+drop index if exists idx_companies_embedding_cosine;
