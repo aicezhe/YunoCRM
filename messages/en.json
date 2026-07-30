@@ -261,6 +261,7 @@
     "cannotDemoteLastAdmin": "Can't demote the only remaining admin — promote someone else first.",
     "invalidEmail": "Enter a valid email address.",
     "emailTaken": "A user with that email already exists.",
-    "missingAdminCredentials": "Server is missing Supabase admin credentials."
+    "missingAdminCredentials": "Server is missing Supabase admin credentials.",
+    "notAllowed": "Only admins can manage users."
   }
 }

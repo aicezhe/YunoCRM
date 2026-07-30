@@ -261,6 +261,7 @@
     "cannotDemoteLastAdmin": "Non puoi retrocedere l'unico admin rimasto — promuovi prima qualcun altro.",
     "invalidEmail": "Inserisci un indirizzo email valido.",
     "emailTaken": "Esiste già un utente con questa email.",
-    "missingAdminCredentials": "Al server mancano le credenziali admin di Supabase."
+    "missingAdminCredentials": "Al server mancano le credenziali admin di Supabase.",
+    "notAllowed": "Solo gli amministratori possono gestire gli utenti."
   }
 }
