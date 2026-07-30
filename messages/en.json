@@ -124,7 +124,10 @@
     "slowest": "Slowest",
     "flipToCounts": "{stage}: show what the average was computed from",
     "flipToAverage": "{stage}: show the average",
-    "backNote": "Ongoing prospects have no completed duration yet, so they are excluded from the average."
+    "backNote": "Waiting time runs from entering the stage to the newest event in the data.",
+    "ongoingWaitAvg": "Waiting on average",
+    "ongoingWaitMax": "Longest wait",
+    "backEmpty": "Nobody is sitting in this stage right now."
   },
   "witheringScreen": {
     "title": "Withering",

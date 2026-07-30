@@ -93,7 +93,11 @@ function StageCard({ row, longest, delay }: { row: StageDuration; longest: numbe
             </div>
           </div>
 
-          {/* Back: what the average was computed from */}
+          {/* Back: the current backlog. The front's average only describes
+              prospects who DID move on — the stuck ones are excluded from it
+              by construction, so the back is where "where do they get stuck"
+              is actually answered: how many are sitting here now, and for
+              how long already. */}
           <div
             aria-hidden={!flipped}
             className={FACE + " border-[#4B3FE0] bg-[#5B4FE9] text-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.6)]"}
@@ -101,18 +105,38 @@ function StageCard({ row, longest, delay }: { row: StageDuration; longest: numbe
           >
             <span className="text-xs font-medium tracking-wide text-white/60 uppercase">{tStage(row.stage)}</span>
 
-            <dl className="space-y-2.5">
+            <dl className="space-y-1.5">
               <div className="flex items-baseline justify-between gap-3">
                 <dt className="text-xs text-white/60">{t("colCompleted")}</dt>
-                <dd className="text-xl font-semibold tabular-nums">{row.completed}</dd>
+                <dd className="text-sm font-semibold tabular-nums">{row.completed}</dd>
               </div>
               <div className="flex items-baseline justify-between gap-3">
                 <dt className="text-xs text-white/60">{t("colOngoing")}</dt>
-                <dd className="text-xl font-semibold tabular-nums">{row.ongoing}</dd>
+                <dd className="text-sm font-semibold tabular-nums">{row.ongoing}</dd>
               </div>
+              {row.ongoingAvgDays !== null && (
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-xs text-white/60">{t("ongoingWaitAvg")}</dt>
+                  <dd className="text-sm font-semibold tabular-nums">
+                    {t(avgDaysKey(row.ongoingAvgDays, locale), { count: row.ongoingAvgDays })}
+                  </dd>
+                </div>
+              )}
+              {row.ongoingMaxDays !== null && (
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-xs text-white/60">{t("ongoingWaitMax")}</dt>
+                  <dd className="text-sm font-semibold tabular-nums">
+                    {t(avgDaysKey(row.ongoingMaxDays, locale), { count: row.ongoingMaxDays })}
+                  </dd>
+                </div>
+              )}
             </dl>
 
-            <p className="text-[11px] leading-snug text-white/50">{t("backNote")}</p>
+            {row.ongoing === 0 ? (
+              <p className="text-[11px] leading-snug text-white/50">{t("backEmpty")}</p>
+            ) : (
+              <p className="text-[11px] leading-snug text-white/50">{t("backNote")}</p>
+            )}
           </div>
         </motion.div>
 

@@ -109,6 +109,57 @@ describe("Time in stage", () => {
     }
   });
 
+  it("measures how long the ongoing prospects have already waited", async () => {
+    const report = await getTimeReport();
+    if (report.state !== "ok") throw new Error("expected ok");
+
+    for (const row of report.stages) {
+      // Re-derived from `prospects.current_stage` and the transition that put
+      // each one there, rather than from the window function's null-next rows.
+      const independent = await db.execute<{ avg: string | null; max: string | null; n: number }>(sql`
+        with as_of as (select max(occurred_at) as at from interactions),
+        entered as (
+          select p.id, max(st.occurred_at) as entered_at
+          from prospects p
+          join stage_transitions st on st.prospect_id = p.id and st.to_stage = p.current_stage
+          where p.current_stage::text = ${row.stage}
+          group by p.id
+        )
+        select
+          round(avg(extract(epoch from ((select at from as_of) - entered_at)) / 86400)::numeric, 1) as avg,
+          round(max(extract(epoch from ((select at from as_of) - entered_at)) / 86400)::numeric, 1) as max,
+          count(*)::int as n
+        from entered
+      `);
+      const [{ avg, max, n }] = independent;
+
+      expect({ stage: row.stage, n: row.ongoing }).toEqual({ stage: row.stage, n });
+      expect({ stage: row.stage, avg: row.ongoingAvgDays }).toEqual({
+        stage: row.stage,
+        avg: avg === null ? null : Number(avg),
+      });
+      expect({ stage: row.stage, max: row.ongoingMaxDays }).toEqual({
+        stage: row.stage,
+        max: max === null ? null : Number(max),
+      });
+    }
+  });
+
+  it("shows the throughput average can hide a backlog, which is why both are reported", async () => {
+    const report = await getTimeReport();
+    if (report.state !== "ok") throw new Error("expected ok");
+
+    // The point of the back of the card. A stage whose completed transitions
+    // clear in ~a day can still have prospects rotting in it for months —
+    // they are excluded from the average precisely because they never moved.
+    // If this ever stops holding on the fixture the screen's framing is
+    // wrong, not the test.
+    const misleading = report.stages.filter(
+      (s) => s.avgDays !== null && s.ongoingAvgDays !== null && s.ongoingAvgDays > s.avgDays * 10
+    );
+    expect(misleading.length).toBeGreaterThan(0);
+  });
+
   it("gives the tied Lead stage a zero-day duration rather than the next stage's", async () => {
     // The concrete regression the ordering guards against: for a prospect
     // created and contacted by the same email, Lead lasted no time at all.

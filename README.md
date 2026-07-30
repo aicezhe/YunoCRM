@@ -367,6 +367,20 @@ old. It uses the wall clock, so on a stale fixture it honestly reads "21 days
 ago" — which is itself worth knowing, since it says nothing has been ingested
 in three weeks.
 
+**The Time screen reports two different things, on purpose.** The front of
+each card is throughput — how long prospects that *did* move on spent in that
+stage. That number cannot answer the screen's own question ("where do they get
+stuck?"), because the stuck ones are excluded from it by construction: a
+prospect that never moved has no completed duration. On this dataset the gap
+is dramatic. Lead averages 1.1 days and Demo Scheduled 1.2 — the two fastest
+stages — while 7 and 6 prospects have been sitting in them for 89 and 114 days
+respectively. The real clog is Contacted: 35 prospects, 107 days on average,
+roughly 3,750 prospect-days frozen, which is also where most of the withering
+prospects below are. So the back of each card carries the backlog — how many
+are sitting there now and how long they have already waited — and the two
+metrics are labelled distinctly rather than averaged into one misleading
+figure.
+
 **Withering flags 54 of 57 open prospects, and that is correct.** The 393
 seeded interactions are spread fairly evenly across those six months, with only
 16 of them in the final two weeks. A 14-day window is ~8% of the history, so at

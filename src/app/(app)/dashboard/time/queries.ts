@@ -3,9 +3,18 @@ import { db } from "@/db";
 
 export type StageDuration = {
   stage: string;
+  /** Throughput: how long prospects who DID move on spent here. */
   avgDays: number | null;
   completed: number;
+  /** Backlog: prospects sitting in this stage right now... */
   ongoing: number;
+  /** ...and how long they have been waiting, from entering the stage to the
+   * dataset's newest event. This answers "where do they get stuck" — the
+   * average above can't, because the stuck are by definition not in it
+   * (survivorship bias: a stage everyone clears in a day but 35 prospects
+   * rot in shows a flattering 1.1d). */
+  ongoingAvgDays: number | null;
+  ongoingMaxDays: number | null;
 };
 
 export type TimeReport = { state: "ok"; stages: StageDuration[] } | { state: "empty" } | { state: "error" };
@@ -37,9 +46,21 @@ const NON_TERMINAL_STAGES = ["Lead", "Contacted", "Demo Scheduled", "Demo Done",
  */
 export async function getTimeReport(): Promise<TimeReport> {
   try {
-    const rows = await db.execute<{ stage: string; avg_days: string | null; completed: number; ongoing: number }>(
+    const rows = await db.execute<{
+      stage: string;
+      avg_days: string | null;
+      completed: number;
+      ongoing: number;
+      ongoing_avg_days: string | null;
+      ongoing_max_days: string | null;
+    }>(
       sql`
-        with spans as (
+        with as_of as (
+          -- Same anchor as the Withering screen: the dataset's newest event,
+          -- not the wall clock, or a non-live fixture inflates every wait.
+          select max(occurred_at) as at from interactions
+        ),
+        spans as (
           select
             to_stage,
             occurred_at,
@@ -50,7 +71,9 @@ export async function getTimeReport(): Promise<TimeReport> {
           to_stage::text as stage,
           round(avg(extract(epoch from (next_at - occurred_at)) / 86400) filter (where next_at is not null)::numeric, 1) as avg_days,
           count(*) filter (where next_at is not null)::int as completed,
-          count(*) filter (where next_at is null)::int as ongoing
+          count(*) filter (where next_at is null)::int as ongoing,
+          round(avg(extract(epoch from ((select at from as_of) - occurred_at)) / 86400) filter (where next_at is null)::numeric, 1) as ongoing_avg_days,
+          round(max(extract(epoch from ((select at from as_of) - occurred_at)) / 86400) filter (where next_at is null)::numeric, 1) as ongoing_max_days
         from spans
         group by to_stage
       `
@@ -66,6 +89,8 @@ export async function getTimeReport(): Promise<TimeReport> {
         avgDays: row?.avg_days != null ? Number(row.avg_days) : null,
         completed: row?.completed ?? 0,
         ongoing: row?.ongoing ?? 0,
+        ongoingAvgDays: row?.ongoing_avg_days != null ? Number(row.ongoing_avg_days) : null,
+        ongoingMaxDays: row?.ongoing_max_days != null ? Number(row.ongoing_max_days) : null,
       };
     }).sort((a, b) => (b.avgDays ?? -1) - (a.avgDays ?? -1));
 

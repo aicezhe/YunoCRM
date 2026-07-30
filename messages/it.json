@@ -124,7 +124,10 @@
     "slowest": "Più lenta",
     "flipToCounts": "{stage}: mostra su cosa è calcolata la media",
     "flipToAverage": "{stage}: mostra la media",
-    "backNote": "I prospect ancora in corso non hanno una durata completata, quindi restano fuori dalla media."
+    "backNote": "L'attesa va dall'ingresso nella fase all'evento più recente nei dati.",
+    "ongoingWaitAvg": "In attesa in media",
+    "ongoingWaitMax": "Attesa più lunga",
+    "backEmpty": "Nessun prospect è fermo in questa fase al momento."
   },
   "witheringScreen": {
     "title": "Inattivi",
