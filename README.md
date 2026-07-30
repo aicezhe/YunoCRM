@@ -75,21 +75,29 @@ also restores roles changed through the UI.
 **Tests**
 
 ```bash
-npm test          # vitest — 72 tests, no database or network needed
+npm test          # 92 unit tests — pure logic, no database, no network
+npm run test:db   # 14 integration tests — needs DATABASE_URL + the loaded fixture
 npx tsc --noEmit  # types
 npm run build     # production build
 ```
 
-What the tests cover, in the brief's order of importance: the classification
-rules against the fixture's planted traps (personal-domain senders that are
-real leads, bulk senders, auto-replies, the ambiguous-sender cases), the
-resolution rules (channel attribution, stage signals from emails and calendar
-events, the canonical lost reasons, reschedule-vs-cancel), embedding-text
+The split is deliberate. `npm test` stays fast and secret-free so it works as
+a tight loop and in CI: the classification rules against the fixture's planted
+traps (personal-domain senders that are real leads, bulk senders, auto-replies,
+ambiguous senders), the resolution rules (channel attribution, stage signals
+from emails and calendar events, the canonical lost reasons,
+reschedule-vs-cancel), the user-management authorization rules, embedding-text
 construction, and the display logic where locales genuinely differ (Russian
-plural forms, the fractional-number grammar case, relative time). Dashboard
-aggregates live in SQL; they were verified against independently written SQL
-over the same database rather than unit-tested, and the pure formatting around
-them is what the unit tests pin down.
+plural forms, the fractional-number grammar case, relative time).
+
+The dashboard numbers can't be covered that way, because they *are* SQL —
+reimplementing those aggregates in TypeScript would only prove the copy agrees
+with itself. So `npm run test:db` re-derives every figure a **different** way
+against the same database (a correlated lookup where the shipped query uses a
+window function, separate counts where it uses filters) and compares. That
+suite paid for itself immediately: it caught the stage-duration window
+ordering by `occurred_at` alone, which leaves same-timestamp transitions in an
+arbitrary order — see the comment in `dashboard/time/queries.ts`.
 
 ## Data model
 

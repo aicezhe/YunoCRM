@@ -100,7 +100,7 @@ export async function getTimeMetric(): Promise<Metric> {
       from (
         select
           occurred_at,
-          lead(occurred_at) over (partition by prospect_id order by occurred_at) as next_at
+          lead(occurred_at) over (partition by prospect_id order by occurred_at, to_stage) as next_at
         from stage_transitions
       ) spans
       where next_at is not null

@@ -15,7 +15,8 @@
     "audit-filtering": "tsx --env-file=.env.local scripts/audit-filtering.ts",
     "embed-companies": "tsx --env-file=.env.local scripts/embed-companies.ts",
     "seed-users": "tsx --env-file=.env.local scripts/seed-users.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:db": "vitest run --config vitest.db.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

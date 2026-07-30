@@ -23,6 +23,17 @@ const NON_TERMINAL_STAGES = ["Lead", "Contacted", "Demo Scheduled", "Demo Done",
  * next transition is the prospect's *current* stage — it hasn't "moved on"
  * yet, so it's excluded from the average and counted separately as
  * "ongoing" rather than silently dropped or treated as zero days.
+ *
+ * The window orders by (occurred_at, to_stage), not occurred_at alone. One
+ * inbound email can produce two transitions sharing a timestamp — a website
+ * lead that is created and contacted at once yields `→ Lead` and
+ * `Lead → Contacted` at the same instant, which happens for 39 prospects in
+ * the seeded data. Ordering by the timestamp alone leaves those ties in an
+ * arbitrary order, so whichever stage got sorted second would absorb the
+ * *next* stage's duration, and the averages would shift between runs.
+ * funnel_stage is a Postgres enum, so `to_stage` sorts in declared funnel
+ * order and reconstructs the intended chain: Lead lasted 0 days here, which
+ * is the truth.
  */
 export async function getTimeReport(): Promise<TimeReport> {
   try {
@@ -32,7 +43,7 @@ export async function getTimeReport(): Promise<TimeReport> {
           select
             to_stage,
             occurred_at,
-            lead(occurred_at) over (partition by prospect_id order by occurred_at) as next_at
+            lead(occurred_at) over (partition by prospect_id order by occurred_at, to_stage) as next_at
           from stage_transitions
         )
         select
