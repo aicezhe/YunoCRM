@@ -47,9 +47,14 @@ export function CopyEmail({ email, className = "" }: { email: string; className?
         type="button"
         onClick={copy}
         aria-label={t("copyEmail", { email })}
-        className="relative -my-1 shrink-0 rounded-md p-1 text-gray-400 opacity-60 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:opacity-100 group-hover/copy:opacity-100"
+        // Fixed box (icon 14px + 4px padding each side) because the two icons
+        // overlap while they cross-fade; without it the row would twitch.
+        className="relative -my-1 h-[22px] w-[22px] shrink-0 rounded-md text-gray-400 opacity-60 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:opacity-100 group-hover/copy:opacity-100"
       >
-        <AnimatePresence mode="wait" initial={false}>
+        {/* Not mode="wait": that only mounts the tick once the copy icon has
+            finished its exit, so the confirmation would be hostage to an exit
+            animation completing. Sync mode swaps on the state change itself. */}
+        <AnimatePresence initial={false}>
           {state === "copied" ? (
             <motion.span
               key="done"
@@ -57,7 +62,7 @@ export function CopyEmail({ email, className = "" }: { email: string; className?
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
               transition={{ duration: 0.15 }}
-              className="block text-green-600"
+              className="absolute inset-0 flex items-center justify-center text-green-600"
             >
               <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
             </motion.span>
@@ -68,7 +73,7 @@ export function CopyEmail({ email, className = "" }: { email: string; className?
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.7 }}
               transition={{ duration: 0.15 }}
-              className="block"
+              className="absolute inset-0 flex items-center justify-center"
             >
               <Copy className="h-3.5 w-3.5" strokeWidth={2} />
             </motion.span>
