@@ -42,7 +42,6 @@ function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: Reac
     <motion.a
       href={`/companies/${result.id}`}
       onClick={onOpen}
-      layoutId={`company-card-${result.id}`}
       variants={cardVariants}
       className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
@@ -322,18 +321,20 @@ export function SearchClient() {
           />
         )}
         {expanded && (
+          // Perspective lives on this wrapper, not on the rotating element:
+          // applied to the element itself the rotation flattens into a skew
+          // with no depth. This is also why there is no layoutId here any
+          // more — a layout projection rewrites `transform` every frame to
+          // morph card into panel, and a 3D rotation underneath it sheared
+          // the content diagonally across the results. Morph and flip cannot
+          // both own the transform; the flip is the one worth having.
           <motion.div
             key={`overlay-panel-${expanded.id}`}
-            layoutId={`company-card-${expanded.id}`}
-            // Two different transitions on purpose. Opening rides a spring,
-            // because the panel is growing out of the card and the settle is
-            // the effect. Closing gets a short tween: an exit inheriting that
-            // spring fades opacity slowly, and AnimatePresence keeps the panel
-            // mounted for all of it — so a full screen of overlay text sat on
-            // top of a fully visible results grid, both legible, for long
-            // enough to read as a smear.
-            exit={{ opacity: 0, transition: { type: "tween", duration: 0.18, ease: "easeIn" } }}
-            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            initial={{ rotateY: -90, opacity: 0 }}
+            animate={{ rotateY: 0, opacity: 1 }}
+            exit={{ rotateY: 90, opacity: 0, transition: { duration: 0.22, ease: "easeIn" } }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformPerspective: 1600, transformStyle: "preserve-3d" }}
             className="fixed inset-4 z-50 sm:inset-8"
           >
             <CompanyOverlay
