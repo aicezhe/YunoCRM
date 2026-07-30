@@ -156,6 +156,18 @@ export function SearchClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The results stay mounted behind the overlay, so without this the page
+  // scrolls under it — and scrolling a layout-projected element mid-morph
+  // makes it chase the moving target.
+  useEffect(() => {
+    if (!expanded) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [expanded]);
+
   function openResult(e: React.MouseEvent, result: SearchResult) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let the browser open a new tab
     e.preventDefault();
@@ -245,7 +257,13 @@ export function SearchClient() {
         </p>
       </div>
 
-      {hasSearched && !expanded && (
+      {/* Deliberately NOT gated on `!expanded`. Unmounting the results while
+          the overlay is open meant the whole grid was rebuilt on close and
+          replayed its staggered reveal — 76 cards fading back in, which reads
+          as the page reloading. It also defeats the shared-element
+          transition: the card the panel morphs back into has to still exist.
+          The overlay covers the grid anyway (fixed, z-50, over a backdrop). */}
+      {hasSearched && (
         <div className="mt-8">
           {isPending && <ResultsSkeleton />}
 
@@ -307,9 +325,11 @@ export function SearchClient() {
           <motion.div
             key={`overlay-panel-${expanded.id}`}
             layoutId={`company-card-${expanded.id}`}
+            // Without an exit of its own, AnimatePresence has nothing to wait
+            // for and tears the panel out while the backdrop is still fading.
+            exit={{ opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 28 }}
             className="fixed inset-4 z-50 sm:inset-8"
-            style={{ transformStyle: "preserve-3d" }}
           >
             <CompanyOverlay
               companyId={expanded.id}

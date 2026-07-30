@@ -180,13 +180,18 @@ export function CompanyOverlay({
         : (state.data.contacts[0] ?? null)
       : null;
 
+  // Opacity only — deliberately no rotateY here. This sits inside an element
+  // doing a layoutId projection, which rewrites `transform` every frame to
+  // morph the card into the panel; a 3D rotation on the child fights it and
+  // the content shears diagonally across the grid mid-transition. Fading the
+  // contents lets the projection own the movement, which is the effect that
+  // actually reads.
   return (
     <motion.div
-      initial={{ rotateY: -90, opacity: 0.4 }}
-      animate={{ rotateY: 0, opacity: 1 }}
-      exit={{ rotateY: 90, opacity: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      style={{ transformPerspective: 1400 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className="h-full w-full overflow-y-auto rounded-[28px] border border-gray-100 bg-[#FBFAFF] shadow-2xl"
     >
       <div className="mx-auto max-w-3xl px-5 py-5 sm:px-8 sm:py-7">
