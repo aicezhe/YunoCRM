@@ -1,140 +1,186 @@
 # YunoCRM
 
-A CRM built on top of a raw event feed: emails, calendar events and website form
-submissions are ingested, classified, resolved into companies and prospects, and
-surfaced as a pipeline an operator can actually work.
+A CRM that fills itself from a raw event feed. Emails and calendar events are
+ingested verbatim, classified by rules, resolved into companies, prospects,
+contacts and stage history, and whatever the rules cannot decide goes to a
+human review queue instead of being guessed at or dropped.
 
-UI available in English, Italian, and Russian — added as a demonstration of
-production-readiness beyond the brief's requirements.
+Built for the Yuno take-home. Stack: Next.js 16 (App Router, React 19) ·
+Postgres via Supabase · Drizzle ORM · Tailwind 4 · Vitest · Recharts ·
+Framer Motion · next-intl. Deployed at
+[yuno-crm.vercel.app](https://yuno-crm.vercel.app).
 
-Live demo: [yuno-crm.vercel.app](https://yuno-crm.vercel.app) (Vercel + Supabase).
+## Contents
 
-## Running from scratch
+- [Quick start](#quick-start)
+- [Running the tests](#running-the-tests)
+- [Data model](#data-model)
+- [Ingestion pipeline](#ingestion-pipeline)
+- [Automations](#automations)
+- [Where AI is used, and where it deliberately is not](#where-ai-is-used-and-where-it-deliberately-is-not)
+- [Designing the real Gmail/Calendar integration](#designing-the-real-gmailcalendar-integration)
+- [What I would do with more time](#what-i-would-do-with-more-time)
+- [What I cut, and known limitations](#what-i-cut-and-known-limitations)
 
-Prerequisites: Node 20+, a free [Supabase](https://supabase.com) project
-(hosted Postgres — nothing else from Supabase is required beyond Auth).
+## Quick start
 
-**1. Install and configure**
+Prerequisites: Node 20+ (developed on 24.18) and a free Supabase project.
+Nothing else is needed — no Docker, no local Postgres.
+
+**1. Clone and install**
 
 ```bash
+git clone https://github.com/aicezhe/YunoCRM.git
+cd YunoCRM
 npm install
 ```
 
-Create `.env.local` in the repo root (values come from your Supabase project's
-Settings → Database / API):
+**2. Configure**
 
 ```bash
-# Postgres connection string (Direct connection, port 5432)
-DATABASE_URL=postgresql://postgres:...@db.<ref>.supabase.co:5432/postgres
-
-# Supabase Auth (login sessions)
-NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...   # server-only: creating auth users
-
-# Optional — smart (semantic) search. Without it the search screen says so
-# and exact matching keeps working.
-VOYAGE_API_KEY=pa-...
+cp .env.example .env.local
 ```
 
-**2. Apply the schema**
+Fill it in. Every value comes from one Supabase project:
+
+| Variable | Where it comes from | Required |
+| --- | --- | --- |
+| `DATABASE_URL` | Settings → Database → Connection string (URI, port 5432) | yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Settings → API → Project URL | yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Settings → API → anon public | yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Settings → API → service_role (server-only) | yes — creates auth accounts |
+| `VOYAGE_API_KEY` | [dash.voyageai.com](https://dash.voyageai.com) | no — semantic search degrades gracefully |
+| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) | no — quarantine AI tier is skipped |
+
+**3. Create the schema**
 
 ```bash
 npx supabase login
-npx supabase link --project-ref <ref>
+npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-Migrations live in `supabase/migrations/` and create all nine tables, the
-enums, constraints, triggers, and indexes described under *Data model* below.
+Ten migrations in `supabase/migrations/` create nine tables, four enums, the
+CHECK constraints, two triggers, the indexes, and the `pg_trgm` / `vector`
+extensions.
 
-**3. Load the dataset**
+**4. Load the dataset**
 
-The provided fixture is committed at `data/yuno-crm-seed-data.json`. The
-pipeline is a chain of idempotent scripts — each safe to re-run:
+The fixture ships with the repo at `data/yuno-crm-seed-data.json`
+(360 emails, 181 calendar events). Run in this order — each script is
+idempotent and safe to re-run:
 
 ```bash
-npm run ingest            # raw feed -> raw_events, verbatim
-npm run classify          # rule engine: process / ignore / quarantine
-npm run resolve           # -> companies, contacts, prospects, interactions, stage history
+npm run ingest            # JSON -> raw_events, stored verbatim
+npm run classify          # rules decide: processed / ignored / quarantined
+npm run resolve           # -> companies, contacts, prospects, interactions, stage history, tasks
 npm run enrich            # resolution suggestions for quarantined items
-npm run embed-companies   # optional, needs VOYAGE_API_KEY (powers smart search)
-npm run seed-users        # auth accounts + roles; prints logins and the demo password
+npm run embed-companies   # optional: needs VOYAGE_API_KEY, powers semantic search
+npm run seed-users        # auth accounts + roles; prints the logins below
 ```
 
-**4. Run**
+**5. Run**
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and sign in with any
-account `seed-users` printed. `seed-users` upserts by email, so re-running it
-also restores roles changed through the UI.
+Open <http://localhost:3000>. Five seeded accounts share one password:
 
-**Tests**
+| Email | Role |
+| --- | --- |
+| `giulia@yunoai.io` | admin |
+| `marco@yunoai.io` | admin |
+| `admin@yunoai.io` | admin |
+| `sara@yunoai.io` | member |
+| `luca@yunoai.io` | member |
+
+Password: `YunoCRM2026!` — a fixture, not a credential scheme.
+`seed-users` upserts by email, so re-running it also restores roles that
+were changed through the UI.
+
+What a clean run produces, verified against the database:
+
+| | |
+| --- | --- |
+| raw_events | 538 (357 email + 181 calendar) — 3 fewer than the 541 in the JSON, see duplicates below |
+| classified | 389 processed · 149 ignored · 5 quarantined for review |
+| companies / prospects / contacts | 76 / 75 / 88 |
+| interactions / stage_transitions | 393 / 259 |
+| auto-created follow-up tasks | 40 |
+
+## Running the tests
 
 ```bash
 npm test          # 92 unit tests — pure logic, no database, no network
-npm run test:db   # 14 integration tests — needs DATABASE_URL + the loaded fixture
+npm run test:db   # 16 integration tests — needs DATABASE_URL and the loaded fixture
 npx tsc --noEmit  # types
 npm run build     # production build
 ```
 
 The split is deliberate. `npm test` stays fast and secret-free so it works as
-a tight loop and in CI: the classification rules against the fixture's planted
-traps (personal-domain senders that are real leads, bulk senders, auto-replies,
-ambiguous senders), the resolution rules (channel attribution, stage signals
-from emails and calendar events, the canonical lost reasons,
-reschedule-vs-cancel), the user-management authorization rules, embedding-text
-construction, and the display logic where locales genuinely differ (Russian
-plural forms, the fractional-number grammar case, relative time).
+a tight loop and in CI:
 
-The dashboard numbers can't be covered that way, because they *are* SQL —
-reimplementing those aggregates in TypeScript would only prove the copy agrees
-with itself. So `npm run test:db` re-derives every figure a **different** way
-against the same database (a correlated lookup where the shipped query uses a
-window function, separate counts where it uses filters) and compares. That
-suite paid for itself immediately: it caught the stage-duration window
-ordering by `occurred_at` alone, which leaves same-timestamp transitions in an
-arbitrary order — see the comment in `dashboard/time/queries.ts`.
+| File | Tests | What it pins down |
+| --- | --- | --- |
+| `scripts/classification-rules.test.ts` | 21 | Each rule in isolation, plus **priority order** — the tests assert that `website_lead` (priority 2) beats `internal_email` (6), which is the trap described below |
+| `scripts/resolution-rules.test.ts` | 9 | Channel attribution, stage signals from email and calendar, canonical lost reasons, reschedule vs cancellation |
+| `scripts/embedding-rules.test.ts` | 11 | The text handed to the embedding model |
+| `src/app/(app)/users/user-rules.test.ts` | 13 | Authorization: a member cannot promote themselves, the last admin cannot be demoted, and an unauthorized caller is refused *before* existence is checked so error text can't be used to probe real user ids |
+| `relative-time`, `format-days`, `typewriter-core`, `particle-field-core` | 38 | Display logic where locales genuinely differ (Russian three-form plurals, the fractional-genitive rule) and pure animation maths |
+
+The dashboard numbers can't be unit-tested honestly, because they *are* SQL —
+reimplementing those aggregates in TypeScript would only prove the copy
+agrees with itself. `npm run test:db` re-derives every figure a **different**
+way against the same database (a lateral ordered lookup where the shipped
+query uses a window function, separate counts where it uses filters) and
+compares.
+
+That suite paid for itself on its first run: it caught the stage-duration
+window ordering by `occurred_at` alone. 39 prospects have two transitions
+sharing a timestamp (one inbound email both creates a website lead and counts
+as first contact), and without a tiebreaker their order is unspecified — so
+whichever sorted second absorbed the next stage's duration. Both queries now
+order by `(occurred_at, to_stage)`; `funnel_stage` is a Postgres enum, so it
+sorts in declared funnel order and reconstructs the intended chain. The
+displayed averages did not change, because Postgres happened to return the
+rows in the right order. That was luck, not a guarantee.
+
+Idempotency is verified by re-running the pipeline: a second `npm run ingest`
+reports `processed 541, inserted 0, skipped 541`.
 
 ## Data model
 
-Nine tables. The short version: `raw_events` is the append-only inbox,
-`quarantine_items` is its human-review queue, and everything else is the CRM
-domain, with `stage_transitions` as the source of truth for funnel history.
-
 ```mermaid
 erDiagram
-    companies ||--o{ prospects : "restrict delete"
-    companies ||--o{ contacts : "restrict delete"
-    users |o--o{ prospects : "owner (set null)"
-    users |o--o{ tasks : "assignee (set null)"
-    users |o--o{ stage_transitions : "actor (set null)"
-    users |o--o{ quarantine_items : "resolved_by (set null)"
+    companies ||--o{ prospects : "restrict"
+    companies ||--o{ contacts : "restrict"
+    users |o--o{ prospects : "owner, set null"
+    users |o--o{ tasks : "assignee, set null"
+    users |o--o{ stage_transitions : "actor, set null"
+    users |o--o{ quarantine_items : "resolved_by, set null"
     prospects ||--o{ interactions : "cascade"
     prospects ||--o{ stage_transitions : "cascade"
     prospects ||--o{ tasks : "cascade"
     contacts |o--o{ interactions : "set null"
-    raw_events |o--o{ interactions : "provenance (set null)"
+    raw_events |o--o{ interactions : "provenance, set null"
     raw_events ||--o{ quarantine_items : "cascade"
 
     companies {
         uuid id PK
         text name
-        text domain UK
-        vector embedding "512d, smart search"
+        text domain UK "one company per domain"
+        vector embedding "512d, semantic search"
     }
     prospects {
         uuid id PK
         uuid company_id FK
         uuid owner_id FK
-        enum channel
+        enum channel "6 values"
         text utm_source
-        enum current_stage "cached via trigger"
+        enum current_stage "cache, trigger-maintained"
         text lost_reason "CHECK: required when Lost"
-        timestamptz last_interaction_at "cached via trigger"
+        timestamptz last_interaction_at "cache, trigger-maintained"
     }
     contacts {
         uuid id PK
@@ -163,7 +209,7 @@ erDiagram
     stage_transitions {
         uuid id PK
         uuid prospect_id FK
-        enum from_stage "null = initial"
+        enum from_stage "null = created"
         enum to_stage
         timestamptz occurred_at
         text actor_type "CHECK: human|automation"
@@ -192,210 +238,364 @@ erDiagram
         jsonb suggested_action
         jsonb candidates
         text status "CHECK: open|resolved"
-        text resolution "audit, always English"
+        text resolution "audit trail, always English"
     }
 ```
 
-Decisions worth defending up front:
+**Why each table exists, and the decision behind it.**
 
-- **Stage history is the source of truth; `current_stage` is a cache.** Every
-  stage change is a `stage_transitions` row (who/what moved it, from, to,
-  when, why). A database trigger — not application code — keeps
-  `prospects.current_stage` in sync on insert, so no write path can forget.
-  Same pattern for `last_interaction_at`, whose trigger only ever moves the
-  timestamp forward, so late-arriving events can't rewind it.
-- **Integrity lives in the database.** `lost_requires_reason` (a Lost prospect
-  must say why), the `actor_type`/`created_by`/`status` CHECKs, unique
-  `companies.domain` and `contacts.email`, and `raw_events (source,
-  external_id)` unique — which is what makes the entire ingest pipeline
-  idempotent and webhook-replay-safe.
-- **Deletes are deliberate.** A company with prospects can't be deleted
-  (restrict); deleting a prospect takes its interactions/history/tasks with it
-  (cascade); deleting a user never destroys records they touched (set null).
-- **Every index is tied to a named query** — the comments in
-  `supabase/migrations/20260727200006_indexes.sql` state which one. At the
-  brief's reference scale (tens of thousands of prospects, hundreds of
-  thousands of interactions) the hot paths are index scans: dashboard
-  aggregates on `current_stage` / `last_interaction_at` / `to_stage`,
-  timelines on `(prospect_id, occurred_at)`, ingest batches on
-  `raw_events.status`, plus trigram on `companies.name` for search.
+- **`companies` / `prospects` are separate.** A company is a legal entity that
+  exists once; a prospect is one sales attempt at it. The same company can
+  come back through a different channel next quarter, and that has to be a
+  second prospect with its own funnel, owner and history — not an overwrite of
+  the first. Channel, stage and owner therefore live on `prospects`, not on
+  `companies`. `companies.domain` is UNIQUE, which is what lets the resolver
+  match an incoming sender domain to an existing company deterministically.
+
+- **`stage_transitions` is the source of truth; `current_stage` is a cache.**
+  Every stage change is a row recording from, to, when, by whom and whether a
+  human or the automation did it. `prospects.current_stage` exists only so the
+  dashboard doesn't recompute history on every query — and it is maintained by
+  a **database trigger** on insert into `stage_transitions`, not by application
+  code, so no write path can forget to update it. Same pattern for
+  `last_interaction_at`, whose trigger only ever moves the timestamp *forward*,
+  so a late-arriving old email cannot rewind it.
+
+- **Integrity is enforced by the database, not by the app.** `lost_requires_reason`
+  makes a Lost prospect without a reason unrepresentable. `actor_type`,
+  `created_by` and every `status` are CHECK-constrained. `contacts.email` and
+  `companies.domain` are UNIQUE. And `raw_events (source, external_id)` is
+  UNIQUE — that one line is what makes the whole pipeline idempotent and
+  replay-safe. It is not theoretical: the provided dataset contains **3 emails
+  with duplicate `message_id`s**, and the constraint collapsed them silently
+  (360 rows in the JSON, 357 in the table).
+
+- **Deletes are deliberate, per relationship.** A company with prospects cannot
+  be deleted (`restrict`) — losing pipeline by deleting an account is not an
+  accident worth allowing. Deleting a prospect takes its interactions, history
+  and tasks with it (`cascade`). Deleting a user never destroys the records
+  they touched (`set null`) — the stage history stays, it just loses the actor.
+
+- **`raw_events` keeps the payload verbatim** and is append-only. Rules change;
+  the record of what actually arrived should not. Any reclassification is a
+  re-run over the same rows, not a re-import.
+
+- **`quarantine_items`** is the human-review queue, one row per raw event the
+  rules could not resolve, carrying the reason and machine-generated
+  suggestions. Its `resolution` text is stored in English regardless of the
+  UI language — an audit trail should not depend on which locale someone
+  happened to be using.
+
+- **`tasks`** carries automation output that needs a human ("no reply in 7
+  days"), with `created_by` distinguishing it from anything a person adds.
+
+- **Every index is tied to a named query**, documented inline in
+  `supabase/migrations/20260727200006_indexes.sql`: `current_stage` for the
+  by-stage dashboard, `last_interaction_at` for the withering range scan,
+  `(prospect_id, occurred_at)` for the timelines, `raw_events.status` for
+  fetching the next ingest batch, `(assignee_id, status)` for "my open tasks",
+  plus a GIN trigram index on `companies.name` for search. At the brief's
+  reference scale — tens of thousands of prospects, hundreds of thousands of
+  interactions — these are the hot paths, and each is an index scan rather
+  than a sequential one.
+
 - **No RLS.** All database access goes through the Next.js server over
   `DATABASE_URL`; the browser only ever talks to Supabase Auth. Authorization
   is enforced server-side twice: middleware gates the routes, and the
-  admin-only server actions re-check the caller's role themselves (a page
-  redirect alone would not stop a member from invoking the action endpoint
-  directly). RLS would add value the day the browser gets a direct database
-  path; it doesn't have one.
+  admin-only server actions re-check the caller's role themselves — a page
+  redirect alone would not stop a member from POSTing to the action endpoint
+  directly. RLS would earn its keep the day the browser gets a direct database
+  connection; it doesn't have one.
 
-## Real email/calendar integration
+## Ingestion pipeline
 
-The pipeline was shaped so that swapping the JSON fixture for live sources
-changes the *feeder*, not the model:
+```
+data/yuno-crm-seed-data.json
+        │  ingest — verbatim, UNIQUE(source, external_id)
+        ▼
+   raw_events ──── classify ────┬── ignored     149  (noise: internal, bulk, auto-reply, recruiting)
+   (538 rows)   first match wins ├── processed   389 ──── resolve ──▶ companies · prospects
+                                 │                                     contacts · interactions
+                                 └── quarantined   5 ──── enrich ──▶ human review queue
+```
 
-- **Ingestion is already idempotent.** `raw_events (source, external_id)` is
-  unique and payloads are stored verbatim, so a webhook delivered twice, a
-  replayed batch, or an overlapping backfill inserts nothing twice. Gmail:
-  `users.watch` + Pub/Sub push, then `history.list` from the stored
-  `historyId` cursor, fetching each new message id → one `raw_events` row per
-  message (`external_id` = Gmail message id). Calendar: `events.watch`
-  channels with incremental `syncToken`s, `external_id` = event id + a
-  version discriminator so reschedules arrive as new events rather than
-  silent mutations.
-- **Push is an optimization, polling is the guarantee.** Watch channels
-  expire (~7 days) and Pub/Sub can drop; a scheduled poll with the same
-  cursors produces identical rows, and idempotency makes the overlap free.
-- **Everything downstream is unchanged.** Classification, resolution,
-  quarantine and enrichment already consume `raw_events` with a status state
-  machine (`pending → processed | ignored | quarantined | failed`).
-  `failed` is retryable; ambiguity goes to quarantine for a human, which is
-  the same answer for a live feed as for the fixture.
-- **Auth and secrets.** Per-workspace OAuth (gmail.readonly,
-  calendar.events.readonly), refresh tokens server-side only; the webhook
-  endpoint validates the channel token it issued. Nothing in the browser.
+### The central decision: content over sender
 
-## Scope: cut deliberately
+The obvious way to filter a company's own inbox is by sender — drop anything
+from `@yunoai.io`, keep the rest. On this dataset that rule destroys the most
+valuable records in the file.
 
-- **Tasks screen.** The `tasks` table, constraints and indexes exist and the
-  model is ready for "book a follow-up when a prospect withers" — the screen
-  itself was cut for depth elsewhere. Adding it is UI work, not model work.
-- **Manual prospect/stage editing.** Records enter through the pipeline or
-  through quarantine resolution; there is no hand-built "create prospect"
-  form. That matches the product's thesis (the CRM that fills itself), but a
-  real deployment would grow one — `stage_transitions.actor_type = 'human'`
-  is already there waiting for it.
-- **Segment drawer caps at 200 rows** and says so in its footer instead of
-  paginating; at reference scale a single channel can exceed what anyone
-  reads in a drawer.
-- **Smart search degrades, never blocks.** Without `VOYAGE_API_KEY` (or
-  before `embed-companies` has run) the screen states which piece is missing
-  and exact search keeps working.
+28 emails arrive from the company's own domain. Twenty of them are from
+`noreply@yunoai.io` and are **website lead notifications** — a structured
+template carrying `Nome:`, `Email:`, `Azienda:`, `Messaggio:`, `UTM source:`.
+They are not internal chatter; they are the only record of twenty inbound
+leads, and they are the entire `website` channel. The remaining 8 are genuine
+internal mail between Giulia and Marco.
 
-## Using it
+So classification keys on **what the message contains**, not who sent it. The
+`website_lead` rule sits at priority 2, above `internal_email` at priority 6,
+and matches the body template. A sender-based rule would have discarded 20 of
+those 28 emails — 71% of what it filtered would have been real pipeline.
 
-### Dashboard
+Two tests in `classification-rules.test.ts` exist specifically to keep that
+ordering from being "tidied up" by a future edit: one asserts a
+`noreply@yunoai.io` lead notification classifies as `website_lead`, another
+asserts internal mail between two employees still classifies as
+`internal_email`.
 
-Four cards, each a link into a screen that answers one question:
+### Rules, in priority order — first match wins
 
-| Card | Question it answers |
-| --- | --- |
-| **Source** | Where do prospects come from, and which channels convert best? |
-| **By stage** | How is the pipeline distributed across stages today? |
-| **Time** | How long do prospects sit in each stage, and where do they stick? |
-| **Withering** | Which prospects have gone cold (no interaction for 14+ days)? |
+| # | Rule | Outcome | Signal | Matched |
+| --- | --- | --- | --- | --- |
+| 1 | `duplicate` | ignored | Already-seen `(source, external_id)` | 0 — the UNIQUE constraint gets there first; kept as a documented no-op |
+| 2 | `website_lead` | processed | Structured lead template in the body | 20 |
+| 3 | `auto_reply` | ignored | Subject starts `Risposta automatica:` | 6 |
+| 4 | `external_bulk` | ignored | `noreply`/`newsletter`/`events`/`billing`/`notifications` local part | 27 |
+| 5 | `recruiting` | ignored | Careers/hiring role accounts | 3 |
+| 6 | `internal_email` | ignored | Both sender and all recipients are `@yunoai.io` | 8 |
+| 7 | `internal_event` | ignored | Calendar event with no external attendee | 96 |
+| 8 | `cancelled_event` | ignored | Cancelled event; a later same-company Demo/Check-in makes it a **reschedule**, not a drop | 7 |
+| 9 | `known_contact` | processed | Sender matches an existing contact | 0 on a cold run |
+| 10 | `known_domain` | processed | Sender domain matches an existing company | 0 on a cold run |
+| 11 | `personal_domain` | quarantined | gmail / libero / outlook — a person, not a company | 4 |
+| 12 | `default_processed` | processed | Reached here ⇒ not noise ⇒ legitimate correspondence | 366 |
+| 13 | `unresolved` | quarantined | Genuinely undecidable | 1 |
 
-The number on each card is the headline; the caption under it is the
-denominator, so "54 · of 57 open, cold 14+ days" is readable without opening
-anything.
+Note on #4 vs #2: `noreply@` *is* in the bulk list, and would have caught the
+lead notifications — priority is what saves them. Rule order here is load-bearing,
+which is why it is asserted by tests rather than left to reading order.
 
-**Recent activity** below the cards is the last five interactions across every
-prospect — company, what happened (inbound/outbound email, call, meeting,
-note), and when.
+Note on #12: rules 9 and 10 can only fire once companies and contacts exist,
+so on a first run against an empty database every legitimate external email
+would fall through to `unresolved` and flood the review queue. `default_processed`
+exists so that quarantine stays a genuine exception rather than the default
+destination.
 
-### Reading the charts
+### Three outcomes, and why quarantine is not a dumping ground
 
-The two donuts on the Source screen carry two levels of detail:
+**Ignored** is a decision, not a deletion — the row stays in `raw_events` with
+the rule that matched it, so any filtering choice can be audited or reversed
+by re-running classification.
 
-- **Hover a segment** — a card with that segment's numbers: prospects, active,
-  won, win rate.
-- **Click a segment** — a panel slides in from the right with the same numbers
-  plus every prospect behind them: company, stage, owner, last contact. Each row
-  opens that company. Close with the ✕, a click outside, or `Esc`.
+**Processed** goes to the resolver, which creates or matches the company by
+domain, creates contacts, opens a prospect, writes interactions and stage
+transitions.
 
-**On touch devices** there is no hover, so a tap goes straight to the panel —
-which is why the panel repeats the summary numbers rather than assuming you
-already saw the hover card. The panel enters from the bottom instead of the
-side, sized so the list is thumb-reachable.
+**Quarantined** means the automation refused to guess. On this dataset that is
+5 records out of 538 — under 1%. That ratio is the point: a review queue that
+receives a third of the traffic is just a second inbox and gets ignored. Every
+quarantined item arrives with the reason, a suggested action and candidate
+companies, so the human decision is a click (create / link to existing /
+discard), not an investigation. In the deployed demo all 5 have since been
+resolved that way, so the queue reads empty — a fresh run leaves them open.
 
-### Search
+The `personal_domain` case is the interesting one. An email from
+`cristina.ricci@libero.it` cannot be attributed by domain — `libero.it` is a
+consumer mailbox, not a company. Guessing would silently corrupt the pipeline;
+dropping would lose a real lead. So it goes to a human, with fuzzy-matched
+company candidates attached.
 
-Two modes behind one toggle:
+## Automations
 
-- **Off** — substring matching on company name, plus contact names and email
-  addresses. A contact match resolves to that contact's company rather than
-  becoming its own result, annotated with who matched.
-- **Smart search** — the query is embedded and matched by meaning, so a Russian
-  query like *винодельня* finds an Italian company named *Vini Colline Toscane*.
+All three run inside `npm run resolve` and are marked
+`actor_type = 'automation'` / `created_by = 'automation'` so machine actions
+are always distinguishable from human ones in the history.
 
-`⌘⇧F` dumps the full company list without typing anything. That shortcut is
-desktop-only; below `md` the same thing is a **Show full list** button next to
-Search, because a keyboard shortcut on a phone is not a feature.
+- **Stage advancement from signals.** Email bodies and calendar events carry
+  stage signals — a demo booked, a trial started, a contract sent, an
+  explicit loss. Each produces a `stage_transitions` row; the trigger updates
+  the cached `current_stage`. 259 transitions were derived this way.
+  Terminal-stage rules are enforced by the schema: a prospect moved to `Lost`
+  without a canonical reason violates a CHECK constraint.
 
-### Quarantine
+- **Reschedule detection.** A cancelled calendar event is *not* a lost deal if
+  the same company has a later Demo or Check-in on the calendar. Seven
+  cancellations were correctly read as reschedules and left the stage
+  untouched, instead of pushing seven live deals to Lost.
 
-Events the pipeline could not resolve on its own, with the reason it gave up and
-its own suggestion. Three ways out: create a new company, link to an existing
-one, or discard. The badge in the navigation is the number still open.
+- **Follow-up tasks.** A prospect with no reply for 7 days gets an open task
+  assigned to the Yuno employee on the thread — 40 were created. Re-running
+  the resolver does not duplicate them: it keys on
+  `(prospect_id, "no reply in 7 days")`.
 
-Resolutions are written to the database in English regardless of the interface
-language — an audit trail should not depend on which locale someone happened to
-be using when they clicked.
+## Where AI is used, and where it deliberately is not
 
-### Team
+**Not used: classification.** Every routing decision in the table above is a
+deterministic rule. This is the single most consequential choice in the
+project, and it is not a cost decision:
 
-Admin-only. Role changes and invitations. The last remaining admin cannot be
-demoted; the screen is also protected server-side, so opening `/users` directly
-as a member redirects rather than rendering.
+- **Determinism.** The same email must classify the same way every time. An
+  LLM that reclassifies `noreply@yunoai.io` differently on Tuesday silently
+  reshapes the funnel and nobody notices until the numbers are wrong.
+- **Testability.** Rules can be asserted. `classification-rules.test.ts` runs
+  21 assertions against real rows from the fixture in 71 ms with no network. A
+  prompt cannot be pinned that way.
+- **Auditability.** `raw_events.matched_rule` records *which* rule decided,
+  by name. "Why was this email ignored?" has an exact answer. "The model
+  decided" is not an answer a sales team can act on.
 
-## On how much the interface explains
+The rules are also the cheap path: classification is local — no API call, no
+rate limit, no per-record cost, and no failure mode that can leave half the
+inbox unclassified.
 
-Not much of this is spelled out on screen, and that is deliberate. A CRM is not
-a page someone reads once — it is a tool the same few people open every morning
-for months. Explanatory copy that helps on day one is noise by week two, and
-noise is what makes people stop reading the screen at all.
+**Used: quarantine suggestions**, in two tiers, and only *after* the rules have
+already admitted they can't decide.
 
-So the interface states the numbers and keeps the fast paths available without
-announcing them: hover for a peek, click for the list, a shortcut for the full
-dump. Everything is reachable without knowing the shortcuts; knowing them just
-makes it quicker. The explanation lives here, in the README, where it can be
-read once and does not have to be scrolled past every day.
+1. **`pg_trgm` word similarity** against `companies.name`, run in Postgres. If
+   a confident match exists, candidates are attached and the item never
+   reaches the AI. Database-native, free, deterministic.
+2. **Claude Haiku (`claude-haiku-4-5`)** for what tier 1 could not match —
+   reading the email body to propose a company name and action.
 
-## Reading the numbers
+This layer is **strictly additive**: it writes only to
+`quarantine_items.suggested_action` and `.candidates`. If `ANTHROPIC_API_KEY`
+is absent the script logs that tier 2 is disabled and applies tier 1 only; if
+the API fails mid-run, items are left bare. Nothing downstream depends on it,
+and the AI never decides — a human still clicks create / link / discard.
 
-Two things are worth knowing before the dashboard surprises you.
+**Used: semantic search.** Company records are embedded with Voyage
+(`voyage-3-lite`, 512 dimensions) into `companies.embedding`, and search
+compares the query embedding by cosine distance. This is what lets the Russian
+query *винодельня* find the Italian company *Vini Colline Toscane* — scoring
+0.566 against 0.369 for the next-closest company. Without `VOYAGE_API_KEY` the
+screen says so and exact matching keeps working.
 
-**Analytics are measured against the data; the activity feed is not.** The
-seeded history runs 7 Jan – 9 Jul 2026. "Cold" and "days in stage" measure
-distances *inside* that history, so they are anchored to the newest event in
-the dataset rather than to today — otherwise every prospect would read as
-stale purely because the fixture is not live. The anchor date is printed under
-the greeting ("Funnel data as of …").
+One deliberate absence here: the vector index. An IVFFlat index on
+`companies.embedding` was created and then **dropped** (migration
+`20260730090000`). At 76 rows with `lists = 100`, most k-means cells are empty
+and a query whose nearest centroid owns an empty cell matches *nothing* —
+measured, with `enable_seqscan = off` to force it: 20 of 20 random query
+vectors returned 0 rows. A sequential scan over 76 rows is both exact and
+faster. The index earns its place at tens of thousands of rows, sized from a
+real row count and verified against exact results.
 
-Recent activity is the exception, and deliberately so: it answers "what has
-happened lately", and a reader takes *now* literally. Anchoring it to the data
-made the newest event announce itself as just-happened when it was three weeks
-old. It uses the wall clock, so on a stale fixture it honestly reads "21 days
-ago" — which is itself worth knowing, since it says nothing has been ingested
-in three weeks.
+## Designing the real Gmail/Calendar integration
 
-**The Time screen reports two different things, on purpose.** The front of
-each card is throughput — how long prospects that *did* move on spent in that
-stage. That number cannot answer the screen's own question ("where do they get
-stuck?"), because the stuck ones are excluded from it by construction: a
-prospect that never moved has no completed duration. On this dataset the gap
-is dramatic. Lead averages 1.1 days and Demo Scheduled 1.2 — the two fastest
-stages — while 7 and 6 prospects have been sitting in them for 89 and 114 days
-respectively. The real clog is Contacted: 35 prospects, 107 days on average,
-roughly 3,750 prospect-days frozen, which is also where most of the withering
-prospects below are. So the back of each card carries the backlog — how many
-are sitting there now and how long they have already waited — and the two
-metrics are labelled distinctly rather than averaged into one misleading
-figure.
+The pipeline was shaped so that swapping the fixture for live sources changes
+the **feeder**, not the model. `ingest.ts` is the only file that knows the JSON
+shape; everything downstream consumes `raw_events`. A Gmail adapter that writes
+the same rows is a drop-in replacement — classification, resolution,
+quarantine and the UI do not change.
 
-**Withering flags 54 of 57 open prospects, and that is correct.** The 393
-seeded interactions are spread fairly evenly across those six months, with only
-16 of them in the final two weeks. A 14-day window is ~8% of the history, so at
-an even spread you would expect roughly 4–5 prospects to still count as warm;
-there are 3. Every open prospect has at least one interaction, so none of the 54
-are "never contacted". The threshold comes from the brief, and it has been left
-alone rather than tuned to produce a more flattering screenshot.
+**OAuth and scopes.** Per-workspace OAuth with `gmail.readonly` and
+`calendar.events.readonly` — read-only, because nothing in this product needs
+to send on a user's behalf. Refresh tokens live server-side only, encrypted at
+rest, one grant per connected mailbox. Nothing touches the browser.
 
-## Notes
+**Incremental sync, not full scans.**
+- *Gmail*: `users.watch` registers a Pub/Sub push channel; each notification
+  carries a `historyId`. The worker calls `history.list` from the last stored
+  cursor, fetches each new message id, and writes one `raw_events` row with
+  `external_id = ` the Gmail message id.
+- *Calendar*: `events.watch` channels plus incremental `syncToken`s.
+  `external_id` is the event id *plus a version discriminator*, so a
+  reschedule arrives as a new row rather than silently mutating the old one —
+  which matters, because the reschedule-vs-cancellation rule needs both events
+  to be visible.
+
+**Webhook plus polling, deliberately.** Push is an optimization; polling is the
+guarantee. Watch channels expire (~7 days for Gmail) and Pub/Sub can drop
+messages. A scheduled poll using the same cursors produces identical rows, and
+because ingestion is idempotent the overlap costs nothing. This is not
+belt-and-braces — a lead lost to an expired watch channel is invisible until
+someone asks why the pipeline went quiet.
+
+**Duplicates are already solved.** `UNIQUE(source, external_id)` plus
+`onConflictDoNothing` means a webhook delivered twice, a replayed batch, or a
+backfill overlapping live traffic all insert exactly once. This is not
+speculative: the provided fixture already contains 3 duplicate `message_id`s
+and the constraint handled them.
+
+**Errors and retries.** `raw_events.status` is a state machine:
+`pending → processed | ignored | quarantined | failed`. A transient failure
+(API 5xx, rate limit, timeout) marks `failed`, which is retryable by re-running
+the classifier — the payload is already stored, so retrying costs no API call.
+Permanent failures stay `failed` with the error recorded, visible rather than
+swallowed. Gmail rate limits are handled by exponential backoff on the fetch
+side, before anything is written.
+
+**LLM parsing for unstructured mail.** The fixture's website leads use a fixed
+template that a regex parses reliably. Real inboxes do not cooperate: the same
+lead arrives as prose, in Italian or English, with the company name in a
+signature. The design is to keep the deterministic parser as the fast path,
+and fall back to an LLM extraction pass — structured output (company, contact
+name, intent, requested action) with a confidence score — only when the
+template does not match. Two rules make that safe: the LLM's output is a
+*proposal*, written to `quarantine_items.suggested_action` rather than applied,
+and anything below a confidence threshold goes to a human. Extraction is
+already the place where a model earns its keep; routing is not.
+
+**Where the human sits.** Quarantine is not a design sketch — it is a working
+prototype of exactly this loop, running today on the `personal_domain` and
+`unresolved` cases. Anything the automation cannot decide with confidence
+lands in a queue with the reason, machine-generated candidates and three
+one-click resolutions, and the outcome is written back to the audit trail with
+who resolved it and when. The volume discipline carries over: at under 1% of
+traffic the queue is a real workflow. If a live feed pushed that past a few
+percent, the correct response is to fix the rules, not to grow the queue.
+
+## What I would do with more time
+
+- **Predictive churn instead of a fixed threshold.** "Cold after 14 days"
+  is a blunt instrument: it treats a 3-day-old enterprise negotiation and a
+  3-day-old inbound lead identically. With enough closed-won/closed-lost
+  history the honest version is a model that estimates *probability of loss*
+  from the features already in the schema — stage, channel, time in stage,
+  interaction cadence, direction ratio — and ranks the pipeline by expected
+  value at risk rather than by days elapsed. Thresholds would then be
+  per-segment rather than global, because a 14-day silence means something
+  very different for `website` than for `linkedin_outbound`.
+- **The tasks screen.** The table, its constraints and its indexes exist and
+  the automation already writes 40 rows into it; there is no UI. This is the
+  largest deliberate gap and it is UI work, not model work.
+- **Ingestion as a service, not a script.** The pipeline is six idempotent CLI
+  scripts. For production it needs to be a queue-backed worker with retries and
+  a dead-letter path, which is a runtime change — the state machine in
+  `raw_events.status` is already the right shape for it.
+- **Test the SQL against a fixture database.** `npm run test:db` currently runs
+  against the same database the app uses. The right version spins up a
+  disposable Postgres, loads a small hand-built fixture with the edge cases
+  written on purpose, and runs there — so the tests are hermetic and can assert
+  on exact numbers rather than on cross-derivations.
+- **Realtime.** Supabase Realtime on `quarantine_items` would keep the review
+  queue live across users; today two people can pick up the same item.
+
+## What I cut, and known limitations
+
+- **Ownership graph — cut for lack of honest data.** The brief hints at
+  understanding who owns which relationship. The dataset carries only who
+  appears on a thread, which is not the same thing: the person who sends the
+  most email to an account may be doing the least valuable work on it. Building
+  a confident-looking ownership view on that signal would have been the most
+  visually impressive thing in this project and the least true, so
+  `prospects.owner_id` records the assignee and nothing extrapolates from it.
+- **Manual prospect and stage editing.** Records enter through the pipeline or
+  through quarantine resolution; there is no "create prospect" form. This
+  matches the product thesis — a CRM that fills itself — but a real deployment
+  would need it. `stage_transitions.actor_type = 'human'` is already there
+  waiting for it.
+- **The segment drawer caps at 200 rows** and says so in its footer rather than
+  paginating.
+- **The dataset is static, and the withering screen shows it.** The fixture
+  ends 9 July 2026. Measured against today's date, every prospect reads as
+  cold — so "cold", "days per stage" and stage timings are all anchored to the
+  newest event *in the data*, not the wall clock, and the anchor date is
+  printed under the dashboard greeting. This is a property of a frozen
+  fixture, not a logic flaw. The one place that intentionally uses the real
+  clock is the Recent Activity feed, which answers "what happened lately" and
+  would be lying if it called a three-week-old event "now".
+- **54 of 57 open prospects are flagged as withering, and that is correct.**
+  The 393 seeded interactions spread fairly evenly across six months with only
+  16 in the final fortnight, so a 14-day window covers about 8% of the history.
+  At an even spread you would expect 4–5 prospects to still count as warm;
+  there are 3. The threshold comes from the brief and was left alone rather
+  than tuned to produce a friendlier screenshot.
+- **The UI ships in English, Italian and Russian.** Beyond the brief, added as
+  a production-readiness demonstration — and it surfaced real bugs worth
+  keeping (grammatical gender agreement in generated phrases, and the Russian
+  rule that a fractional quantity takes the genitive singular: *13,7 дня*, not
+  *13,7 дней*).
 
 `DECISIONS.md`, cited throughout the pipeline code by section (§1–§8), is the
-brief's own specification document. It is not part of this repository — the
-references point back at the source of each rule so the reasoning stays
-traceable.
-
-Beyond the pipeline scripts listed under *Running from scratch*, `npm run
-explore` and `npm run audit-filtering` are read-only diagnostics over the same
-data.
+brief's own specification document and is not vendored here; the citations
+point back at the source of each rule so the reasoning stays traceable.
