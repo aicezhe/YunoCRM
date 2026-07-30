@@ -61,16 +61,21 @@ body {
   }
 }
 
-@keyframes motif-fall {
+@keyframes motif-draw {
   0% {
-    transform: translateY(-4px);
+    stroke-dashoffset: 90;
     opacity: 0;
   }
-  35% {
-    opacity: 1;
+  12% {
+    opacity: 0.85;
+  }
+  62%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
   }
   100% {
-    transform: translateY(12px);
+    stroke-dashoffset: 0;
     opacity: 0;
   }
 }
@@ -103,20 +108,30 @@ body {
   transform-origin: center bottom;
 }
 
-.motif-fall {
-  animation: motif-fall 3s ease-in-out infinite;
-}
-
 .motif-pulse {
   animation: motif-pulse 2.6s ease-in-out infinite;
+}
+
+/* The dash length covers the polyline's ~87.5 units, rounded up so the line
+   is fully hidden at the start of each cycle. The retract back to hidden
+   happens while the stroke is transparent, so the loop never runs backwards
+   on screen. */
+.motif-draw {
+  stroke-dasharray: 90;
+  animation: motif-draw 4.2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .motif-orbit,
   .motif-sweep,
   .motif-grow,
-  .motif-fall,
-  .motif-pulse {
+  .motif-pulse,
+  .motif-draw {
     animation: none;
+  }
+
+  /* Without the animation the dash offset would leave the line invisible. */
+  .motif-draw {
+    stroke-dasharray: none;
   }
 }

@@ -48,14 +48,26 @@ function MotifArt({ motif }: { motif: Motif }) {
       </svg>
     );
   }
-  // withering: a declining curve with dots dropping off its tail.
+  // withering: a line chart trending down, drawing itself in left to right.
+  // Vertices sit on a plain polyline rather than a smooth curve so it reads
+  // as plotted data rather than decoration.
   return (
     <svg viewBox="0 0 96 96" fill="none" className="h-full w-full" aria-hidden>
-      <path d="M12 30 C 34 34, 52 46, 82 72" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-      <circle cx="12" cy="30" r="4" fill="currentColor" opacity="0.7" />
-      <circle cx="82" cy="72" r="4.5" fill="currentColor" className="motif-pulse" />
-      <circle cx="52" cy="52" r="3" fill="currentColor" className="motif-fall" />
-      <circle cx="67" cy="64" r="2.5" fill="currentColor" className="motif-fall" style={{ animationDelay: "1.5s" }} />
+      <line x1="10" y1="84" x2="86" y2="84" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
+      <polygon points="12,26 30,38 48,44 66,60 84,74 84,84 12,84" fill="currentColor" opacity="0.08" />
+      <polyline
+        points="12,26 30,38 48,44 66,60 84,74"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="motif-draw"
+      />
+      <circle cx="12" cy="26" r="3" fill="currentColor" opacity="0.45" />
+      <circle cx="30" cy="38" r="3" fill="currentColor" opacity="0.55" />
+      <circle cx="48" cy="44" r="3" fill="currentColor" opacity="0.7" />
+      <circle cx="66" cy="60" r="3" fill="currentColor" opacity="0.85" />
+      <circle cx="84" cy="74" r="4.5" fill="currentColor" className="motif-pulse" />
     </svg>
   );
 }
