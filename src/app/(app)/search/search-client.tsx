@@ -325,9 +325,14 @@ export function SearchClient() {
           <motion.div
             key={`overlay-panel-${expanded.id}`}
             layoutId={`company-card-${expanded.id}`}
-            // Without an exit of its own, AnimatePresence has nothing to wait
-            // for and tears the panel out while the backdrop is still fading.
-            exit={{ opacity: 0 }}
+            // Two different transitions on purpose. Opening rides a spring,
+            // because the panel is growing out of the card and the settle is
+            // the effect. Closing gets a short tween: an exit inheriting that
+            // spring fades opacity slowly, and AnimatePresence keeps the panel
+            // mounted for all of it — so a full screen of overlay text sat on
+            // top of a fully visible results grid, both legible, for long
+            // enough to read as a smear.
+            exit={{ opacity: 0, transition: { type: "tween", duration: 0.18, ease: "easeIn" } }}
             transition={{ type: "spring", stiffness: 260, damping: 28 }}
             className="fixed inset-4 z-50 sm:inset-8"
           >
