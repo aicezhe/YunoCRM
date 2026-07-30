@@ -13,6 +13,7 @@ Framer Motion · next-intl. Deployed at
 ## Contents
 
 - [Quick start](#quick-start)
+- [Keyboard shortcuts](#keyboard-shortcuts)
 - [Running the tests](#running-the-tests)
 - [Data model](#data-model)
 - [Ingestion pipeline](#ingestion-pipeline)
@@ -108,6 +109,37 @@ What a clean run produces, verified against the database:
 | companies / prospects / contacts | 76 / 75 / 88 |
 | interactions / stage_transitions | 393 / 259 |
 | auto-created follow-up tasks | 40 |
+
+## Keyboard shortcuts
+
+The app is opened every morning by the same few people, so the fast paths are
+built for the second month of use rather than the first.
+
+| Shortcut | Does |
+| --- | --- |
+| `Shift`+`1` | Dashboard |
+| `Shift`+`2` | Search |
+| `Shift`+`3` | Quarantine |
+| `Shift`+`4` | Team — admins only; for a member there is no fourth section and the key does nothing |
+| `⌘`+`Shift`+`F` | On the search screen: list every company without typing a query |
+
+Three implementation details that are not obvious:
+
+- The numbers come from the same `NAV_ITEMS` array the sidebar renders from,
+  so a shortcut cannot drift out of sync with the visible order, and the
+  admin-only rule is applied once rather than duplicated.
+- Matching is on `event.code` (`Digit1`), not `event.key`. `Shift`+`1` only
+  produces `!` on some layouts — with a Russian or Italian keyboard, `key`
+  would be something else entirely while `code` stays `Digit1`. The app ships
+  in three languages; assuming a US layout would have quietly broken it for
+  two of them.
+- Nothing fires while focus is in an input, textarea, select or
+  contenteditable. Without that guard, typing `!` into the search box would
+  navigate away mid-query. `Cmd`/`Ctrl`+digit is also left alone, since that
+  is the browser's own tab switcher.
+
+The sidebar shows each number on hover — discoverable when you go looking,
+invisible when you are not.
 
 ## Running the tests
 

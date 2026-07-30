@@ -6,6 +6,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 import { BottomNav } from "@/components/bottom-nav";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Sidebar } from "@/components/sidebar";
+import { NavShortcuts } from "@/components/nav-shortcuts";
 
 async function getQuarantineOpenCount(): Promise<number> {
   try {
@@ -50,6 +51,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <SignOutButton />
         </div>
       </header>
+
+      {/* Keyboard-only, renders nothing — see the hint in the sidebar footer. */}
+      <NavShortcuts isAdmin={isAdmin} />
 
       <Sidebar isAdmin={isAdmin} quarantineOpenCount={quarantineOpenCount} name={name} email={email} />
 

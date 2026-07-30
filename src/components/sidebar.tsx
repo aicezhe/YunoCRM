@@ -51,7 +51,7 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3" aria-label={t("primary")}>
-        {items.map((item) => {
+        {items.map((item, i) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
           const badge = item.href === "/quarantine" ? quarantineOpenCount : 0;
@@ -61,7 +61,7 @@ export function Sidebar({
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors " +
+                "group/nav flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors " +
                 (active
                   ? "bg-white font-semibold text-[#5B4FE9] shadow-sm"
                   : "font-medium text-gray-500 hover:bg-white/50 hover:text-gray-900")
@@ -69,6 +69,12 @@ export function Sidebar({
             >
               <Icon className="h-4.5 w-4.5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
               <span className="flex-1">{t(item.labelKey)}</span>
+              {/* The Shift+N hint rides the same map as the link, so the
+                  number shown is always the item's real position. Dimmed
+                  until hover: useful once learned, noise before that. */}
+              <kbd className="rounded border border-gray-200/80 bg-white/70 px-1.5 py-0.5 font-sans text-[10px] font-medium text-gray-400 opacity-0 transition group-hover/nav:opacity-100">
+                ⇧{i + 1}
+              </kbd>
               {badge > 0 && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#5B4FE9] px-1.5 text-[11px] font-semibold text-white">
                   {badge > 9 ? "9+" : badge}
