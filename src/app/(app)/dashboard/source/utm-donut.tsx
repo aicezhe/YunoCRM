@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip, type PieSectorDataItem } from "recharts";
 import { UTM_COLORS } from "./labels";
@@ -39,13 +39,30 @@ function UtmTooltip({ active, payload }: { active?: boolean; payload?: { payload
 export function UtmDonut({
   utm,
   onSelect,
+  panelOpen = false,
 }: {
   utm: UtmRow[];
   onSelect: (utmSource: string | null) => void;
+  /** See ChannelDonut: the drawer covers the chart, so no pointerleave ever
+   * arrives and the hover card would stay frozen underneath it. */
+  panelOpen?: boolean;
 }) {
   const t = useTranslations("sourceScreen");
   const total = utm.reduce((sum, u) => sum + u.total, 0);
   const [isHovering, setIsHovering] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Fired on drawer close (and harmlessly on mount): recharts still holds
+  // the hover state from before the drawer covered the chart — the pointer
+  // never actually left it — so without this the hover card pops right back
+  // the moment the drawer's suppression is lifted. React handles the
+  // synthetic mouseleave dispatched on the chart root like a real one.
+  useEffect(() => {
+    if (panelOpen) return;
+    wrapRef.current
+      ?.querySelector(".recharts-wrapper")
+      ?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+  }, [panelOpen]);
 
   return (
     <div>
@@ -53,11 +70,11 @@ export function UtmDonut({
         aria-hidden
         className={
           "pointer-events-none fixed inset-0 z-40 bg-gray-900/35 backdrop-blur-[1px] transition-opacity duration-200 " +
-          (isHovering ? "opacity-100" : "opacity-0")
+          (isHovering && !panelOpen ? "opacity-100" : "opacity-0")
         }
       />
 
-      <div className="relative z-50 mx-auto h-[200px] max-w-[240px]">
+      <div ref={wrapRef} className="relative z-50 mx-auto h-[200px] max-w-[240px]">
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-semibold text-gray-900">{total}</span>
           <span className="text-xs text-gray-400">{t("websiteProspects")}</span>
@@ -72,7 +89,7 @@ export function UtmDonut({
               outerRadius={80}
               paddingAngle={2}
               cornerRadius={4}
-              activeShape={renderActiveShape}
+              activeShape={panelOpen ? undefined : renderActiveShape}
               isAnimationActive
               className="cursor-pointer"
               onMouseEnter={() => setIsHovering(true)}
@@ -88,7 +105,7 @@ export function UtmDonut({
                 <Cell key={u.utmSource ?? UNSET_KEY} fill={UTM_COLORS[i % UTM_COLORS.length]} stroke="none" />
               ))}
             </Pie>
-            <Tooltip content={<UtmTooltip />} />
+            <Tooltip content={<UtmTooltip />} active={panelOpen ? false : undefined} />
           </PieChart>
         </ResponsiveContainer>
       </div>

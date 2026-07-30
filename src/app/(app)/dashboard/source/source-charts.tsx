@@ -27,14 +27,22 @@ export function SourceCharts({ channels, utm }: { channels: ChannelRow[]; utm: U
   return (
     <div className="space-y-8">
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
-        <ChannelDonut channels={channels} onSelect={(channel) => setSegment({ kind: "channel", channel })} />
+        <ChannelDonut
+          channels={channels}
+          panelOpen={segment !== null}
+          onSelect={(channel) => setSegment({ kind: "channel", channel })}
+        />
       </div>
 
       {utm.length > 0 && (
         <div>
           <h2 className="mb-3 text-sm font-semibold tracking-wide text-gray-500 uppercase">{t("utmHeading")}</h2>
           <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] sm:p-8">
-            <UtmDonut utm={utm} onSelect={(utmSource) => setSegment({ kind: "utm", utmSource })} />
+            <UtmDonut
+              utm={utm}
+              panelOpen={segment !== null}
+              onSelect={(utmSource) => setSegment({ kind: "utm", utmSource })}
+            />
           </div>
         </div>
       )}

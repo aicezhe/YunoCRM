@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip, type PieSectorDataItem } from "recharts";
 import { useTranslations } from "next-intl";
 import { channelLabel } from "@/i18n/channel-labels";
@@ -67,9 +67,14 @@ function ChannelTooltip({ active, payload }: { active?: boolean; payload?: { pay
 export function ChannelDonut({
   channels,
   onSelect,
+  panelOpen = false,
 }: {
   channels: ChannelRow[];
   onSelect: (channel: string) => void;
+  /** The segment drawer covers the chart, so the pointer never "leaves" it.
+   * Without this the hover card and the raised sector stay frozen underneath
+   * the panel for as long as it is open. */
+  panelOpen?: boolean;
 }) {
   const tChannel = useTranslations("channels");
   const t = useTranslations("sourceScreen");
@@ -77,6 +82,19 @@ export function ChannelDonut({
   const bestChannel = channels.find((c) => c.total > 0)?.channel;
   const data = channels.map((c) => ({ ...c, isBest: c.channel === bestChannel }));
   const [isHovering, setIsHovering] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Fired on drawer close (and harmlessly on mount): recharts still holds
+  // the hover state from before the drawer covered the chart — the pointer
+  // never actually left it — so without this the hover card pops right back
+  // the moment the drawer's suppression is lifted. React handles the
+  // synthetic mouseleave dispatched on the chart root like a real one.
+  useEffect(() => {
+    if (panelOpen) return;
+    wrapRef.current
+      ?.querySelector(".recharts-wrapper")
+      ?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+  }, [panelOpen]);
 
   return (
     <div>
@@ -88,11 +106,11 @@ export function ChannelDonut({
         aria-hidden
         className={
           "pointer-events-none fixed inset-0 z-40 bg-gray-900/35 backdrop-blur-[1px] transition-opacity duration-200 " +
-          (isHovering ? "opacity-100" : "opacity-0")
+          (isHovering && !panelOpen ? "opacity-100" : "opacity-0")
         }
       />
 
-      <div className="relative z-50 mx-auto h-[280px] max-w-[320px]">
+      <div ref={wrapRef} className="relative z-50 mx-auto h-[280px] max-w-[320px]">
         {/* Rendered before the chart so the (fully opaque) tooltip — part of
             the chart's own DOM subtree — paints on top of it instead of the
             other way around. */}
@@ -110,7 +128,7 @@ export function ChannelDonut({
               outerRadius={104}
               paddingAngle={2}
               cornerRadius={4}
-              activeShape={renderActiveShape}
+              activeShape={panelOpen ? undefined : renderActiveShape}
               isAnimationActive
               className="cursor-pointer"
               onMouseEnter={() => setIsHovering(true)}
@@ -128,7 +146,9 @@ export function ChannelDonut({
                 <Cell key={d.channel} fill={CHANNEL_COLORS[d.channel] ?? "#5B4FE9"} stroke="none" />
               ))}
             </Pie>
-            <Tooltip content={<ChannelTooltip />} />
+            {/* active={false} means "never show"; undefined hands control back
+                to recharts. Keeps the hover card from hanging behind the drawer. */}
+            <Tooltip content={<ChannelTooltip />} active={panelOpen ? false : undefined} />
           </PieChart>
         </ResponsiveContainer>
       </div>
