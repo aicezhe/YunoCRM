@@ -184,6 +184,7 @@ export const quarantineItems = pgTable("quarantine_items", {
 	resolution: text(),
 	resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: 'string' }),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	resolvedCompanyId: uuid("resolved_company_id"),
 }, (table) => [
 	index("idx_quarantine_status").using("btree", table.status.asc().nullsLast().op("text_ops")),
 	foreignKey({
@@ -195,6 +196,11 @@ export const quarantineItems = pgTable("quarantine_items", {
 			columns: [table.resolvedBy],
 			foreignColumns: [users.id],
 			name: "quarantine_items_resolved_by_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.resolvedCompanyId],
+			foreignColumns: [companies.id],
+			name: "quarantine_items_resolved_company_id_fkey"
 		}).onDelete("set null"),
 	check("quarantine_items_status_check", sql`status = ANY (ARRAY['open'::text, 'resolved'::text])`),
 ]);

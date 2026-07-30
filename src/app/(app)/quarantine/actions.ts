@@ -52,7 +52,14 @@ async function loadItemWithEvent(quarantineItemId: string) {
 async function resolveQuarantineItem(
   quarantineItemId: string,
   rawEventId: string,
-  opts: { rawEventStatus: "processed" | "ignored"; matchedRule: string; resolution: string }
+  opts: {
+    rawEventStatus: "processed" | "ignored";
+    matchedRule: string;
+    resolution: string;
+    /** The company the human picked, so the resolver uses it instead of
+     * inferring one from the sender domain. Null when discarding. */
+    resolvedCompanyId?: string | null;
+  }
 ) {
   const resolvedBy = await currentUserId();
   await db.transaction(async (tx) => {
@@ -62,7 +69,13 @@ async function resolveQuarantineItem(
       .where(eq(rawEvents.id, rawEventId));
     await tx
       .update(quarantineItems)
-      .set({ status: "resolved", resolution: opts.resolution, resolvedBy, resolvedAt: sql`now()` })
+      .set({
+        status: "resolved",
+        resolution: opts.resolution,
+        resolvedBy,
+        resolvedAt: sql`now()`,
+        resolvedCompanyId: opts.resolvedCompanyId ?? null,
+      })
       .where(eq(quarantineItems.id, quarantineItemId));
   });
   // Refreshes the quarantine badge count in the sidebar/bottom nav (computed
@@ -103,6 +116,7 @@ export async function createCompanyAndResolve(
       rawEventStatus: "processed",
       matchedRule: "quarantine_created_company",
       resolution: `Created new company "${name}"`,
+      resolvedCompanyId: company.id,
     });
     return { ok: true };
   } catch (err) {
@@ -136,6 +150,7 @@ export async function linkToExistingAndResolve(quarantineItemId: string, company
       rawEventStatus: "processed",
       matchedRule: "quarantine_linked_existing",
       resolution: `Linked to "${company.name}"`,
+      resolvedCompanyId: companyId,
     });
     return { ok: true };
   } catch (err) {

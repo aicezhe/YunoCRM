@@ -5,7 +5,6 @@ import {
   classifyRow,
   emptyContext,
   type CalendarPayload,
-  type ClassificationContext,
   type EmailPayload,
   type RawEventRow,
 } from "./classification-rules";

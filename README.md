@@ -106,8 +106,8 @@ What a clean run produces, verified against the database:
 | --- | --- |
 | raw_events | 538 (357 email + 181 calendar) — 3 fewer than the 541 in the JSON, see duplicates below |
 | classified | 389 processed · 149 ignored · 5 quarantined for review |
-| companies / prospects / contacts | 76 / 75 / 88 |
-| interactions / stage_transitions | 393 / 259 |
+| companies / prospects / contacts | 76 / 76 / 88 |
+| interactions / stage_transitions | 396 / 259 |
 | auto-created follow-up tasks | 40 |
 
 ## Keyboard shortcuts
@@ -179,7 +179,17 @@ displayed averages did not change, because Postgres happened to return the
 rows in the right order. That was luck, not a guarantee.
 
 Idempotency is verified by re-running the pipeline: a second `npm run ingest`
-reports `processed 541, inserted 0, skipped 541`.
+reports `processed 541, inserted 0, skipped 541`, and a second `npm run
+resolve` creates 0 companies, 0 prospects and 0 interactions.
+
+That second check earned its place. It used to be false: quarantine
+resolutions leave their raw event `processed`, so the resolver picked them up
+again and matched the company by **sender domain** — the one inference those
+records exist to avoid. On this data it created a company literally named
+`libero.it` and moved two interactions onto it, one of which a human had
+explicitly linked to `Autotrasporti Fumagalli`. A re-run silently overruled
+two human decisions. `quarantine_items.resolved_company_id` now records which
+company the person picked and the resolver uses it instead of guessing.
 
 ## Data model
 
@@ -197,6 +207,7 @@ erDiagram
     contacts |o--o{ interactions : "set null"
     raw_events |o--o{ interactions : "provenance, set null"
     raw_events ||--o{ quarantine_items : "cascade"
+    companies |o--o{ quarantine_items : "human's choice, set null"
 
     companies {
         uuid id PK
@@ -271,6 +282,7 @@ erDiagram
         jsonb candidates
         text status "CHECK: open|resolved"
         text resolution "audit trail, always English"
+        uuid resolved_company_id FK "the company the human picked"
     }
 ```
 
@@ -316,7 +328,9 @@ erDiagram
   rules could not resolve, carrying the reason and machine-generated
   suggestions. Its `resolution` text is stored in English regardless of the
   UI language — an audit trail should not depend on which locale someone
-  happened to be using.
+  happened to be using. `resolved_company_id` is the machine-readable half of
+  the same decision: the resolver reads it instead of inferring a company from
+  the sender domain, so re-running the pipeline can never overrule a person.
 
 - **`tasks`** carries automation output that needs a human ("no reply in 7
   days"), with `created_by` distinguishing it from anything a person adds.
@@ -579,9 +593,14 @@ percent, the correct response is to fix the rules, not to grow the queue.
   value at risk rather than by days elapsed. Thresholds would then be
   per-segment rather than global, because a 14-day silence means something
   very different for `website` than for `linkedin_outbound`.
-- **The tasks screen.** The table, its constraints and its indexes exist and
-  the automation already writes 40 rows into it; there is no UI. This is the
-  largest deliberate gap and it is UI work, not model work.
+- **A cross-company task list.** Follow-up tasks are created (40 of them) and
+  are shown in context — on the company page and in the search overlay, with
+  title, due date and assignee. What is missing is the other view of the same
+  rows: one "my open tasks" screen spanning every company. The brief asks for
+  the tasks to be *created*, not for that screen, so this is an addition
+  rather than a gap — and the model is ready for it, since
+  `idx_tasks_assignee_status` on `(assignee_id, status)` exists for exactly
+  that query.
 - **Ingestion as a service, not a script.** The pipeline is six idempotent CLI
   scripts. For production it needs to be a queue-backed worker with retries and
   a dead-letter path, which is a runtime change — the state machine in

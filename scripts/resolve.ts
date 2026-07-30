@@ -27,13 +27,14 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { eq, inArray, or } from "drizzle-orm";
+import { eq, isNotNull, or } from "drizzle-orm";
 import { db, client } from "../src/db";
 import {
   companies,
   contacts,
   interactions,
   prospects,
+  quarantineItems,
   rawEvents,
   stageTransitions,
   tasks,
@@ -144,7 +145,7 @@ async function main() {
   for (const u of newUsers) userIdByEmail.set(u.email, u.id);
 
   // ---- 2. Load everything needed into memory, once -----------------------
-  const [companyRows, contactRows, prospectRows, interactionRows, taskRows, resolvable] = await Promise.all([
+  const [companyRows, contactRows, prospectRows, interactionRows, taskRows, resolvable, humanChoices] = await Promise.all([
     db.select().from(companies),
     db.select().from(contacts),
     db.select().from(prospects),
@@ -154,7 +155,19 @@ async function main() {
       .select()
       .from(rawEvents)
       .where(or(eq(rawEvents.status, "processed"), eq(rawEvents.matchedRule, "cancelled_event:reschedule"))),
+    // Which company a human chose for each quarantine-resolved event. Those
+    // records are precisely the ones whose sender domain means nothing — a
+    // personal mailbox, an ambiguous address — so inferring a company from it
+    // would re-make the guess the review queue existed to prevent.
+    db
+      .select({ rawEventId: quarantineItems.rawEventId, companyId: quarantineItems.resolvedCompanyId })
+      .from(quarantineItems)
+      .where(isNotNull(quarantineItems.resolvedCompanyId)),
   ]);
+
+  // rawEventId -> the company a human picked in the quarantine screen.
+  const humanCompanyByRawEvent = new Map<string, string>();
+  for (const c of humanChoices) if (c.companyId) humanCompanyByRawEvent.set(c.rawEventId, c.companyId);
 
   const companyByDomain = new Map<string, CompanyRec>();
   const companyById = new Map<string, CompanyRec>();
@@ -205,7 +218,7 @@ async function main() {
    * does reveal a real name, it replaces that placeholder instead of being
    * discarded (audit found borsalab.io / capitalgate.eu stuck this way).
    */
-  function getOrCreateCompany(domain: string, name: string | null, ts: string): CompanyRec {
+  function getOrCreateCompany(domain: string, name: string | null): CompanyRec {
     const clean = name ? cleanCompanyName(name) : null;
     const existing = companyByDomain.get(domain);
     if (existing) {
@@ -316,8 +329,11 @@ async function main() {
         continue;
       }
 
+      // A human already said which company this is; their answer wins over
+      // anything the sender domain would suggest.
+      const chosenId = humanCompanyByRawEvent.get(row.id);
       const domain = splitEmail(contactEmail).domain;
-      const company = getOrCreateCompany(domain, companyName, ts);
+      const company = (chosenId && companyById.get(chosenId)) || getOrCreateCompany(domain, companyName);
       const contact = getOrCreateContact(contactEmail, company.id, contactName);
 
       const yunoActor =
@@ -353,10 +369,13 @@ async function main() {
       }
 
       // Prefer the external attendee's domain (robust); title only names it.
+      const chosenId = humanCompanyByRawEvent.get(row.id);
       const domain = extAttendee ? splitEmail(extAttendee).domain : null;
-      const company = domain
-        ? getOrCreateCompany(domain, parsed?.company ?? null, ts)
-        : [...companyByDomain.values()].find((c) => c.name === parsed!.company) ?? null;
+      const company =
+        (chosenId && companyById.get(chosenId)) ||
+        (domain
+          ? getOrCreateCompany(domain, parsed?.company ?? null)
+          : [...companyByDomain.values()].find((c) => c.name === parsed!.company) ?? null);
       if (!company) {
         skippedNoCounterparty++;
         continue;
