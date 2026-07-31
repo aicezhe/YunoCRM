@@ -32,9 +32,41 @@ export default async function WitheringPage() {
           </div>
         )}
         {report.state === "ok" && (
-          <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)]">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+          <>
+            {/* Below sm the five columns can't fit, and sideways scrolling
+                hides the one number the screen exists to show. Same rows,
+                stacked: how cold leads, the rest supports it. */}
+            <ul className="space-y-3 md:hidden">
+              {report.rows.map((row) => (
+                <li key={row.prospectId}>
+                  <Link
+                    href={`/companies/${row.companyId}`}
+                    className="block rounded-2xl border border-gray-100 bg-white px-4 py-3.5 shadow-[0_14px_32px_-28px_rgba(91,79,233,0.5)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 font-medium text-gray-900">{row.companyName}</p>
+                      <span className="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
+                        {t("daysCold", { count: row.daysCold })}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-600">
+                        {tStage(row.currentStage)}
+                      </span>
+                      <span>{channelLabel(tChannel, row.channel)}</span>
+                    </div>
+                    {/* Labelled, unlike the table: with no column header above
+                        it, a bare name reads as anything. */}
+                    <p className="mt-1 text-xs text-gray-400">
+                      {t("colOwner")}: {row.ownerName ?? t("unassigned")}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_45px_-30px_rgba(91,79,233,0.35)] md:block">
+              <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 text-xs font-medium tracking-wide text-gray-400 uppercase">
                     <th className="px-5 py-4">{t("colCompany")}</th>
@@ -89,7 +121,7 @@ export default async function WitheringPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </>
         )}
       </div>
     </>
