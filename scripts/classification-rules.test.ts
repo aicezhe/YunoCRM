@@ -258,7 +258,7 @@ describe("rule priority order", () => {
 
   it("resolves a record matching both website_lead and internal_email as website_lead (higher priority)", () => {
     // `trap` has from/to entirely on yunoai.io (would match internal_email)
-    // AND a structural lead body (matches website_lead, priority 2 vs 5).
+    // AND a structural lead body (matches website_lead, priority 2 vs 6).
     const { matchedRule } = classifyRow(emailRow(trap), emptyContext());
     expect(matchedRule).toBe("website_lead");
   });

@@ -6,10 +6,8 @@ import { ShieldCheck, User as UserIcon, UserPlus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { inviteUser, updateUserRole } from "./actions";
 import type { UserRow } from "./queries";
-
-function fmtDate(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
-}
+import { fmtDate } from "@/i18n/format-dates";
+import { initialsOf } from "@/lib/initials";
 
 function RoleToggle({ user }: { user: UserRow }) {
   const router = useRouter();
@@ -127,16 +125,6 @@ function InviteForm() {
   );
 }
 
-/** Initials for the avatar chip — first letter of the first two words. */
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
 function UserCard({ user }: { user: UserRow }) {
   const t = useTranslations("users");
   const locale = useLocale();
@@ -145,7 +133,7 @@ function UserCard({ user }: { user: UserRow }) {
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white px-5 py-4 shadow-[0_14px_32px_-28px_rgba(91,79,233,0.5)] transition duration-300 hover:-translate-y-0.5 hover:border-[#5B4FE9]/25 hover:shadow-[0_18px_38px_-26px_rgba(91,79,233,0.4)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-sm font-semibold text-[#5B4FE9]">
-        {initials(user.name)}
+        {initialsOf(user.name)}
       </span>
 
       <div className="min-w-0 flex-1">

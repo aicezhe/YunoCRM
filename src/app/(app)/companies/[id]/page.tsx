@@ -3,30 +3,13 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { BackButton } from "@/components/back-button";
 import { CopyEmail } from "@/components/copy-email";
 import { channelLabel } from "@/i18n/channel-labels";
+import { fmtDate, fmtDateTime } from "@/i18n/format-dates";
+import { stageColor } from "@/components/stage-colors";
 import { getCompanyDetail, type ProspectDetail } from "./queries";
-
-const STAGE_COLORS: Record<string, string> = {
-  Won: "bg-green-100 text-green-700",
-  Lost: "bg-gray-200 text-gray-600",
-};
-
-function fmtDate(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
-}
-
-function fmtDateTime(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
 
 function StagePill({ stage, label }: { stage: string; label: string }) {
   return (
-    <span className={"rounded-full px-3 py-1 text-xs font-semibold " + (STAGE_COLORS[stage] ?? "bg-[#5B4FE9]/10 text-[#5B4FE9]")}>
+    <span className={"rounded-full px-3 py-1 text-xs font-semibold " + stageColor(stage)}>
       {label}
     </span>
   );

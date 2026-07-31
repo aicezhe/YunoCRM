@@ -7,22 +7,13 @@ import { Calendar, CheckCircle2, Mail, Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { createCompanyAndResolve, discardQuarantineItem, linkToExistingAndResolve, listCompaniesForLink } from "./actions";
 import type { QuarantineDisplayItem, ResolvedQuarantineItem } from "./queries";
+import { fmtDateTime } from "@/i18n/format-dates";
 
 const CONFIDENCE_STYLES: Record<string, string> = {
   high: "bg-green-100 text-green-700",
   medium: "bg-amber-100 text-amber-700",
   low: "bg-gray-200 text-gray-600",
 };
-
-function fmtDateTime(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
 
 function EmptyState() {
   const t = useTranslations("quarantine");

@@ -9,11 +9,7 @@ import { CompanyOverlay } from "./company-overlay";
 import { channelLabel } from "@/i18n/channel-labels";
 import { displayedText, initialTypewriterState, nextTypewriterState, tickDelayMs } from "./typewriter-core";
 import type { SearchReport, SearchResult } from "./queries";
-
-const STAGE_COLORS: Record<string, string> = {
-  Won: "bg-green-100 text-green-700",
-  Lost: "bg-gray-200 text-gray-600",
-};
+import { stageColor } from "@/components/stage-colors";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -60,7 +56,7 @@ function ResultCard({ result, onOpen }: { result: SearchResult; onOpen: (e: Reac
       <div className="mt-1 flex flex-wrap items-center gap-2">
         {result.stage && (
           <span
-            className={"rounded-full px-2 py-0.5 text-xs font-medium " + (STAGE_COLORS[result.stage] ?? "bg-[#5B4FE9]/10 text-[#5B4FE9]")}
+            className={"rounded-full px-2 py-0.5 text-xs font-medium " + stageColor(result.stage)}
           >
             {tStage(result.stage)}
           </span>
@@ -156,8 +152,7 @@ export function SearchClient() {
   }, []);
 
   // The results stay mounted behind the overlay, so without this the page
-  // scrolls under it — and scrolling a layout-projected element mid-morph
-  // makes it chase the moving target.
+  // would keep scrolling underneath it while the overlay itself stays fixed.
   useEffect(() => {
     if (!expanded) return;
     const previous = document.body.style.overflow;
@@ -259,9 +254,8 @@ export function SearchClient() {
       {/* Deliberately NOT gated on `!expanded`. Unmounting the results while
           the overlay is open meant the whole grid was rebuilt on close and
           replayed its staggered reveal — 76 cards fading back in, which reads
-          as the page reloading. It also defeats the shared-element
-          transition: the card the panel morphs back into has to still exist.
-          The overlay covers the grid anyway (fixed, z-50, over a backdrop). */}
+          as the page reloading. The overlay covers the grid anyway (fixed,
+          z-50, over a backdrop). */}
       {hasSearched && (
         <div className="mt-8">
           {isPending && <ResultsSkeleton />}

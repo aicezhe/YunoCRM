@@ -6,10 +6,9 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { companies, contacts, quarantineItems, rawEvents, users } from "../../../../drizzle/schema";
 import { createClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/lib/action-result";
 import { isYunoAddress, type CalendarPayload, type EmailPayload } from "../../../../scripts/classification-rules";
 import { nameFromEmailLocal } from "../../../../scripts/resolution-rules";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 /** The signed-in user's `users.id` (for quarantine_items.resolved_by) — the
  * Supabase session only carries email, so this looks it up once per action. */

@@ -9,8 +9,8 @@ export async function runSearch(query: string, smart: boolean): Promise<SearchRe
   return smart ? searchSmart(trimmed) : searchNormal(trimmed);
 }
 
-/** Backs the in-page company overlay (card -> full-screen shared-layout
- * transition) so it can fetch full detail without a route navigation. */
+/** Backs the in-page company overlay (the card-flip panel) so it can
+ * fetch full detail without a route navigation. */
 export async function loadCompanyOverlay(companyId: string): Promise<CompanyDetailResult> {
   return getCompanyDetail(companyId);
 }

@@ -14,6 +14,7 @@ import {
   type Metric,
 } from "./metrics";
 import { relativeTime } from "./relative-time";
+import { fmtDate } from "@/i18n/format-dates";
 
 const TYPE_ICON: Record<string, LucideIcon> = { email: Mail, call: Phone, meeting: Calendar, note: StickyNote };
 const KNOWN_TYPES = ["email", "call", "meeting", "note"];
@@ -41,12 +42,7 @@ function firstNameOf(appUser: Awaited<ReturnType<typeof getCurrentAppUser>>): st
 async function AsOfNote() {
   const [asOf, t, locale] = await Promise.all([getDataAsOf(), getTranslations("dashboard"), getLocale()]);
   if (!asOf) return null;
-  const formatted = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(asOf));
-  return <p className="mt-1 text-sm text-gray-400">{t("asOf", { date: formatted })}</p>;
+  return <p className="mt-1 text-sm text-gray-400">{t("asOf", { date: fmtDate(asOf, locale) })}</p>;
 }
 
 async function RecentActivity() {

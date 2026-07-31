@@ -4,10 +4,9 @@ import { db } from "@/db";
 /**
  * Pipeline metrics, one function per dashboard section.
  *
- * The home screen's cards are navigation tiles and no longer show a number,
- * so only getDataAsOf() is called from there today — the rest are kept for
- * the section screens (/dashboard/source, /by-stage, /time, /withering),
- * which are built next.
+ * The home screen calls all of them: each card is a navigation tile that
+ * also shows its live number. The section screens (/dashboard/source,
+ * /by-stage, /time, /withering) run their own, more detailed queries.
  *
  * No function throws: each resolves to a discriminated union so a caller can
  * render an ok / empty / error state without one failed query taking down

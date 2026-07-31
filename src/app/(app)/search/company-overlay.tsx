@@ -7,33 +7,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { loadCompanyOverlay } from "./actions";
 import { CopyEmail } from "@/components/copy-email";
 import { channelLabel } from "@/i18n/channel-labels";
+import { fmtDate, fmtDateTime } from "@/i18n/format-dates";
+import { initialsOf } from "@/lib/initials";
+import { stageColor } from "@/components/stage-colors";
 import type { CompanyDetail, ProspectDetail } from "../companies/[id]/queries";
-
-const STAGE_COLORS: Record<string, string> = {
-  Won: "bg-green-100 text-green-700",
-  Lost: "bg-gray-200 text-gray-600",
-};
-
-function fmtDate(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
-}
-
-function fmtDateTime(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 function MetricBlock({ label, value }: { label: string; value: string }) {
   return (
@@ -223,7 +200,7 @@ export function CompanyOverlay({
                 <span
                   className={
                     "rounded-full px-3 py-1 text-xs font-semibold " +
-                    (STAGE_COLORS[primaryProspect.currentStage] ?? "bg-[#5B4FE9]/10 text-[#5B4FE9]")
+                    stageColor(primaryProspect.currentStage)
                   }
                 >
                   {tStage(primaryProspect.currentStage)}

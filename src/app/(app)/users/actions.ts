@@ -7,10 +7,9 @@ import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js
 import { db } from "@/db";
 import { users } from "../../../../drizzle/schema";
 import { getCurrentAppUser } from "@/lib/auth/current-user";
+import type { ActionResult } from "@/lib/action-result";
 import { canManageUsers, decideRoleChange, normalizeInviteEmail, type Role } from "./user-rules";
 import { nameFromEmailLocal } from "../../../../scripts/resolution-rules";
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 // Same shared demo password every seeded account uses (scripts/seed-users.ts)
 // — this is a take-home fixture, not a production credential scheme.
