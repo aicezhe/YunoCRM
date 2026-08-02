@@ -214,6 +214,12 @@ export function CompanyOverlay({
               {state.data.domain && <span className="text-sm text-gray-400">{state.data.domain}</span>}
             </div>
 
+            {primaryProspect?.currentStage === "Lost" && primaryProspect.lostReason && (
+              <p className="mt-3 rounded-2xl border-l-4 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <span className="font-semibold">{t("lostReason")}</span> {primaryProspect.lostReason}
+              </p>
+            )}
+
             {primaryProspect && (
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <MetricBlock label={t("stage")} value={tStage(primaryProspect.currentStage)} />

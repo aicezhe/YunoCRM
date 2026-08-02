@@ -7,7 +7,20 @@ export type StageRow = {
   pct: number;
 };
 
-export type StageReport = { state: "ok"; stages: StageRow[]; total: number } | { state: "empty" } | { state: "error" };
+export type LostRow = {
+  companyId: string;
+  companyName: string;
+  channel: string;
+  /** Non-null in practice: the lost_requires_reason CHECK makes a Lost
+   * prospect without a reason unrepresentable. Typed nullable only because
+   * the column is. */
+  reason: string | null;
+};
+
+export type StageReport =
+  | { state: "ok"; stages: StageRow[]; total: number; lost: LostRow[] }
+  | { state: "empty" }
+  | { state: "error" };
 
 /** funnel_stage enum order, used both for the query and the chart's y-axis. */
 export const FUNNEL_STAGES = [
@@ -38,7 +51,34 @@ export async function getStageReport(): Promise<StageReport> {
       return { stage, count, pct: Math.round((count / total) * 1000) / 10 };
     });
 
-    return { state: "ok", stages, total };
+    // The brief's requirement is not just that Lost carries a reason, but
+    // that the reason is visible — so the screen lists every lost prospect
+    // with its why, not only the bar.
+    const lostRows = await db.execute<{
+      company_id: string;
+      company_name: string;
+      channel: string;
+      reason: string | null;
+    }>(sql`
+      select c.id as company_id, c.name as company_name,
+             p.channel::text as channel, p.lost_reason as reason
+      from prospects p
+      join companies c on c.id = p.company_id
+      where p.current_stage = 'Lost'
+      order by c.name asc
+    `);
+
+    return {
+      state: "ok",
+      stages,
+      total,
+      lost: lostRows.map((r) => ({
+        companyId: r.company_id,
+        companyName: r.company_name,
+        channel: r.channel,
+        reason: r.reason,
+      })),
+    };
   } catch (err) {
     console.error("[dashboard/by-stage] query failed:", err);
     return { state: "error" };
