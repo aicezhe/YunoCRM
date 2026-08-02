@@ -144,3 +144,35 @@ body {
 .recharts-sector:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Deep links from the dashboard's activity feed land on one specific
+   interaction (#interaction-<id>). :target scrolls clear of the viewport
+   edge and the row announces itself with a brand-tinted pulse that settles
+   back into the list — a plain jump left you scanning for which row you
+   were sent to. */
+.interaction-anchor {
+  scroll-margin-top: 6rem;
+}
+.interaction-anchor:target {
+  animation: interaction-arrive 2.4s ease-out both;
+}
+@keyframes interaction-arrive {
+  0% {
+    background-color: rgba(91, 79, 233, 0.18);
+    box-shadow: 0 0 0 2px rgba(91, 79, 233, 0.45);
+  }
+  60% {
+    background-color: rgba(91, 79, 233, 0.1);
+    box-shadow: 0 0 0 2px rgba(91, 79, 233, 0.2);
+  }
+  100% {
+    background-color: rgb(249 250 251);
+    box-shadow: 0 0 0 0 rgba(91, 79, 233, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .interaction-anchor:target {
+    animation: none;
+    background-color: rgba(91, 79, 233, 0.1);
+  }
+}

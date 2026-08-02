@@ -91,7 +91,7 @@ async function RecentActivity() {
         return (
           <li key={item.id}>
             <Link
-              href={`/companies/${item.companyId}`}
+              href={`/companies/${item.companyId}#interaction-${item.id}`}
               className="flex items-center gap-3 px-4 py-3 transition hover:bg-[#5B4FE9]/[0.04]"
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-[#5B4FE9]">

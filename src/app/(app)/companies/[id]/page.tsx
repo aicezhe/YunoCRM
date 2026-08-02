@@ -115,7 +115,7 @@ function ProspectCard({
           <h3 className="text-xs font-semibold tracking-wide text-gray-400 uppercase">{t("interactions")}</h3>
           <ul className="mt-3 space-y-3">
             {prospect.interactions.map((i) => (
-              <li key={i.id} className="rounded-2xl bg-gray-50 px-4 py-3 text-sm">
+              <li key={i.id} id={`interaction-${i.id}`} className="interaction-anchor rounded-2xl bg-gray-50 px-4 py-3 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium text-gray-800">{i.subject ?? tInterType(i.type)}</span>
                   <span className="text-xs text-gray-400">{fmtDateTime(i.occurredAt, locale)}</span>
