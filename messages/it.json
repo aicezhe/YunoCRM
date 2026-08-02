@@ -107,10 +107,7 @@
     "subtitle": "Come si distribuisce oggi la pipeline tra le fasi?",
     "error": "Impossibile caricare la ripartizione della pipeline. Aggiorna la pagina.",
     "empty": "Ancora nessun prospect — l'imbuto si popolerà non appena arriveranno.",
-    "totalProspects": "{count, plural, one {# prospect totale} other {# prospect totali}}",
-    "lostTitle": "Persi — e perché",
-    "lostSubtitle": "Ogni prospect perso ha un motivo — il database rifiuta un Lost senza motivo.",
-    "lostEmpty": "Nessun prospect perso finora."
+    "totalProspects": "{count, plural, one {# prospect totale} other {# prospect totali}}"
   },
   "timeScreen": {
     "title": "Tempi",

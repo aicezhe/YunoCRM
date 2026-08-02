@@ -107,10 +107,7 @@
     "subtitle": "How is the pipeline distributed across stages today?",
     "error": "Couldn't load the pipeline breakdown right now. Try refreshing the page.",
     "empty": "No prospects yet — the funnel will fill in once some come in.",
-    "totalProspects": "{count, plural, one {# prospect total} other {# prospects total}}",
-    "lostTitle": "Lost — and why",
-    "lostSubtitle": "Every lost prospect carries a reason — the database refuses a Lost without one.",
-    "lostEmpty": "Nothing lost yet."
+    "totalProspects": "{count, plural, one {# prospect total} other {# prospects total}}"
   },
   "timeScreen": {
     "title": "Time",
