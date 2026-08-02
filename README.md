@@ -526,12 +526,13 @@ not a bigger queue.
   or quarantine resolution. Matches the thesis — a CRM that fills itself — but
   a real deployment needs it. `actor_type = 'human'` is already there.
 - **The segment drawer caps at 200 rows** and says so in its footer.
-- **The dataset is static, and the withering screen shows it.** The fixture
-  ends 9 July 2026, so against today every prospect reads as cold. "Cold",
-  "days per stage" and stage timings are anchored to the newest event *in the
-  data*, and that anchor date is printed under the dashboard greeting. Recent
-  Activity is the one place using the real clock — it answers "what happened
-  lately" and would be lying otherwise.
+- **The dataset is static, so nothing uses the wall clock.** The fixture
+  ends 9 July 2026 — against the real clock every prospect reads as cold and
+  every feed entry as ancient. "Cold", "days per stage" and stage timings are
+  anchored to the newest event *in the data* (the anchor date is printed
+  under the dashboard greeting), and the Recent Activity feed pins its "now"
+  three days after that event, so it reads as a live workspace instead of an
+  abandoned one. Both anchors are derived from the data, not hardcoded.
 - **54 of 57 open prospects are withering, and that's correct.** The 393
   interactions spread evenly over six months with only 16 in the last
   fortnight, so a 14-day window covers ~8% of the history. An even spread

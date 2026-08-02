@@ -1,11 +1,10 @@
 /**
  * Formats how long ago `occurredAt` was, relative to whatever `asOf` the
- * caller supplies — deliberately not hardcoded, because the dashboard needs
- * both anchors. Measures *within* the history (days per stage, cold for 14+
- * days) pass the dataset's own newest event, otherwise a fixture that ends
- * mid-2026 marks everything stale. Recent activity passes the wall clock,
- * because a reader takes "now" literally and would otherwise be told a
- * three-week-old event just happened.
+ * caller supplies — deliberately not hardcoded, so every screen can anchor
+ * to the dataset rather than the wall clock. A fixture frozen in mid-2026
+ * marks everything stale against the real clock; the callers pass either
+ * the dataset's newest event (days per stage, cold for 14+ days) or a
+ * pinned "now" a few days after it (the recent-activity feed).
  *
  * Uses Intl.RelativeTimeFormat rather than hand-built strings: Russian
  * needs three plural forms ("1 день / 2 дня / 5 дней") and Italian its own

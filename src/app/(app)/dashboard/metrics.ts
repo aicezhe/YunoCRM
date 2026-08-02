@@ -40,10 +40,14 @@ function failed(card: string, err: unknown): Metric {
  */
 export async function getDataAsOf(): Promise<Date | null> {
   try {
-    const rows = await db.execute<{ as_of: Date | null }>(
+    // The raw driver returns timestamptz as a string despite what the type
+    // parameter claims — normalize through the Date constructor (which also
+    // accepts a Date) so callers can rely on real Date methods.
+    const rows = await db.execute<{ as_of: string | Date | null }>(
       sql`select max(occurred_at) as as_of from interactions`
     );
-    return rows[0]?.as_of ?? null;
+    const value = rows[0]?.as_of;
+    return value ? new Date(value) : null;
   } catch (err) {
     console.error("[dashboard] as-of date lookup failed:", err);
     return null;

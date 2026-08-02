@@ -46,18 +46,20 @@ async function AsOfNote() {
 }
 
 async function RecentActivity() {
-  const [report, t, locale] = await Promise.all([
+  const [report, asOf, t, locale] = await Promise.all([
     getRecentActivity(5),
+    getDataAsOf(),
     getTranslations("dashboard"),
     getLocale(),
   ]);
 
-  // Anchored to the wall clock, unlike the metrics above. "Cold for 14+ days"
-  // and "days per stage" measure distances inside the history, so they use
-  // the dataset's own newest event. This is a feed of what has happened
-  // lately, and a reader takes "now" literally — anchoring it to the data
-  // made a three-week-old event announce itself as just-happened.
-  const now = new Date().toISOString();
+  // "Now" for this feed is pinned three days after the dataset's newest
+  // event, not the wall clock. The fixture is frozen in July 2026, so
+  // against the real clock every entry reads "N weeks ago" and drifts
+  // further daily — the feed looked abandoned when the point of it is what
+  // the workspace's last days looked like. Derived from the data rather
+  // than hardcoded, so reloading a different dataset moves it along.
+  const now = asOf ? new Date(asOf.getTime() + 3 * 86_400_000).toISOString() : new Date().toISOString();
 
   if (report.state === "error") {
     return (
