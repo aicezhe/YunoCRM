@@ -147,6 +147,7 @@ export async function getWitheringMetric(): Promise<Metric> {
 
 export type ActivityItem = {
   id: string;
+  companyId: string;
   companyName: string;
   type: string;
   direction: string | null;
@@ -161,12 +162,13 @@ export async function getRecentActivity(limit = 5): Promise<ActivityReport> {
   try {
     const rows = await db.execute<{
       id: string;
+      company_id: string;
       company_name: string;
       type: string;
       direction: string | null;
       occurred_at: string;
     }>(sql`
-      select i.id, c.name as company_name, i.type::text as type, i.direction::text as direction, i.occurred_at
+      select i.id, c.id as company_id, c.name as company_name, i.type::text as type, i.direction::text as direction, i.occurred_at
       from interactions i
       join prospects p on p.id = i.prospect_id
       join companies c on c.id = p.company_id
@@ -179,6 +181,7 @@ export async function getRecentActivity(limit = 5): Promise<ActivityReport> {
       state: "ok",
       items: rows.map((r) => ({
         id: r.id,
+        companyId: r.company_id,
         companyName: r.company_name,
         type: r.type,
         direction: r.direction,

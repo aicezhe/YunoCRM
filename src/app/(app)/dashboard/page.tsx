@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Calendar, Mail, Phone, StickyNote, type LucideIcon } from "lucide-react";
 import { getCurrentAppUser } from "@/lib/auth/current-user";
@@ -88,17 +89,22 @@ async function RecentActivity() {
           ? t(`activity.${item.type}${item.direction ? `_${item.direction}` : ""}`)
           : item.type;
         return (
-          <li key={item.id} className="flex items-center gap-3 px-4 py-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-[#5B4FE9]">
-              <Icon className="h-4 w-4" strokeWidth={1.75} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-sm text-gray-800">
-              <span className="font-medium">{item.companyName}</span>
-              <span className="text-gray-400"> — {label}</span>
-            </span>
-            <span className="shrink-0 text-xs text-gray-400">
-              {relativeTime(item.occurredAt, now, locale)}
-            </span>
+          <li key={item.id}>
+            <Link
+              href={`/companies/${item.companyId}`}
+              className="flex items-center gap-3 px-4 py-3 transition hover:bg-[#5B4FE9]/[0.04]"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9]/10 text-[#5B4FE9]">
+                <Icon className="h-4 w-4" strokeWidth={1.75} />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm text-gray-800">
+                <span className="font-medium">{item.companyName}</span>
+                <span className="text-gray-400"> — {label}</span>
+              </span>
+              <span className="shrink-0 text-xs text-gray-400">
+                {relativeTime(item.occurredAt, now, locale)}
+              </span>
+            </Link>
           </li>
         );
       })}
