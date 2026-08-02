@@ -135,3 +135,12 @@ body {
     stroke-dasharray: none;
   }
 }
+
+/* Recharts makes pie sectors keyboard-focusable, so after a click the
+   browser draws its default focus ring around the clicked segment — a blue
+   rectangle floating over the donut. Mouse/touch clicks shouldn't leave it
+   behind; :focus-visible keeps the ring for actual keyboard navigation. */
+.recharts-pie:focus:not(:focus-visible),
+.recharts-sector:focus:not(:focus-visible) {
+  outline: none;
+}
