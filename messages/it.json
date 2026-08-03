@@ -16,7 +16,8 @@
     "missingPassword": "Inserisci la password",
     "wrongCredentials": "Email o password non validi",
     "showPassword": "Mostra password",
-    "hidePassword": "Nascondi password"
+    "hidePassword": "Nascondi password",
+    "connectionError": "Impossibile raggiungere il server al momento. Controlla la connessione e riprova."
   },
   "nav": {
     "dashboard": "Dashboard",

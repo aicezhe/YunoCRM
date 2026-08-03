@@ -16,7 +16,8 @@
     "missingPassword": "Please enter your password",
     "wrongCredentials": "Invalid email or password",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "connectionError": "Can't reach the server right now. Check your connection and try again."
   },
   "nav": {
     "dashboard": "Dashboard",

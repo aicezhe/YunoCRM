@@ -16,7 +16,8 @@
     "missingPassword": "Введите пароль",
     "wrongCredentials": "Неверный email или пароль",
     "showPassword": "Показать пароль",
-    "hidePassword": "Скрыть пароль"
+    "hidePassword": "Скрыть пароль",
+    "connectionError": "Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз."
   },
   "nav": {
     "dashboard": "Обзор",

@@ -15,6 +15,29 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * UI locale, or the check silently stops matching. */
 const SUPABASE_BAD_CREDENTIALS = "Invalid login credentials";
 
+/** Without this, a backend that hangs (unreachable database, dropped
+ * connection) leaves the button spinning forever with no way out — the
+ * network call itself never rejects, so nothing ever turns loading back
+ * off. 12s is generous for a real login and short enough that a genuine
+ * outage reads as "something's wrong", not as a frozen page. */
+const LOGIN_TIMEOUT_MS = 12_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("TIMEOUT")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations("login");
@@ -39,10 +62,23 @@ export default function LoginPage() {
 
     setLoading(true);
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+
+    let authError: { message: string } | null;
+    try {
+      ({
+        error: authError,
+      } = await withTimeout(
+        supabase.auth.signInWithPassword({ email: email.trim(), password }),
+        LOGIN_TIMEOUT_MS
+      ));
+    } catch {
+      // Either the timeout fired or the request itself failed outright
+      // (offline, DNS, connection refused) — same message either way,
+      // since the actual cause isn't something the user can act on.
+      setError(t("connectionError"));
+      setLoading(false);
+      return;
+    }
 
     if (authError) {
       setError(authError.message === SUPABASE_BAD_CREDENTIALS ? t("wrongCredentials") : authError.message);
